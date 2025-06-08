@@ -5,7 +5,7 @@ import {
   Phone,
   Shield,
   Plus,
-  DollarSign,
+  IndianRupee,
   Calendar,
 } from "lucide-react";
 import { GlassCard } from "./GlassCard";
@@ -767,7 +767,7 @@ export const Staff = () => {
             onClick={handleAddPayment}
             className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 w-full sm:w-auto"
           >
-            <DollarSign size={20} className="mr-2" />
+            <IndianRupee size={20} className="mr-2" />
             Add Payment
           </Button>
 

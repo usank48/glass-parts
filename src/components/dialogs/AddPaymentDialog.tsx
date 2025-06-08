@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Calendar, DollarSign, Plus, Minus } from "lucide-react";
+import { Calendar, IndianRupee, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -111,7 +111,7 @@ export const AddPaymentDialog: React.FC<AddPaymentDialogProps> = ({
             {/* Base Amount */}
             <div className="space-y-2">
               <Label className="text-white flex items-center gap-2">
-                <DollarSign size={16} />
+                <IndianRupee size={16} />
                 Base Amount
               </Label>
               <Input
