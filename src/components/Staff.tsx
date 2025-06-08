@@ -734,7 +734,7 @@ export const Staff = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header with Add New Staff Button */}
+      {/* Header with Action Buttons */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">
@@ -750,14 +750,35 @@ export const Staff = () => {
           </p>
         </div>
 
-        {/* Add New Staff Button */}
-        <Button
-          onClick={() => setShowAddStaffDialog(true)}
-          className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 w-full sm:w-auto"
-        >
-          <Plus size={20} className="mr-2" />
-          Add New Staff
-        </Button>
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          {/* Add Payment Button */}
+          <Button
+            onClick={handleAddPayment}
+            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 w-full sm:w-auto"
+          >
+            <DollarSign size={20} className="mr-2" />
+            Add Payment
+          </Button>
+
+          {/* Add Attendance Button */}
+          <Button
+            onClick={handleAddAttendance}
+            className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white border-0 w-full sm:w-auto"
+          >
+            <Calendar size={20} className="mr-2" />
+            Attendance
+          </Button>
+
+          {/* Add New Staff Button */}
+          <Button
+            onClick={() => setShowAddStaffDialog(true)}
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 w-full sm:w-auto"
+          >
+            <Plus size={20} className="mr-2" />
+            Add New Staff
+          </Button>
+        </div>
       </div>
 
       {/* Staff Grid */}
