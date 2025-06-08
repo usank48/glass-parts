@@ -12,6 +12,7 @@ import {
   SortDesc,
   Car,
   Grid3X3,
+  BarChart3,
 } from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,12 @@ import {
 import { ExcelImportDialog } from "./dialogs/ExcelImportDialog";
 import { exportInventoryToExcel, InventoryData } from "@/lib/excelUtils";
 import { toast } from "sonner";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
 interface Product {
   id: number;
@@ -236,6 +243,30 @@ export const Inventory = () => {
       category: "HEAD GASKET",
     },
   ]);
+
+  // Get top 10 items by stock for chart
+  const getTop10StockData = () => {
+    return products
+      .sort((a, b) => b.stock - a.stock)
+      .slice(0, 10)
+      .map((product) => ({
+        name:
+          product.name.length > 20
+            ? product.name.substring(0, 20) + "..."
+            : product.name,
+        fullName: product.name,
+        partNumber: product.partNumber,
+        stock: product.stock,
+        status: product.status,
+        fill: product.status === "Low Stock" ? "#ef4444" : "#10b981",
+      }));
+  };
+
+  const chartConfig = {
+    stock: {
+      label: "Stock Quantity",
+    },
+  };
 
   // Group products by selected sort method
   const getGroupedData = (): GroupedData[] => {
@@ -486,6 +517,102 @@ export const Inventory = () => {
           </Button>
         </div>
       </div>
+
+      {/* Top 10 Stock Chart */}
+      <GlassCard className="p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600">
+            <BarChart3 className="text-white" size={24} />
+          </div>
+          <div>
+            <h3 className="text-white font-semibold text-lg">
+              Top 10 Items by Stock
+            </h3>
+            <p className="text-white/70 text-sm">
+              Current inventory levels for highest stocked items
+            </p>
+          </div>
+        </div>
+
+        <div className="h-80">
+          <ChartContainer config={chartConfig}>
+            <BarChart
+              data={getTop10StockData()}
+              margin={{
+                top: 20,
+                right: 30,
+                left: 20,
+                bottom: 60,
+              }}
+            >
+              <XAxis
+                dataKey="name"
+                angle={-45}
+                textAnchor="end"
+                height={80}
+                interval={0}
+                tick={{ fontSize: 12, fill: "white" }}
+              />
+              <YAxis
+                tick={{ fontSize: 12, fill: "white" }}
+                label={{
+                  value: "Stock Quantity",
+                  angle: -90,
+                  position: "insideLeft",
+                  style: { textAnchor: "middle", fill: "white" },
+                }}
+              />
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    className="bg-white/10 backdrop-blur-md border border-white/20 text-white"
+                    formatter={(value, name, props) => [
+                      `${value} units`,
+                      "Stock",
+                    ]}
+                    labelFormatter={(label, payload) => {
+                      const data = payload?.[0]?.payload;
+                      return data ? (
+                        <div>
+                          <div className="font-medium">{data.fullName}</div>
+                          <div className="text-sm text-white/70">
+                            {data.partNumber}
+                          </div>
+                          <div
+                            className={`text-sm ${data.status === "Low Stock" ? "text-red-300" : "text-green-300"}`}
+                          >
+                            {data.status}
+                          </div>
+                        </div>
+                      ) : (
+                        label
+                      );
+                    }}
+                  />
+                }
+              />
+              <Bar
+                dataKey="stock"
+                radius={[4, 4, 0, 0]}
+                fill="currentColor"
+                className="fill-current"
+              />
+            </BarChart>
+          </ChartContainer>
+        </div>
+
+        {/* Chart Legend */}
+        <div className="flex items-center justify-center gap-6 mt-4 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded bg-green-500"></div>
+            <span className="text-white/70">In Stock</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded bg-red-500"></div>
+            <span className="text-white/70">Low Stock</span>
+          </div>
+        </div>
+      </GlassCard>
 
       {/* Search, Filter, and Sort */}
       <GlassCard className="p-6">
