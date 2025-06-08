@@ -22,6 +22,8 @@ import {
   Bell,
   X,
   Eye,
+  LayoutGrid,
+  Menu,
 } from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import { Button } from "@/components/ui/button";
