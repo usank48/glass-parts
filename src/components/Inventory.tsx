@@ -53,6 +53,7 @@ import {
   formatInventoryValue,
   getInventoryStatusColor,
 } from "@/utils/inventoryManager";
+import { ProductDetailDialog } from "./dialogs/ProductDetailDialog";
 
 interface GroupedData {
   id: string;
