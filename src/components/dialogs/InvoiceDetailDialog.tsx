@@ -1,8 +1,13 @@
-import React, { useState, useRef } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import React, { useState, useRef } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   FileText,
   Download,
@@ -16,11 +21,11 @@ import {
   Edit3,
   Save,
   Trash2,
-  Plus
-} from 'lucide-react';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-import { toast } from 'sonner';
+  Plus,
+} from "lucide-react";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import { toast } from "sonner";
 
 interface InvoiceItem {
   id: string;
@@ -60,7 +65,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
   open,
   onClose,
   invoice,
-  onSave
+  onSave,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedInvoice, setEditedInvoice] = useState<Invoice | null>(null);
@@ -73,18 +78,21 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Paid':
-        return 'bg-green-500/20 text-green-300 border-green-500/30';
-      case 'Pending':
-        return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
-      case 'Overdue':
-        return 'bg-red-500/20 text-red-300 border-red-500/30';
+      case "Paid":
+        return "bg-green-500/20 text-green-300 border-green-500/30";
+      case "Pending":
+        return "bg-yellow-500/20 text-yellow-300 border-yellow-500/30";
+      case "Overdue":
+        return "bg-red-500/20 text-red-300 border-red-500/30";
       default:
-        return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
+        return "bg-gray-500/20 text-gray-300 border-gray-500/30";
     }
   };
 
-  const subtotal = currentInvoice.items.reduce((sum, item) => sum + item.totalPrice, 0);
+  const subtotal = currentInvoice.items.reduce(
+    (sum, item) => sum + item.totalPrice,
+    0,
+  );
   const taxAmount = subtotal * (currentInvoice.taxRate / 100);
   const discountAmount = currentInvoice.discountAmount || 0;
   const finalTotal = subtotal + taxAmount - discountAmount;
@@ -98,7 +106,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
     if (editedInvoice && onSave) {
       onSave({ ...editedInvoice, amount: finalTotal });
       setIsEditing(false);
-      toast.success('Invoice updated successfully!');
+      toast.success("Invoice updated successfully!");
     }
   };
 
@@ -115,11 +123,12 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
 
   const updateItem = (itemId: string, field: keyof InvoiceItem, value: any) => {
     if (editedInvoice) {
-      const updatedItems = editedInvoice.items.map(item => {
+      const updatedItems = editedInvoice.items.map((item) => {
         if (item.id === itemId) {
           const updatedItem = { ...item, [field]: value };
-          if (field === 'quantity' || field === 'unitPrice') {
-            updatedItem.totalPrice = updatedItem.quantity * updatedItem.unitPrice;
+          if (field === "quantity" || field === "unitPrice") {
+            updatedItem.totalPrice =
+              updatedItem.quantity * updatedItem.unitPrice;
           }
           return updatedItem;
         }
@@ -131,7 +140,9 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
 
   const removeItem = (itemId: string) => {
     if (editedInvoice) {
-      const updatedItems = editedInvoice.items.filter(item => item.id !== itemId);
+      const updatedItems = editedInvoice.items.filter(
+        (item) => item.id !== itemId,
+      );
       setEditedInvoice({ ...editedInvoice, items: updatedItems });
     }
   };
@@ -140,30 +151,46 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
     if (editedInvoice) {
       const newItem: InvoiceItem = {
         id: Date.now().toString(),
-        partNumber: '',
-        partName: '',
-        brand: '',
+        partNumber: "",
+        partName: "",
+        brand: "",
         quantity: 1,
         unitPrice: 0,
-        totalPrice: 0
+        totalPrice: 0,
       };
-      setEditedInvoice({ ...editedInvoice, items: [...editedInvoice.items, newItem] });
+      setEditedInvoice({
+        ...editedInvoice,
+        items: [...editedInvoice.items, newItem],
+      });
     }
   };
 
   // Professional Invoice Format Component
-  const ProfessionalInvoice = ({ invoice, showForPrint = false }: { invoice: Invoice; showForPrint?: boolean }) => {
-    const subtotal = invoice.items.reduce((sum, item) => sum + item.totalPrice, 0);
+  const ProfessionalInvoice = ({
+    invoice,
+    showForPrint = false,
+  }: {
+    invoice: Invoice;
+    showForPrint?: boolean;
+  }) => {
+    const subtotal = invoice.items.reduce(
+      (sum, item) => sum + item.totalPrice,
+      0,
+    );
     const taxAmount = subtotal * (invoice.taxRate / 100);
     const discountAmount = invoice.discountAmount || 0;
     const finalTotal = subtotal + taxAmount - discountAmount;
 
     return (
-      <div className={`${showForPrint ? 'text-black bg-white' : 'text-white'} max-w-2xl mx-auto p-8 font-sans`}>
+      <div
+        className={`${showForPrint ? "text-black bg-white" : "text-white"} max-w-2xl mx-auto p-8 font-sans`}
+      >
         {/* Company Header */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold mb-2">Auto Parts Pro</h1>
-          <p className="text-sm mb-1">456 Industrial Ave, Mechanicsville, USA</p>
+          <p className="text-sm mb-1">
+            456 Industrial Ave, Mechanicsville, USA
+          </p>
           <p className="text-sm mb-4">contact@autopartspro.com</p>
           <h2 className="text-xl font-bold">INVOICE</h2>
         </div>
@@ -192,7 +219,9 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
         {/* Items Table */}
         <table className="w-full mb-6">
           <thead>
-            <tr className={`border-b-2 ${showForPrint ? 'border-black' : 'border-white/20'}`}>
+            <tr
+              className={`border-b-2 ${showForPrint ? "border-black" : "border-white/20"}`}
+            >
               <th className="text-left py-2">Item</th>
               <th className="text-center py-2">Qty</th>
               <th className="text-right py-2">Total</th>
@@ -200,13 +229,19 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
           </thead>
           <tbody>
             {invoice.items.map((item) => (
-              <tr key={item.id} className={`border-b ${showForPrint ? 'border-gray-300' : 'border-white/10'}`}>
+              <tr
+                key={item.id}
+                className={`border-b ${showForPrint ? "border-gray-300" : "border-white/10"}`}
+              >
                 <td className="py-2">
-                  <div>{item.partName} ({item.partNumber})</div>
+                  <div>
+                    {item.partName} ({item.partNumber})
+                  </div>
                 </td>
                 <td className="text-center py-2">{item.quantity}</td>
+                <td className="text-right py-2">
                   ₹{item.totalPrice.toFixed(2)}
-                <td className="text-right py-2">${item.totalPrice.toFixed(2)}</td>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -217,21 +252,23 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
           <div className="w-64">
             <div className="flex justify-between py-1">
               <span>Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>₹{subtotal.toFixed(2)}</span>
             </div>
             {discountAmount > 0 && (
               <div className="flex justify-between py-1">
                 <span>Discount</span>
-                <span>-${discountAmount.toFixed(2)}</span>
+                <span>-₹{discountAmount.toFixed(2)}</span>
               </div>
             )}
             <div className="flex justify-between py-1">
               <span>Tax ({invoice.taxRate}%)</span>
-              <span>${taxAmount.toFixed(2)}</span>
+              <span>₹{taxAmount.toFixed(2)}</span>
             </div>
-            <div className={`flex justify-between py-2 border-t-2 font-bold text-lg ${showForPrint ? 'border-black' : 'border-white/20'}`}>
+            <div
+              className={`flex justify-between py-2 border-t-2 font-bold text-lg ${showForPrint ? "border-black" : "border-white/20"}`}
+            >
               <span>TOTAL</span>
-              <span>${finalTotal.toFixed(2)}</span>
+              <span>₹{finalTotal.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -247,12 +284,12 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
   const generatePDF = async () => {
     try {
       // Create a temporary container for the professional invoice
-      const tempDiv = document.createElement('div');
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.left = '-9999px';
-      tempDiv.style.background = 'white';
-      tempDiv.style.width = '800px';
-      tempDiv.style.padding = '40px';
+      const tempDiv = document.createElement("div");
+      tempDiv.style.position = "absolute";
+      tempDiv.style.left = "-9999px";
+      tempDiv.style.background = "white";
+      tempDiv.style.width = "800px";
+      tempDiv.style.padding = "40px";
 
       // Create the professional invoice HTML
       tempDiv.innerHTML = `
@@ -263,7 +300,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
             <p style="margin: 5px 0;">contact@autopartspro.com</p>
             <h2 style="font-size: 24px; font-weight: bold; margin-top: 20px; margin-bottom: 0;">INVOICE</h2>
           </div>
-
+          
           <div style="margin-bottom: 30px;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
               <span>Invoice #:</span>
@@ -274,7 +311,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
               <span style="font-weight: 500;">${currentInvoice.date}</span>
             </div>
           </div>
-
+          
           <div style="margin-bottom: 30px;">
             <h3 style="font-weight: bold; margin-bottom: 10px; margin-top: 0;">Bill To:</h3>
             <div>
@@ -282,7 +319,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
               <p style="margin: 5px 0;">${currentInvoice.customerAddress}</p>
             </div>
           </div>
-
+          
           <table style="width: 100%; margin-bottom: 30px; border-collapse: collapse;">
             <thead>
               <tr style="border-bottom: 2px solid black;">
@@ -292,39 +329,47 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
               </tr>
             </thead>
             <tbody>
-              ${currentInvoice.items.map(item => `
+              ${currentInvoice.items
+                .map(
+                  (item) => `
                 <tr style="border-bottom: 1px solid #ccc;">
                   <td style="padding: 8px 0;">${item.partName} (${item.partNumber})</td>
                   <td style="text-align: center; padding: 8px 0;">${item.quantity}</td>
-                  <td style="text-align: right; padding: 8px 0;">$${item.totalPrice.toFixed(2)}</td>
+                  <td style="text-align: right; padding: 8px 0;">₹${item.totalPrice.toFixed(2)}</td>
                 </tr>
-              `).join('')}
+              `,
+                )
+                .join("")}
             </tbody>
           </table>
-
+          
           <div style="display: flex; justify-content: flex-end;">
             <div style="width: 250px;">
               <div style="display: flex; justify-content: space-between; padding: 5px 0;">
                 <span>Subtotal</span>
-              <span>₹{subtotal.toFixed(2)}</span>
-            </div>
-            {discountAmount > 0 && (
-              <div className="flex justify-between py-1">
-                <span>Discount</span>
-                <span>-₹{discountAmount.toFixed(2)}</span>
+                <span>₹${subtotal.toFixed(2)}</span>
               </div>
-            )}
-            <div className="flex justify-between py-1">
-              <span>Tax ({invoice.taxRate}%)</span>
-              <span>₹{taxAmount.toFixed(2)}</span>
-            </div>
-            <div className={`flex justify-between py-2 border-t-2 font-bold text-lg ${showForPrint ? "border-black" : "border-white/20"}`}>
-              <span>TOTAL</span>
-              <span>₹{finalTotal.toFixed(2)}</span>
+              ${
+                discountAmount > 0
+                  ? `
+                <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                  <span>Discount</span>
+                  <span>-₹${discountAmount.toFixed(2)}</span>
+                </div>
+              `
+                  : ""
+              }
+              <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                <span>Tax (${currentInvoice.taxRate}%)</span>
+                <span>₹${taxAmount.toFixed(2)}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 10px 0; border-top: 2px solid black; font-weight: bold; font-size: 18px;">
+                <span>TOTAL</span>
+                <span>₹${finalTotal.toFixed(2)}</span>
               </div>
             </div>
           </div>
-
+          
           <div style="text-align: center; margin-top: 40px;">
             <p style="font-weight: 500;">Thank you for your business!</p>
           </div>
@@ -336,15 +381,15 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
       const canvas = await html2canvas(tempDiv, {
         scale: 2,
         useCORS: true,
-        backgroundColor: '#ffffff',
+        backgroundColor: "#ffffff",
         width: 800,
-        height: tempDiv.scrollHeight
+        height: tempDiv.scrollHeight,
       });
 
       document.body.removeChild(tempDiv);
 
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
 
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
@@ -354,18 +399,25 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
       const imgX = (pdfWidth - imgWidth * ratio) / 2;
       const imgY = 10;
 
-      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      pdf.addImage(
+        imgData,
+        "PNG",
+        imgX,
+        imgY,
+        imgWidth * ratio,
+        imgHeight * ratio,
+      );
       pdf.save(`${currentInvoice.id}.pdf`);
 
-      toast.success('PDF downloaded successfully!');
+      toast.success("PDF downloaded successfully!");
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      toast.error('Failed to generate PDF. Please try again.');
+      console.error("Error generating PDF:", error);
+      toast.error("Failed to generate PDF. Please try again.");
     }
   };
 
   const handlePrint = () => {
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
 
     if (printWindow) {
       const printContent = `
@@ -374,10 +426,10 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
         <head>
           <title>Invoice ${currentInvoice.id}</title>
           <style>
-            body {
-              font-family: Arial, sans-serif;
-              background: white;
-              color: black;
+            body { 
+              font-family: Arial, sans-serif; 
+              background: white; 
+              color: black; 
               margin: 0;
               padding: 20px;
             }
@@ -464,7 +516,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
               <p>contact@autopartspro.com</p>
               <h2 class="invoice-title">INVOICE</h2>
             </div>
-
+            
             <div class="invoice-details">
               <div class="detail-row">
                 <span>Invoice #:</span>
@@ -475,7 +527,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                 <span><strong>${currentInvoice.date}</strong></span>
               </div>
             </div>
-
+            
             <div class="bill-to">
               <h3><strong>Bill To:</strong></h3>
               <div>
@@ -483,7 +535,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                 <p>${currentInvoice.customerAddress}</p>
               </div>
             </div>
-
+            
             <table class="items-table">
               <thead>
                 <tr>
@@ -493,39 +545,47 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                 </tr>
               </thead>
               <tbody>
-                ${currentInvoice.items.map(item => `
+                ${currentInvoice.items
+                  .map(
+                    (item) => `
                   <tr>
                     <td>${item.partName} (${item.partNumber})</td>
                     <td class="center">${item.quantity}</td>
-                    <td class="right">$${item.totalPrice.toFixed(2)}</td>
+                    <td class="right">₹${item.totalPrice.toFixed(2)}</td>
                   </tr>
-                `).join('')}
+                `,
+                  )
+                  .join("")}
               </tbody>
             </table>
-
+            
             <div class="totals">
               <div class="totals-inner">
                 <div class="total-row">
                   <span>Subtotal</span>
-                  <span>$${subtotal.toFixed(2)}</span>
+                  <span>₹${subtotal.toFixed(2)}</span>
                 </div>
-                ${discountAmount > 0 ? `
+                ${
+                  discountAmount > 0
+                    ? `
                   <div class="total-row">
                     <span>Discount</span>
-                    <span>-$${discountAmount.toFixed(2)}</span>
+                    <span>-₹${discountAmount.toFixed(2)}</span>
                   </div>
-                ` : ''}
+                `
+                    : ""
+                }
                 <div class="total-row">
                   <span>Tax (${currentInvoice.taxRate}%)</span>
-                  <span>$${taxAmount.toFixed(2)}</span>
+                  <span>₹${taxAmount.toFixed(2)}</span>
                 </div>
                 <div class="total-final">
                   <span>TOTAL</span>
-                  <span>$${finalTotal.toFixed(2)}</span>
+                  <span>₹${finalTotal.toFixed(2)}</span>
                 </div>
               </div>
             </div>
-
+            
             <div class="footer">
               <p>Thank you for your business!</p>
             </div>
@@ -543,32 +603,38 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
         printWindow.close();
       }, 500);
 
-      toast.success('Invoice sent to printer!');
+      toast.success("Invoice sent to printer!");
     }
   };
 
   const handleWhatsApp = () => {
-    const message = `*INVOICE - ${currentInvoice.id}*%0A%0A` +
-                   `*Auto Parts Pro*%0A` +
-                   `456 Industrial Ave, Mechanicsville, USA%0A` +
-                   `contact@autopartspro.com%0A%0A` +
-                   `*Invoice #:* ${currentInvoice.id}%0A` +
-                   `*Date:* ${currentInvoice.date}%0A%0A` +
-                   `*Bill To:*%0A${currentInvoice.customer}%0A${currentInvoice.customerAddress}%0A%0A` +
-                   `*ITEMS:*%0A` +
-                   currentInvoice.items.map(item =>
-                     `• ${item.partName} (${item.partNumber}) - Qty: ${item.quantity} - $${item.totalPrice.toFixed(2)}`
-                   ).join('%0A') +
-                   `%0A%0A*TOTALS:*%0A` +
-                   `Subtotal: $${subtotal.toFixed(2)}%0A` +
-                   (discountAmount > 0 ? `Discount: -$${discountAmount.toFixed(2)}%0A` : '') +
-                   `Tax (${currentInvoice.taxRate}%): $${taxAmount.toFixed(2)}%0A` +
-                   `*TOTAL: $${finalTotal.toFixed(2)}*%0A%0A` +
-                   `Thank you for your business! 🚗✨`;
+    const message =
+      `*INVOICE - ${currentInvoice.id}*%0A%0A` +
+      `*Auto Parts Pro*%0A` +
+      `456 Industrial Ave, Mechanicsville, USA%0A` +
+      `contact@autopartspro.com%0A%0A` +
+      `*Invoice #:* ${currentInvoice.id}%0A` +
+      `*Date:* ${currentInvoice.date}%0A%0A` +
+      `*Bill To:*%0A${currentInvoice.customer}%0A${currentInvoice.customerAddress}%0A%0A` +
+      `*ITEMS:*%0A` +
+      currentInvoice.items
+        .map(
+          (item) =>
+            `• ${item.partName} (${item.partNumber}) - Qty: ${item.quantity} - ₹${item.totalPrice.toFixed(2)}`,
+        )
+        .join("%0A") +
+      `%0A%0A*TOTALS:*%0A` +
+      `Subtotal: ₹${subtotal.toFixed(2)}%0A` +
+      (discountAmount > 0
+        ? `Discount: -₹${discountAmount.toFixed(2)}%0A`
+        : "") +
+      `Tax (${currentInvoice.taxRate}%): ₹${taxAmount.toFixed(2)}%0A` +
+      `*TOTAL: ₹${finalTotal.toFixed(2)}*%0A%0A` +
+      `Thank you for your business! 🚗✨`;
 
     const whatsappUrl = `https://wa.me/?text=${message}`;
-    window.open(whatsappUrl, '_blank');
-    toast.success('WhatsApp opened with invoice details!');
+    window.open(whatsappUrl, "_blank");
+    toast.success("WhatsApp opened with invoice details!");
   };
 
   return (
@@ -581,12 +647,16 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                 <FileText size={24} />
               </div>
               <div>
-                <span>{isEditing ? 'Edit Invoice' : 'Invoice Details'}</span>
-                <p className="text-sm text-white/70 font-normal">{currentInvoice.id}</p>
+                <span>{isEditing ? "Edit Invoice" : "Invoice Details"}</span>
+                <p className="text-sm text-white/70 font-normal">
+                  {currentInvoice.id}
+                </p>
               </div>
             </DialogTitle>
             <div className="flex items-center gap-2">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(currentInvoice.status)}`}>
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(currentInvoice.status)}`}
+              >
                 {currentInvoice.status}
               </span>
               {!isEditing && (
@@ -618,11 +688,15 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                   {isEditing ? (
                     <Input
                       value={currentInvoice.customer}
-                      onChange={(e) => updateInvoiceField('customer', e.target.value)}
+                      onChange={(e) =>
+                        updateInvoiceField("customer", e.target.value)
+                      }
                       className="mt-1 bg-white/10 border-white/20 text-white"
                     />
                   ) : (
-                    <span className="text-white ml-2 font-medium">{currentInvoice.customer}</span>
+                    <span className="text-white ml-2 font-medium">
+                      {currentInvoice.customer}
+                    </span>
                   )}
                 </div>
                 <div>
@@ -630,11 +704,15 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                   {isEditing ? (
                     <Input
                       value={currentInvoice.customerEmail}
-                      onChange={(e) => updateInvoiceField('customerEmail', e.target.value)}
+                      onChange={(e) =>
+                        updateInvoiceField("customerEmail", e.target.value)
+                      }
                       className="mt-1 bg-white/10 border-white/20 text-white"
                     />
                   ) : (
-                    <span className="text-white ml-2">{currentInvoice.customerEmail}</span>
+                    <span className="text-white ml-2">
+                      {currentInvoice.customerEmail}
+                    </span>
                   )}
                 </div>
                 <div>
@@ -642,11 +720,15 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                   {isEditing ? (
                     <Input
                       value={currentInvoice.customerPhone}
-                      onChange={(e) => updateInvoiceField('customerPhone', e.target.value)}
+                      onChange={(e) =>
+                        updateInvoiceField("customerPhone", e.target.value)
+                      }
                       className="mt-1 bg-white/10 border-white/20 text-white"
                     />
                   ) : (
-                    <span className="text-white ml-2">{currentInvoice.customerPhone}</span>
+                    <span className="text-white ml-2">
+                      {currentInvoice.customerPhone}
+                    </span>
                   )}
                 </div>
                 <div>
@@ -654,12 +736,16 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                   {isEditing ? (
                     <Textarea
                       value={currentInvoice.customerAddress}
-                      onChange={(e) => updateInvoiceField('customerAddress', e.target.value)}
+                      onChange={(e) =>
+                        updateInvoiceField("customerAddress", e.target.value)
+                      }
                       className="mt-1 bg-white/10 border-white/20 text-white"
                       rows={2}
                     />
                   ) : (
-                    <span className="text-white ml-2">{currentInvoice.customerAddress}</span>
+                    <span className="text-white ml-2">
+                      {currentInvoice.customerAddress}
+                    </span>
                   )}
                 </div>
               </div>
@@ -678,11 +764,15 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                     <Input
                       type="date"
                       value={currentInvoice.date}
-                      onChange={(e) => updateInvoiceField('date', e.target.value)}
+                      onChange={(e) =>
+                        updateInvoiceField("date", e.target.value)
+                      }
                       className="mt-1 bg-white/10 border-white/20 text-white"
                     />
                   ) : (
-                    <span className="text-white ml-2 font-medium">{currentInvoice.date}</span>
+                    <span className="text-white ml-2 font-medium">
+                      {currentInvoice.date}
+                    </span>
                   )}
                 </div>
                 <div>
@@ -691,11 +781,15 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                     <Input
                       type="date"
                       value={currentInvoice.dueDate}
-                      onChange={(e) => updateInvoiceField('dueDate', e.target.value)}
+                      onChange={(e) =>
+                        updateInvoiceField("dueDate", e.target.value)
+                      }
                       className="mt-1 bg-white/10 border-white/20 text-white"
                     />
                   ) : (
-                    <span className="text-white ml-2">{currentInvoice.dueDate}</span>
+                    <span className="text-white ml-2">
+                      {currentInvoice.dueDate}
+                    </span>
                   )}
                 </div>
                 <div>
@@ -703,11 +797,15 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                   {isEditing ? (
                     <Input
                       value={currentInvoice.paymentTerms}
-                      onChange={(e) => updateInvoiceField('paymentTerms', e.target.value)}
+                      onChange={(e) =>
+                        updateInvoiceField("paymentTerms", e.target.value)
+                      }
                       className="mt-1 bg-white/10 border-white/20 text-white"
                     />
                   ) : (
-                    <span className="text-white ml-2">{currentInvoice.paymentTerms}</span>
+                    <span className="text-white ml-2">
+                      {currentInvoice.paymentTerms}
+                    </span>
                   )}
                 </div>
                 <div>
@@ -717,16 +815,25 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                       type="number"
                       step="0.01"
                       value={currentInvoice.taxRate}
-                      onChange={(e) => updateInvoiceField('taxRate', parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        updateInvoiceField(
+                          "taxRate",
+                          parseFloat(e.target.value) || 0,
+                        )
+                      }
                       className="mt-1 bg-white/10 border-white/20 text-white"
                     />
                   ) : (
-                    <span className="text-white ml-2">{currentInvoice.taxRate}%</span>
+                    <span className="text-white ml-2">
+                      {currentInvoice.taxRate}%
+                    </span>
                   )}
                 </div>
                 <div>
                   <span className="text-white/70">Total Amount:</span>
-                  <span className="text-white ml-2 font-bold text-lg">${finalTotal.toFixed(2)}</span>
+                  <span className="text-white ml-2 font-bold text-lg">
+                    ₹{finalTotal.toFixed(2)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -765,11 +872,16 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
             {/* Items List */}
             <div className="space-y-3 mt-4">
               {currentInvoice.items.map((item) => (
-                <div key={item.id} className="md:grid md:grid-cols-7 gap-4 p-3 bg-white/5 rounded-lg border border-white/10">
+                <div
+                  key={item.id}
+                  className="md:grid md:grid-cols-7 gap-4 p-3 bg-white/5 rounded-lg border border-white/10"
+                >
                   {/* Mobile Layout */}
                   <div className="md:hidden space-y-2">
                     <div className="flex justify-between items-start">
-                      <span className="text-white font-medium">{item.partName}</span>
+                      <span className="text-white font-medium">
+                        {item.partName}
+                      </span>
                       {isEditing && (
                         <Button
                           onClick={() => removeItem(item.id)}
@@ -784,7 +896,10 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                     <div className="text-sm text-white/70">
                       <div>Part #: {item.partNumber}</div>
                       <div>Brand: {item.brand}</div>
-                      <div>Qty: {item.quantity} × ${item.unitPrice.toFixed(2)} = ${item.totalPrice.toFixed(2)}</div>
+                      <div>
+                        Qty: {item.quantity} × ₹{item.unitPrice.toFixed(2)} = ₹
+                        {item.totalPrice.toFixed(2)}
+                      </div>
                     </div>
                   </div>
 
@@ -793,33 +908,45 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                     {isEditing ? (
                       <Input
                         value={item.partNumber}
-                        onChange={(e) => updateItem(item.id, 'partNumber', e.target.value)}
+                        onChange={(e) =>
+                          updateItem(item.id, "partNumber", e.target.value)
+                        }
                         className="bg-white/10 border-white/20 text-white text-sm"
                       />
                     ) : (
-                      <span className="text-white/90 text-sm">{item.partNumber}</span>
+                      <span className="text-white/90 text-sm">
+                        {item.partNumber}
+                      </span>
                     )}
                   </div>
                   <div className="hidden md:block">
                     {isEditing ? (
                       <Input
                         value={item.partName}
-                        onChange={(e) => updateItem(item.id, 'partName', e.target.value)}
+                        onChange={(e) =>
+                          updateItem(item.id, "partName", e.target.value)
+                        }
                         className="bg-white/10 border-white/20 text-white"
                       />
                     ) : (
-                      <span className="text-white font-medium">{item.partName}</span>
+                      <span className="text-white font-medium">
+                        {item.partName}
+                      </span>
                     )}
                   </div>
                   <div className="hidden md:block">
                     {isEditing ? (
                       <Input
                         value={item.brand}
-                        onChange={(e) => updateItem(item.id, 'brand', e.target.value)}
+                        onChange={(e) =>
+                          updateItem(item.id, "brand", e.target.value)
+                        }
                         className="bg-white/10 border-white/20 text-white text-sm"
                       />
                     ) : (
-                      <span className="text-white/90 text-sm">{item.brand}</span>
+                      <span className="text-white/90 text-sm">
+                        {item.brand}
+                      </span>
                     )}
                   </div>
                   <div className="hidden md:block text-center">
@@ -827,7 +954,13 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                       <Input
                         type="number"
                         value={item.quantity}
-                        onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 0)}
+                        onChange={(e) =>
+                          updateItem(
+                            item.id,
+                            "quantity",
+                            parseInt(e.target.value) || 0,
+                          )
+                        }
                         className="bg-white/10 border-white/20 text-white text-center"
                       />
                     ) : (
@@ -840,14 +973,24 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                         type="number"
                         step="0.01"
                         value={item.unitPrice}
-                        onChange={(e) => updateItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
+                        onChange={(e) =>
+                          updateItem(
+                            item.id,
+                            "unitPrice",
+                            parseFloat(e.target.value) || 0,
+                          )
+                        }
                         className="bg-white/10 border-white/20 text-white text-right"
                       />
                     ) : (
-                      <span className="text-white">${item.unitPrice.toFixed(2)}</span>
+                      <span className="text-white">
+                        ₹{item.unitPrice.toFixed(2)}
+                      </span>
                     )}
                   </div>
-                  <div className="hidden md:block text-right text-white font-bold">${item.totalPrice.toFixed(2)}</div>
+                  <div className="hidden md:block text-right text-white font-bold">
+                    ₹{item.totalPrice.toFixed(2)}
+                  </div>
                   {isEditing && (
                     <div className="hidden md:flex justify-center">
                       <Button
@@ -872,14 +1015,16 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
               <h3 className="text-white font-semibold mb-3">Notes</h3>
               {isEditing ? (
                 <Textarea
-                  value={currentInvoice.notes || ''}
-                  onChange={(e) => updateInvoiceField('notes', e.target.value)}
+                  value={currentInvoice.notes || ""}
+                  onChange={(e) => updateInvoiceField("notes", e.target.value)}
                   className="bg-white/10 border-white/20 text-white"
                   rows={4}
                   placeholder="Add invoice notes..."
                 />
               ) : (
-                <p className="text-white/80 text-sm">{currentInvoice.notes || 'No notes added.'}</p>
+                <p className="text-white/80 text-sm">
+                  {currentInvoice.notes || "No notes added."}
+                </p>
               )}
             </div>
 
@@ -892,7 +1037,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
               <div className="space-y-2">
                 <div className="flex justify-between text-white/80">
                   <span>Subtotal:</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>₹{subtotal.toFixed(2)}</span>
                 </div>
                 {discountAmount > 0 && (
                   <div className="flex justify-between items-center">
@@ -903,23 +1048,30 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                           type="number"
                           step="0.01"
                           value={currentInvoice.discountAmount || 0}
-                          onChange={(e) => updateInvoiceField('discountAmount', parseFloat(e.target.value) || 0)}
+                          onChange={(e) =>
+                            updateInvoiceField(
+                              "discountAmount",
+                              parseFloat(e.target.value) || 0,
+                            )
+                          }
                           className="w-24 bg-white/10 border-white/20 text-white text-right"
                         />
                       ) : (
-                        <span className="text-green-300">-${discountAmount.toFixed(2)}</span>
+                        <span className="text-green-300">
+                          -₹{discountAmount.toFixed(2)}
+                        </span>
                       )}
                     </div>
                   </div>
                 )}
                 <div className="flex justify-between text-white/80">
                   <span>Tax ({currentInvoice.taxRate}%):</span>
-                  <span>${taxAmount.toFixed(2)}</span>
+                  <span>₹{taxAmount.toFixed(2)}</span>
                 </div>
                 <div className="border-t border-white/20 pt-2">
                   <div className="flex justify-between text-white font-bold text-lg">
                     <span>Total Amount:</span>
-                    <span>${finalTotal.toFixed(2)}</span>
+                    <span>₹{finalTotal.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -984,7 +1136,10 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
         </div>
 
         {/* Hidden Professional Invoice for PDF Generation */}
-        <div ref={printableInvoiceRef} style={{ position: 'absolute', left: '-9999px' }}>
+        <div
+          ref={printableInvoiceRef}
+          style={{ position: "absolute", left: "-9999px" }}
+        >
           <ProfessionalInvoice invoice={currentInvoice} showForPrint={true} />
         </div>
       </DialogContent>
