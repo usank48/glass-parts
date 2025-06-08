@@ -167,7 +167,7 @@ export const AddAttendanceDialog: React.FC<AddAttendanceDialogProps> = ({
                     <SelectTrigger className="bg-white/10 border-white/20 text-white h-9">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white/10 backdrop-blur-md border border-white/20">
+                    <SelectContent className="!bg-gray-900/95 backdrop-blur-md border border-white/20 text-white">
                       <SelectItem
                         value="present"
                         className="text-white focus:bg-white/20 hover:bg-white/10"
