@@ -71,7 +71,6 @@ type ViewMode = "tile" | "list";
 
 export const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [showAddForm, setShowAddForm] = useState(false);
   const [showExcelImport, setShowExcelImport] = useState(false);
   const [sortMethod, setSortMethod] = useState<SortMethod>("category");
   const [productSortMethod, setProductSortMethod] =
@@ -1058,7 +1057,7 @@ export const Inventory = () => {
                                     Purchase
                                   </div>
                                   <div className="text-sm text-white font-medium">
-                                    ₹{product.costPrice}
+                                    ���{product.costPrice}
                                   </div>
                                 </div>
                                 <div>
