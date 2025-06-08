@@ -101,6 +101,10 @@ export const Staff = () => {
   const [showAddAttendanceDialog, setShowAddAttendanceDialog] = useState(false);
   const [selectedStaffForAction, setSelectedStaffForAction] =
     useState<StaffMember | null>(null);
+  const [showStaffSelection, setShowStaffSelection] = useState(false);
+  const [actionType, setActionType] = useState<"payment" | "attendance" | null>(
+    null,
+  );
 
   console.log("🔄 Staff component rendered, selectedStaff:", selectedStaff);
 
