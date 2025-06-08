@@ -88,8 +88,8 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
 
   return (
     <>
-      {/* FAB positioned above bottom navigation bar on mobile, bottom-right on desktop */}
-      <div className="fixed bottom-24 right-4 md:bottom-6 md:right-6 z-50">
+      {/* FAB positioned above bottom navigation bar */}
+      <div className="fixed bottom-24 right-4 z-50">
         <button
           onClick={contextAction.onClick}
           className={`w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-r ${contextAction.color} backdrop-blur-md border border-white/20 text-white shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 flex items-center justify-center group`}
