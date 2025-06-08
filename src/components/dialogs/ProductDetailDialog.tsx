@@ -237,6 +237,26 @@ export const ProductDetailDialog: React.FC<ProductDetailDialogProps> = ({
                   </div>
 
                   <div>
+                    <Label className="text-white/70 text-sm">
+                      OEM Part Number
+                    </Label>
+                    {isEditing ? (
+                      <Input
+                        value={currentProduct.oemPartNumber || ""}
+                        onChange={(e) =>
+                          handleInputChange("oemPartNumber", e.target.value)
+                        }
+                        className="mt-1 bg-white/10 border-white/20 text-white"
+                        placeholder="Enter OEM part number"
+                      />
+                    ) : (
+                      <p className="text-white font-medium mt-1">
+                        {currentProduct.oemPartNumber || "Not specified"}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
                     <Label className="text-white/70 text-sm">Brand</Label>
                     {isEditing ? (
                       <Input
