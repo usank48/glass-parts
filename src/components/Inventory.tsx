@@ -66,6 +66,7 @@ interface GroupedData {
 
 type SortMethod = "category" | "vehicle" | "all";
 type ProductSortMethod = "alphabetical" | "quantity-asc" | "quantity-desc";
+type ViewMode = "tile" | "list";
 
 export const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -79,6 +80,7 @@ export const Inventory = () => {
     null,
   );
   const [showProductDetail, setShowProductDetail] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>("tile");
 
   // Use the inventory sync hook
   const {
