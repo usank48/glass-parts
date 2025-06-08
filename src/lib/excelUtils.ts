@@ -21,6 +21,25 @@ export interface ExcelValidationResult {
   validRows: number;
 }
 
+export interface ImportResult {
+  success: boolean;
+  totalProcessed: number;
+  newProducts: number;
+  updatedProducts: number;
+  errors: string[];
+  updatedItems: Array<{
+    partNumber: string;
+    partName: string;
+    oldStock: number;
+    newStock: number;
+  }>;
+  newItems: Array<{
+    partNumber: string;
+    partName: string;
+    stock: number;
+  }>;
+}
+
 // Expected Excel columns
 export const EXCEL_COLUMNS = {
   PART_NUMBER: "Part Number",
