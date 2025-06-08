@@ -192,28 +192,80 @@ export const Sales = () => {
   ];
 
   return (
-    <div className="space-y-6 pb-20 md:pb-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Sales Management</h1>
-          <p className="text-white/70 mt-1">Track and manage your sales</p>
+    <div className="space-y-4 sm:space-y-6">
+      {/* Low Stock Alert */}
+      {getLowStockItems().length > 0 && (
+        <GlassCard className="p-4 border-l-4 border-l-yellow-500">
+          <div className="flex items-start gap-3">
+            <AlertTriangle
+              className="text-yellow-400 flex-shrink-0 mt-1"
+              size={20}
+            />
+            <div className="flex-1">
+              <h3 className="text-white font-semibold text-sm mb-1">
+                Low Stock Alert
+              </h3>
+              <p className="text-white/70 text-xs">
+                {getLowStockItems().length} items are running low on stock.
+                Check inventory before making sales.
+              </p>
+            </div>
+          </div>
+        </GlassCard>
+      )}
+
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">
+            Sales Management
+          </h1>
+          <div className="flex items-center gap-4 mt-1">
+            <p className="text-white/70 text-sm sm:text-base">
+              Track and manage your sales with real-time inventory
+            </p>
+            {isLoading && (
+              <div className="flex items-center gap-2 text-blue-400">
+                <div className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-xs">Syncing...</span>
+              </div>
+            )}
+          </div>
         </div>
+        <Button
+          onClick={() => setShowNewSale(true)}
+          className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white border-0 w-full sm:w-auto"
+        >
+          <Plus size={20} className="mr-2" />
+          New Sale
+        </Button>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <GlassCard key={index} className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-white/70 text-sm">{stat.title}</p>
-                  <p className="text-white text-2xl font-bold">{stat.value}</p>
-                  <p className="text-green-400 text-sm">{stat.change}</p>
+            <GlassCard key={index} className="p-4 sm:p-6">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div
+                  className={`p-2 sm:p-3 rounded-lg bg-gradient-to-r ${stat.color} flex-shrink-0`}
+                >
+                  <Icon className="text-white" size={20} />
                 </div>
-                <div className="p-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
-                  <Icon className="text-white" size={24} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-white/70 text-xs sm:text-sm">
+                    {stat.title}
+                  </p>
+                  <p
+                    className="text-lg sm:text-2xl font-bold text-white truncate"
+                    title={stat.value}
+                  >
+                    {stat.value}
+                  </p>
+                  <p className="text-green-400 text-xs sm:text-sm">
+                    {stat.change}
+                  </p>
                 </div>
               </div>
             </GlassCard>
@@ -221,35 +273,160 @@ export const Sales = () => {
         })}
       </div>
 
+      {/* Sales Status Summary */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <GlassCard className="p-4 sm:p-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600">
+              <ShoppingCart className="text-white" size={18} />
+            </div>
+            <div>
+              <p className="text-white/70 text-xs sm:text-sm">
+                Completed Sales
+              </p>
+              <p className="text-lg sm:text-xl font-bold text-white">
+                {completedSales}
+              </p>
+            </div>
+          </div>
+        </GlassCard>
+
+        <GlassCard className="p-4 sm:p-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-600">
+              <Package className="text-white" size={18} />
+            </div>
+            <div>
+              <p className="text-white/70 text-xs sm:text-sm">Pending Sales</p>
+              <p className="text-lg sm:text-xl font-bold text-white">
+                {pendingSales}
+              </p>
+            </div>
+          </div>
+        </GlassCard>
+
+        <GlassCard className="p-4 sm:p-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600">
+              <AlertTriangle className="text-white" size={18} />
+            </div>
+            <div>
+              <p className="text-white/70 text-xs sm:text-sm">
+                Low Stock Items
+              </p>
+              <p className="text-lg sm:text-xl font-bold text-white">
+                {getLowStockItems().length}
+              </p>
+            </div>
+          </div>
+        </GlassCard>
+      </div>
+
       {/* Recent Sales */}
-      <GlassCard className="p-6">
-        <h2 className="text-xl font-semibold text-white mb-6">Recent Sales</h2>
-        <div className="space-y-4">
+      <GlassCard className="p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-white">
+            Recent Sales
+          </h2>
+          <Button
+            variant="outline"
+            size="sm"
+            className="!bg-transparent border-white/20 text-white hover:bg-white/10 text-xs sm:text-sm"
+          >
+            View All
+          </Button>
+        </div>
+        <div className="space-y-3 sm:space-y-4">
           {salesData.map((sale) => (
             <div
               key={sale.id}
-              className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10"
+              className="p-3 sm:p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-all duration-200"
             >
-              <div>
-                <h3 className="text-white font-medium">{sale.customerName}</h3>
-                <p className="text-white/70 text-sm">{sale.items}</p>
-                <p className="text-white/50 text-xs">{sale.date}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-white font-semibold">₹{sale.total}</p>
-                <span
-                  className={`px-2 py-1 rounded-full text-xs ${
-                    sale.status === "Completed"
-                      ? "bg-green-500/20 text-green-300"
-                      : "bg-yellow-500/20 text-yellow-300"
-                  }`}
-                >
-                  {sale.status}
-                </span>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-white font-medium text-sm sm:text-base">
+                      {sale.customerName}
+                    </h3>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        sale.status === "completed"
+                          ? "bg-green-500/20 text-green-300"
+                          : sale.status === "pending"
+                            ? "bg-yellow-500/20 text-yellow-300"
+                            : "bg-blue-500/20 text-blue-300"
+                      }`}
+                    >
+                      {sale.status.charAt(0).toUpperCase() +
+                        sale.status.slice(1)}
+                    </span>
+                  </div>
+                  <p className="text-white/70 text-xs sm:text-sm mb-1">
+                    {sale.items.map((item) => item.itemName).join(", ")}
+                  </p>
+                  <div className="flex items-center gap-4 text-xs text-white/50">
+                    <span>{sale.date}</span>
+                    <span>•</span>
+                    <span>{sale.paymentMethod}</span>
+                    <span>•</span>
+                    <span>
+                      {sale.items.length} item
+                      {sale.items.length !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="text-right">
+                    <p className="text-white font-semibold text-sm sm:text-base">
+                      {formatInventoryValue(sale.total)}
+                    </p>
+                  </div>
+                  <div className="flex gap-1 sm:gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="!bg-transparent border-white/20 text-white hover:bg-white/10 p-2 h-auto"
+                      onClick={() => {
+                        setSelectedSale(sale);
+                        setShowSaleDetail(true);
+                      }}
+                    >
+                      <Eye size={14} />
+                    </Button>
+                    {sale.status === "pending" && (
+                      <Button
+                        size="sm"
+                        onClick={() => handleCompleteSale(sale)}
+                        className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white border-0 px-3 h-auto text-xs"
+                      >
+                        Complete
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           ))}
         </div>
+
+        {salesData.length === 0 && (
+          <div className="text-center py-8">
+            <ShoppingCart className="mx-auto text-white/50 mb-4" size={48} />
+            <h3 className="text-white text-lg font-semibold mb-2">
+              No sales yet
+            </h3>
+            <p className="text-white/70 mb-4">
+              Start making sales to see them here
+            </p>
+            <Button
+              onClick={() => setShowNewSale(true)}
+              className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white border-0"
+            >
+              <Plus size={16} className="mr-2" />
+              Create First Sale
+            </Button>
+          </div>
+        )}
       </GlassCard>
     </div>
   );
