@@ -97,6 +97,10 @@ interface NewStaffMember {
 export const Staff = () => {
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
   const [showAddStaffDialog, setShowAddStaffDialog] = useState(false);
+  const [showAddPaymentDialog, setShowAddPaymentDialog] = useState(false);
+  const [showAddAttendanceDialog, setShowAddAttendanceDialog] = useState(false);
+  const [selectedStaffForAction, setSelectedStaffForAction] =
+    useState<StaffMember | null>(null);
 
   console.log("🔄 Staff component rendered, selectedStaff:", selectedStaff);
 
