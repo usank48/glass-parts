@@ -19,7 +19,7 @@ const Index = () => {
   const renderActiveModule = () => {
     switch (activeModule) {
       case "dashboard":
-        return <Dashboard />;
+        return <Dashboard onNavigateToModule={setActiveModule} />;
       case "inventory":
         return <Inventory />;
       case "suppliers":
@@ -35,7 +35,7 @@ const Index = () => {
       case "purchase":
         return <Purchase />;
       default:
-        return <Dashboard />;
+        return <Dashboard onNavigateToModule={setActiveModule} />;
     }
   };
 
