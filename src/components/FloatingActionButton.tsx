@@ -226,6 +226,7 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
           console.log("Imported data:", data);
           setDialogType(null);
         }}
+        existingProducts={existingProducts}
       />
     </>
   );
