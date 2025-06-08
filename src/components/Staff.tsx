@@ -791,6 +791,87 @@ export const Staff = () => {
         </div>
       </div>
 
+      {/* Staff Selection Interface */}
+      {showStaffSelection && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <GlassCard className="w-full max-w-4xl max-h-[80vh] overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-white">
+                    Select Staff Member
+                  </h2>
+                  <p className="text-white/70 text-sm">
+                    Choose a staff member to{" "}
+                    {actionType === "payment"
+                      ? "add payment for"
+                      : "record attendance for"}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleCancelStaffSelection}
+                  className="text-white hover:bg-white/10"
+                >
+                  ×
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                {staff.map((member) => (
+                  <div
+                    key={member.id}
+                    onClick={() => handleStaffSelection(member)}
+                    className="p-4 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 cursor-pointer border border-white/20"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center">
+                        <User className="text-white" size={20} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-white font-medium truncate">
+                          {member.name}
+                        </h3>
+                        <p className="text-white/60 text-sm truncate">
+                          {member.role} • {member.department}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              member.status === "Active"
+                                ? "bg-green-500/20 text-green-300"
+                                : "bg-yellow-500/20 text-yellow-300"
+                            }`}
+                          >
+                            {member.status}
+                          </span>
+                          {member.employeeId && (
+                            <span className="text-white/50 text-xs">
+                              ID: {member.employeeId}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/20">
+                <Button
+                  variant="outline"
+                  onClick={handleCancelStaffSelection}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </GlassCard>
+        </div>
+      )}
+
       {/* Staff Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {staff.map((member) => (
