@@ -943,6 +943,14 @@ export const Inventory = () => {
                               </span>
                             </div>
                           </div>
+
+                          {/* Tap for details indicator */}
+                          <div className="mt-3 pt-2 border-t border-white/10">
+                            <div className="flex items-center justify-center gap-1 text-blue-300/70 group-hover:text-blue-300 transition-colors duration-200">
+                              <Eye size={12} />
+                              <span className="text-xs">Tap for details</span>
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>
