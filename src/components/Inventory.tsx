@@ -6,10 +6,16 @@ import {
   Filter,
   ChevronDown,
   ChevronRight,
+  Upload,
+  Download,
+  FileSpreadsheet,
 } from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ExcelImportDialog } from "./dialogs/ExcelImportDialog";
+import { exportInventoryToExcel, InventoryData } from "@/lib/excelUtils";
+import { toast } from "sonner";
 
 interface Product {
   id: number;
@@ -33,11 +39,12 @@ interface Category {
 export const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showExcelImport, setShowExcelImport] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(),
   );
 
-  const products: Product[] = [
+  const [products, setProducts] = useState<Product[]>([
     // Brake Pads
     {
       id: 1,
@@ -217,7 +224,7 @@ export const Inventory = () => {
       status: "In Stock",
       category: "HEAD GASKET",
     },
-  ];
+  ]);
 
   // Group products by category
   const categories: Category[] = [
@@ -300,6 +307,29 @@ export const Inventory = () => {
     return { status: "In Stock", count: category.products.length, totalStock };
   };
 
+  const handleExcelImport = (importedData: InventoryData[]) => {
+    const newProducts: Product[] = importedData.map((item, index) => ({
+      id: Math.max(...products.map((p) => p.id), 0) + index + 1,
+      partNumber: item.partNumber,
+      name: item.partName,
+      brand: item.brand,
+      vehicle: item.vehicleCompatibility || "Not specified",
+      stock: item.quantity,
+      costPrice: item.costPrice,
+      sellingPrice: item.sellingPrice,
+      status: item.quantity > 10 ? "In Stock" : "Low Stock",
+      category: item.category.toUpperCase(),
+    }));
+
+    setProducts((prevProducts) => [...prevProducts, ...newProducts]);
+    toast.success(`Successfully imported ${newProducts.length} products!`);
+  };
+
+  const handleExcelExport = () => {
+    exportInventoryToExcel(products);
+    toast.success("Inventory exported successfully!");
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -309,13 +339,30 @@ export const Inventory = () => {
           </h1>
           <p className="text-white/70 mt-1">Manage your car parts inventory</p>
         </div>
-        <Button
-          onClick={() => setShowAddForm(true)}
-          className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0"
-        >
-          <Plus size={20} className="mr-2" />
-          Add Product
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            onClick={() => setShowExcelImport(true)}
+            className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white border-0"
+          >
+            <Upload size={20} className="mr-2" />
+            Import Excel
+          </Button>
+          <Button
+            onClick={handleExcelExport}
+            variant="outline"
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+          >
+            <Download size={20} className="mr-2" />
+            Export Excel
+          </Button>
+          <Button
+            onClick={() => setShowAddForm(true)}
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0"
+          >
+            <Plus size={20} className="mr-2" />
+            Add Product
+          </Button>
+        </div>
       </div>
 
       {/* Search and Filter */}
@@ -337,6 +384,43 @@ export const Inventory = () => {
             <Filter size={20} className="mr-2" />
             Filter
           </Button>
+        </div>
+      </GlassCard>
+
+      {/* Excel Import/Export Info Card */}
+      <GlassCard className="p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-green-500 to-teal-600">
+              <FileSpreadsheet className="text-white" size={24} />
+            </div>
+            <div>
+              <h3 className="text-white font-semibold">Bulk Operations</h3>
+              <p className="text-white/70 text-sm">
+                Import multiple products at once using Excel files or export
+                your current inventory
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setShowExcelImport(true)}
+              size="sm"
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              <Upload size={16} className="mr-1" />
+              Import
+            </Button>
+            <Button
+              onClick={handleExcelExport}
+              size="sm"
+              variant="outline"
+              className="border-white/20 text-white hover:bg-white/10"
+            >
+              <Download size={16} className="mr-1" />
+              Export
+            </Button>
+          </div>
         </div>
       </GlassCard>
 
@@ -411,36 +495,29 @@ export const Inventory = () => {
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex items-center gap-3">
                               <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
-                                <Package className="text-white" size={16} />₹
-                                {product.sellingPrice}
-                                <div>
-                                  <h4 className="text-white font-semibold text-sm">
-                                    {product.name}
-                                  </h4>
-                                  <p className="text-white/70 text-xs">
-                                    {product.brand}
-                                  </p>
-                                </div>
+                                <Package className="text-white" size={16} />
                               </div>
-                              <span
-                                className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                  product.status === "In Stock"
-                                    ? "bg-green-500/20 text-green-300"
-                                    : "bg-red-500/20 text-red-300"
-                                }`}
-                              >
-                                {product.status}
-                              </span>
+                              <div>
+                                <h4 className="text-white font-semibold text-sm">
+                                  {product.name}
+                                </h4>
+                                <p className="text-white/70 text-xs">
+                                  {product.brand}
+                                </p>
+                              </div>
                             </div>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                product.status === "In Stock"
+                                  ? "bg-green-500/20 text-green-300"
+                                  : "bg-red-500/20 text-red-300"
+                              }`}
+                            >
+                              {product.status}
+                            </span>
+                          </div>
 
-                            <div className="space-y-1 text-xs">
-                              <div className="flex justify-between">
-                                <span className="text-white/70">Price:</span>
-                                <span className="text-white font-semibold">
-                                  ₹{product.sellingPrice}
-                                </span>
-                              </div>
-                            </div>
+                          <div className="space-y-1 text-xs">
                             <div className="flex justify-between">
                               <span className="text-white/70">Stock:</span>
                               <span className="text-white font-medium">
@@ -489,6 +566,13 @@ export const Inventory = () => {
           <p className="text-white/70">Try adjusting your search criteria</p>
         </GlassCard>
       )}
+
+      {/* Excel Import Dialog */}
+      <ExcelImportDialog
+        open={showExcelImport}
+        onClose={() => setShowExcelImport(false)}
+        onImport={handleExcelImport}
+      />
     </div>
   );
 };
