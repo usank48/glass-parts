@@ -10,7 +10,7 @@ import {
   Star,
   Edit,
   Trash2,
-  DollarSign,
+  IndianRupee,
   Clock,
   TrendingUp,
   Award,

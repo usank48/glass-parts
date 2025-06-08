@@ -286,7 +286,7 @@ export const Invoicing = () => {
         <GlassCard className="p-4 sm:p-6">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-r from-green-500 to-teal-600 flex-shrink-0">
-              <DollarSign className="text-white" size={20} />
+              <IndianRupee className="text-white" size={20} />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white/70 text-xs sm:text-sm">Total Amount</p>
