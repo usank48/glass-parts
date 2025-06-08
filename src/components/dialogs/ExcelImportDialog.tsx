@@ -118,21 +118,48 @@ export const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
 
       <div className="space-y-4">
         {/* Download Sample Button */}
-        <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-white font-medium">Need a template?</h4>
-              <p className="text-white/70 text-sm">
-                Download our sample Excel file with the correct format
-              </p>
+        <div className="space-y-4">
+          <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-white font-medium">Need a template?</h4>
+                <p className="text-white/70 text-sm">
+                  Download our sample Excel file with the correct format
+                </p>
+              </div>
+              <Button
+                onClick={handleDownloadSample}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Download size={16} className="mr-2" />
+                Download Sample
+              </Button>
             </div>
-            <Button
-              onClick={handleDownloadSample}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <Download size={16} className="mr-2" />
-              Download Sample
-            </Button>
+          </div>
+
+          {/* Matching Logic Info */}
+          <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+            <h4 className="text-white font-medium mb-2">
+              How Product Matching Works:
+            </h4>
+            <ul className="text-white/70 text-sm space-y-1">
+              <li>
+                • <strong>Existing products</strong> are matched by Part Number
+                or Product Name
+              </li>
+              <li>
+                • <strong>Stock quantities</strong> will be updated for matched
+                products
+              </li>
+              <li>
+                • <strong>New products</strong> will be added if no match is
+                found
+              </li>
+              <li>
+                • <strong>Prices and details</strong> will be updated for
+                existing products
+              </li>
+            </ul>
           </div>
         </div>
 
