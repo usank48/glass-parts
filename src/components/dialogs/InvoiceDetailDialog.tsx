@@ -1031,7 +1031,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
             {/* Totals */}
             <div className="p-4 bg-white/5 border border-white/10 rounded-lg">
               <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-                <DollarSign size={20} />
+                <IndianRupee size={20} />
                 Invoice Summary
               </h3>
               <div className="space-y-2">

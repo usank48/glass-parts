@@ -26,7 +26,7 @@ import {
   Calendar,
   Shield,
   Building,
-  DollarSign,
+  IndianRupee,
   Badge,
 } from "lucide-react";
 import { toast } from "sonner";
