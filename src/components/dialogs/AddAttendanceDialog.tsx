@@ -132,10 +132,13 @@ export const AddAttendanceDialog: React.FC<AddAttendanceDialogProps> = ({
 
           {/* Form Content */}
           <form onSubmit={handleSubmit}>
-            <div className="p-4 space-y-3 max-h-[60vh] overflow-y-auto">
+            <div
+              className="p-4 space-y-3 max-h-[60vh] overflow-y-auto"
+              style={{ scrollTop: 0 }}
+            >
               {/* Date Field */}
-              <div className="space-y-1">
-                <Label className="text-white flex items-center gap-2 text-sm">
+              <div className="space-y-1 bg-red-500/20 p-2 rounded">
+                <Label className="text-white flex items-center gap-2 text-sm font-bold">
                   <Calendar size={14} />
                   Date
                 </Label>
@@ -149,8 +152,8 @@ export const AddAttendanceDialog: React.FC<AddAttendanceDialogProps> = ({
               </div>
 
               {/* Status Field */}
-              <div className="space-y-1">
-                <Label className="text-white flex items-center gap-2 text-sm">
+              <div className="space-y-1 bg-blue-500/20 p-2 rounded">
+                <Label className="text-white flex items-center gap-2 text-sm font-bold">
                   {getStatusIcon(formData.status)}
                   Attendance Status
                 </Label>
