@@ -135,7 +135,7 @@ export const AddAttendanceDialog: React.FC<AddAttendanceDialogProps> = ({
 
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto">
-            <form onSubmit={handleSubmit} className="flex flex-col h-full">
+            <form onSubmit={handleSubmit} className="flex flex-col min-h-full">
               <div className="flex-1 p-4 space-y-2">
                 {/* Date */}
                 <div className="space-y-1">
