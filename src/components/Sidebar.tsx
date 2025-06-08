@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Home,
   Package,
@@ -8,7 +8,6 @@ import {
   Calculator,
   X,
 } from "lucide-react";
-import { UserDropdown } from "./UserDropdown";
 
 interface SidebarProps {
   activeModule: string;
