@@ -32,7 +32,14 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Cell,
+} from "recharts";
 
 interface Product {
   id: number;
@@ -244,12 +251,12 @@ export const Inventory = () => {
     },
   ]);
 
-  // Get top 10 items by stock for chart
+  // Get top 10 items by stock for chart with proper color coding
   const getTop10StockData = () => {
     return products
       .sort((a, b) => b.stock - a.stock)
       .slice(0, 10)
-      .map((product) => ({
+      .map((product, index) => ({
         name:
           product.name.length > 20
             ? product.name.substring(0, 20) + "..."
@@ -258,13 +265,28 @@ export const Inventory = () => {
         partNumber: product.partNumber,
         stock: product.stock,
         status: product.status,
+        // Use more vibrant and distinct colors
         fill: product.status === "Low Stock" ? "#ef4444" : "#10b981",
+        // Alternative gradient colors for better visibility
+        color:
+          product.status === "Low Stock"
+            ? "hsl(0, 84%, 60%)" // Red for low stock
+            : "hsl(142, 76%, 36%)", // Green for in stock
+        index,
       }));
   };
 
   const chartConfig = {
     stock: {
       label: "Stock Quantity",
+    },
+    inStock: {
+      label: "In Stock",
+      color: "hsl(142, 76%, 36%)",
+    },
+    lowStock: {
+      label: "Low Stock",
+      color: "hsl(0, 84%, 60%)",
     },
   };
 
@@ -534,7 +556,7 @@ export const Inventory = () => {
           </div>
         </div>
 
-        <div className="h-80">
+        <div className="h-80 bg-white/5 rounded-lg p-4">
           <ChartContainer config={chartConfig}>
             <BarChart
               data={getTop10StockData()}
@@ -551,21 +573,25 @@ export const Inventory = () => {
                 textAnchor="end"
                 height={80}
                 interval={0}
-                tick={{ fontSize: 12, fill: "white" }}
+                tick={{ fontSize: 12, fill: "#ffffff" }}
+                axisLine={{ stroke: "#ffffff", strokeOpacity: 0.3 }}
+                tickLine={{ stroke: "#ffffff", strokeOpacity: 0.3 }}
               />
               <YAxis
-                tick={{ fontSize: 12, fill: "white" }}
+                tick={{ fontSize: 12, fill: "#ffffff" }}
+                axisLine={{ stroke: "#ffffff", strokeOpacity: 0.3 }}
+                tickLine={{ stroke: "#ffffff", strokeOpacity: 0.3 }}
                 label={{
                   value: "Stock Quantity",
                   angle: -90,
                   position: "insideLeft",
-                  style: { textAnchor: "middle", fill: "white" },
+                  style: { textAnchor: "middle", fill: "#ffffff" },
                 }}
               />
               <ChartTooltip
                 content={
                   <ChartTooltipContent
-                    className="bg-white/10 backdrop-blur-md border border-white/20 text-white"
+                    className="bg-slate-900/90 backdrop-blur-md border border-white/20 text-white rounded-lg shadow-lg"
                     formatter={(value, name, props) => [
                       `${value} units`,
                       "Stock",
@@ -573,13 +599,15 @@ export const Inventory = () => {
                     labelFormatter={(label, payload) => {
                       const data = payload?.[0]?.payload;
                       return data ? (
-                        <div>
-                          <div className="font-medium">{data.fullName}</div>
-                          <div className="text-sm text-white/70">
+                        <div className="space-y-1">
+                          <div className="font-medium text-white">
+                            {data.fullName}
+                          </div>
+                          <div className="text-sm text-gray-300">
                             {data.partNumber}
                           </div>
                           <div
-                            className={`text-sm ${data.status === "Low Stock" ? "text-red-300" : "text-green-300"}`}
+                            className={`text-sm font-medium ${data.status === "Low Stock" ? "text-red-300" : "text-green-300"}`}
                           >
                             {data.status}
                           </div>
@@ -591,12 +619,16 @@ export const Inventory = () => {
                   />
                 }
               />
-              <Bar
-                dataKey="stock"
-                radius={[4, 4, 0, 0]}
-                fill="currentColor"
-                className="fill-current"
-              />
+              <Bar dataKey="stock" radius={[4, 4, 0, 0]}>
+                {getTop10StockData().map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.fill}
+                    stroke={entry.fill}
+                    strokeWidth={1}
+                  />
+                ))}
+              </Bar>
             </BarChart>
           </ChartContainer>
         </div>
@@ -605,11 +637,11 @@ export const Inventory = () => {
         <div className="flex items-center justify-center gap-6 mt-4 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded bg-green-500"></div>
-            <span className="text-white/70">In Stock</span>
+            <span className="text-white/70">In Stock (10+ units)</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded bg-red-500"></div>
-            <span className="text-white/70">Low Stock</span>
+            <span className="text-white/70">Low Stock (&lt; 10 units)</span>
           </div>
         </div>
       </GlassCard>
