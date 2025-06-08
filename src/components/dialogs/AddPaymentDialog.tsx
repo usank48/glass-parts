@@ -73,8 +73,8 @@ export const AddPaymentDialog: React.FC<AddPaymentDialogProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      {/* Container with aggressive height constraints for mobile with bottom nav */}
-      <div className="w-full max-w-lg max-h-[calc(100vh-180px)] md:max-h-[calc(100vh-100px)] flex flex-col">
+      {/* Container with very aggressive height constraints for mobile with bottom nav */}
+      <div className="w-full max-w-lg max-h-[calc(100vh-200px)] md:max-h-[calc(100vh-120px)] flex flex-col">
         <GlassCard className="flex-1 flex flex-col overflow-hidden">
           {/* Fixed Header */}
           <div className="flex-shrink-0 p-4 pb-3 border-b border-white/10">
@@ -99,7 +99,7 @@ export const AddPaymentDialog: React.FC<AddPaymentDialogProps> = ({
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto">
             <form onSubmit={handleSubmit} className="flex flex-col h-full">
-              <div className="flex-1 p-4 space-y-3">
+              <div className="flex-1 p-4 space-y-2">
                 {/* Payment Date */}
                 <div className="space-y-1">
                   <Label className="text-white flex items-center gap-2 text-sm">
@@ -185,8 +185,7 @@ export const AddPaymentDialog: React.FC<AddPaymentDialogProps> = ({
                     placeholder="Add any additional notes..."
                     value={formData.notes}
                     onChange={(e) => handleInputChange("notes", e.target.value)}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 resize-none text-sm"
-                    rows={2}
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 resize-none text-sm h-16"
                   />
                 </div>
               </div>
