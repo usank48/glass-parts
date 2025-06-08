@@ -1,6 +1,19 @@
-import React from "react";
-import { ShoppingCart, TrendingUp, IndianRupee, Users } from "lucide-react";
+import React, { useState } from "react";
+import {
+  ShoppingCart,
+  TrendingUp,
+  IndianRupee,
+  Users,
+  Plus,
+  Eye,
+  Package,
+  AlertTriangle,
+} from "lucide-react";
 import { GlassCard } from "./GlassCard";
+import { Button } from "@/components/ui/button";
+import { useInventorySync } from "@/hooks/useInventorySync";
+import { formatInventoryValue } from "@/utils/inventoryManager";
+import { toast } from "sonner";
 
 export const Sales = () => {
   const salesData = [
