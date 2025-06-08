@@ -299,14 +299,14 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
               <Button
                 variant="outline"
                 onClick={handleCancel}
-                className="border-white/20 text-white hover:bg-white/10"
+                className="border-white/20 text-white hover:bg-white/10 bg-transparent backdrop-blur-sm"
               >
                 <X size={16} className="mr-1" />
                 Cancel
               </Button>
               <Button
                 onClick={handleSave}
-                className="bg-green-600 hover:bg-green-700 text-white"
+                className="bg-green-600 hover:bg-green-700 text-white border-0"
               >
                 <Save size={16} className="mr-1" />
                 Save Changes
