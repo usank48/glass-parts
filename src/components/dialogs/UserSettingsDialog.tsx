@@ -469,7 +469,7 @@ export const UserSettingsDialog: React.FC<UserSettingsDialogProps> = ({
             <Button
               variant="outline"
               onClick={handleReset}
-              className="border-white/20 text-white hover:bg-white/10"
+              className="border-white/20 text-white hover:bg-white/10 bg-transparent backdrop-blur-sm"
             >
               Reset to Defaults
             </Button>
@@ -478,7 +478,7 @@ export const UserSettingsDialog: React.FC<UserSettingsDialogProps> = ({
               <Button
                 variant="outline"
                 onClick={onClose}
-                className="border-white/20 text-white hover:bg-white/10"
+                className="border-white/20 text-white hover:bg-white/10 bg-transparent backdrop-blur-sm"
               >
                 <X size={16} className="mr-1" />
                 Cancel
@@ -486,7 +486,7 @@ export const UserSettingsDialog: React.FC<UserSettingsDialogProps> = ({
               <Button
                 onClick={handleSave}
                 disabled={!hasChanges}
-                className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50"
+                className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:bg-green-600/50 border-0"
               >
                 <Save size={16} className="mr-1" />
                 Save Settings
