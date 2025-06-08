@@ -95,6 +95,24 @@ export const generateSampleExcelFile = (): void => {
     },
   ];
 
+  // Add instructions as the first row (will be treated as data but provides guidance)
+  const instructionsData = [
+    {
+      [EXCEL_COLUMNS.PART_NUMBER]:
+        "📝 INSTRUCTIONS: Products are matched by Part Number or Part Name. Existing products will have their stock updated.",
+      [EXCEL_COLUMNS.OEM_PART_NUMBER]: "",
+      [EXCEL_COLUMNS.PART_NAME]: "",
+      [EXCEL_COLUMNS.BRAND]: "",
+      [EXCEL_COLUMNS.VEHICLE_COMPATIBILITY]: "",
+      [EXCEL_COLUMNS.COST_PRICE]: "",
+      [EXCEL_COLUMNS.SELLING_PRICE]: "",
+      [EXCEL_COLUMNS.QUANTITY]: "",
+      [EXCEL_COLUMNS.CATEGORY]: "",
+      [EXCEL_COLUMNS.SUB_CATEGORY]: "",
+    },
+    ...sampleData,
+  ];
+
   const worksheet = XLSX.utils.json_to_sheet(sampleData);
   const workbook = XLSX.utils.book_new();
 
