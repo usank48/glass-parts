@@ -12,7 +12,7 @@ import { GlassCard } from "./GlassCard";
 import { StaffDetail } from "./StaffDetail";
 import { AddStaffDialog } from "./dialogs/AddStaffDialog";
 import { AddPaymentDialog } from "./dialogs/AddPaymentDialog";
-import { AddAttendanceDialog } from "./dialogs/AddAttendanceDialog";
+import { AttendanceDialog } from "./dialogs/AttendanceDialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -953,7 +953,7 @@ export const Staff = () => {
 
       {/* Add Attendance Dialog */}
       {selectedStaffForAction && showAddAttendanceDialog && (
-        <AddAttendanceDialog
+        <AttendanceDialog
           employeeName={selectedStaffForAction.name}
           onClose={() => {
             setShowAddAttendanceDialog(false);
