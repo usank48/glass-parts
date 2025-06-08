@@ -325,15 +325,44 @@ export const Invoicing = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Low Stock Alert */}
+      {getLowStockItems().length > 0 && (
+        <GlassCard className="p-4 border-l-4 border-l-yellow-500">
+          <div className="flex items-start gap-3">
+            <AlertTriangle
+              className="text-yellow-400 flex-shrink-0 mt-1"
+              size={20}
+            />
+            <div className="flex-1">
+              <h3 className="text-white font-semibold text-sm mb-1">
+                Low Stock Alert
+              </h3>
+              <p className="text-white/70 text-xs">
+                {getLowStockItems().length} items are running low on stock.
+                Check inventory before creating invoices.
+              </p>
+            </div>
+          </div>
+        </GlassCard>
+      )}
+
       {/* Header - Responsive */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">
             Invoice Management
           </h1>
-          <p className="text-white/70 mt-1 text-sm sm:text-base">
-            Create and manage customer invoices
-          </p>
+          <div className="flex items-center gap-4 mt-1">
+            <p className="text-white/70 text-sm sm:text-base">
+              Create and manage customer invoices with real-time inventory
+            </p>
+            {isLoading && (
+              <div className="flex items-center gap-2 text-blue-400">
+                <div className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-xs">Syncing...</span>
+              </div>
+            )}
+          </div>
         </div>
         <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 w-full sm:w-auto">
           <Plus size={20} className="mr-2" />
