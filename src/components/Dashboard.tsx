@@ -5,7 +5,7 @@ import {
   FileText,
   TrendingUp,
   AlertTriangle,
-  DollarSign,
+  IndianRupee,
   Plus,
 } from "lucide-react";
 import { GlassCard } from "./GlassCard";
@@ -47,7 +47,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigateToModule }) => {
     {
       title: "Monthly Revenue",
       value: "₹45,230",
-      icon: DollarSign,
+      icon: IndianRupee,
       color: "from-purple-500 to-pink-600",
     },
   ];

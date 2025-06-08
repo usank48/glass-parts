@@ -1,8 +1,18 @@
 import React, { useState } from "react";
-import { User, Mail, Phone, Shield, Plus } from "lucide-react";
+import {
+  User,
+  Mail,
+  Phone,
+  Shield,
+  Plus,
+  IndianRupee,
+  Calendar,
+} from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import { StaffDetail } from "./StaffDetail";
 import { AddStaffDialog } from "./dialogs/AddStaffDialog";
+import { AddPaymentDialog } from "./dialogs/AddPaymentDialog";
+import { AttendanceDialog } from "./dialogs/AttendanceDialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -87,6 +97,14 @@ interface NewStaffMember {
 export const Staff = () => {
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
   const [showAddStaffDialog, setShowAddStaffDialog] = useState(false);
+  const [showAddPaymentDialog, setShowAddPaymentDialog] = useState(false);
+  const [showAddAttendanceDialog, setShowAddAttendanceDialog] = useState(false);
+  const [selectedStaffForAction, setSelectedStaffForAction] =
+    useState<StaffMember | null>(null);
+  const [showStaffSelection, setShowStaffSelection] = useState(false);
+  const [actionType, setActionType] = useState<"payment" | "attendance" | null>(
+    null,
+  );
 
   console.log("🔄 Staff component rendered, selectedStaff:", selectedStaff);
 
@@ -611,6 +629,88 @@ export const Staff = () => {
     );
   };
 
+  const handleAddPayment = () => {
+    if (staff.length === 0) {
+      toast.error("No staff members available. Please add staff first.");
+      return;
+    }
+    setActionType("payment");
+    setShowStaffSelection(true);
+  };
+
+  const handleAddAttendance = () => {
+    if (staff.length === 0) {
+      toast.error("No staff members available. Please add staff first.");
+      return;
+    }
+    setActionType("attendance");
+    setShowStaffSelection(true);
+  };
+
+  const handleStaffSelection = (selectedStaff: StaffMember) => {
+    setSelectedStaffForAction(selectedStaff);
+    setShowStaffSelection(false);
+
+    if (actionType === "payment") {
+      setShowAddPaymentDialog(true);
+    } else if (actionType === "attendance") {
+      setShowAddAttendanceDialog(true);
+    }
+
+    setActionType(null);
+  };
+
+  const handleCancelStaffSelection = () => {
+    setShowStaffSelection(false);
+    setActionType(null);
+  };
+
+  const handlePaymentSubmit = (payment: PaymentRecord) => {
+    if (!selectedStaffForAction) return;
+
+    // Update the selected staff member's payment history
+    setStaff((prevStaff) =>
+      prevStaff.map((member) =>
+        member.id === selectedStaffForAction.id
+          ? {
+              ...member,
+              paymentHistory: [payment, ...(member.paymentHistory || [])],
+              currentMonthPay: payment.amount,
+            }
+          : member,
+      ),
+    );
+
+    toast.success(
+      `Payment of ₹${payment.amount} added for ${selectedStaffForAction.name}!`,
+    );
+    setSelectedStaffForAction(null);
+  };
+
+  const handleAttendanceSubmit = (attendance: AttendanceRecord) => {
+    if (!selectedStaffForAction) return;
+
+    // Update the selected staff member's attendance records
+    setStaff((prevStaff) =>
+      prevStaff.map((member) =>
+        member.id === selectedStaffForAction.id
+          ? {
+              ...member,
+              recentAttendance: [
+                attendance,
+                ...(member.recentAttendance || []).slice(0, 4),
+              ], // Keep only 5 recent records
+            }
+          : member,
+      ),
+    );
+
+    toast.success(
+      `Attendance record added for ${selectedStaffForAction.name}!`,
+    );
+    setSelectedStaffForAction(null);
+  };
+
   // If a staff member is selected, show the detail view
   if (selectedStaff) {
     return (
@@ -644,7 +744,7 @@ export const Staff = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header with Add New Staff Button */}
+      {/* Header with Action Buttons */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">
@@ -660,15 +760,117 @@ export const Staff = () => {
           </p>
         </div>
 
-        {/* Add New Staff Button */}
-        <Button
-          onClick={() => setShowAddStaffDialog(true)}
-          className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 w-full sm:w-auto"
-        >
-          <Plus size={20} className="mr-2" />
-          Add New Staff
-        </Button>
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          {/* Add Payment Button */}
+          <Button
+            onClick={handleAddPayment}
+            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 w-full sm:w-auto"
+          >
+            <IndianRupee size={20} className="mr-2" />
+            Add Payment
+          </Button>
+
+          {/* Add Attendance Button */}
+          <Button
+            onClick={handleAddAttendance}
+            className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white border-0 w-full sm:w-auto"
+          >
+            <Calendar size={20} className="mr-2" />
+            Attendance
+          </Button>
+
+          {/* Add New Staff Button */}
+          <Button
+            onClick={() => setShowAddStaffDialog(true)}
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 w-full sm:w-auto"
+          >
+            <Plus size={20} className="mr-2" />
+            Add New Staff
+          </Button>
+        </div>
       </div>
+
+      {/* Staff Selection Interface */}
+      {showStaffSelection && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <GlassCard className="w-full max-w-4xl max-h-[80vh] overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-white">
+                    Select Staff Member
+                  </h2>
+                  <p className="text-white/70 text-sm">
+                    Choose a staff member to{" "}
+                    {actionType === "payment"
+                      ? "add payment for"
+                      : "record attendance for"}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleCancelStaffSelection}
+                  className="text-white hover:bg-white/10"
+                >
+                  ×
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                {staff.map((member) => (
+                  <div
+                    key={member.id}
+                    onClick={() => handleStaffSelection(member)}
+                    className="p-4 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 cursor-pointer border border-white/20"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center">
+                        <User className="text-white" size={20} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-white font-medium truncate">
+                          {member.name}
+                        </h3>
+                        <p className="text-white/60 text-sm truncate">
+                          {member.role} • {member.department}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              member.status === "Active"
+                                ? "bg-green-500/20 text-green-300"
+                                : "bg-yellow-500/20 text-yellow-300"
+                            }`}
+                          >
+                            {member.status}
+                          </span>
+                          {member.employeeId && (
+                            <span className="text-white/50 text-xs">
+                              ID: {member.employeeId}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/20">
+                <Button
+                  variant="outline"
+                  onClick={handleCancelStaffSelection}
+                  className="!bg-transparent border-white/20 text-white hover:bg-white/10"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </GlassCard>
+        </div>
+      )}
 
       {/* Staff Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -730,12 +932,36 @@ export const Staff = () => {
         ))}
       </div>
 
-      {/* Add Staff Dialog */}
+      {/* Dialog Components */}
       <AddStaffDialog
         isOpen={showAddStaffDialog}
         onClose={() => setShowAddStaffDialog(false)}
         onAddStaff={handleAddStaff}
       />
+
+      {/* Add Payment Dialog */}
+      {selectedStaffForAction && showAddPaymentDialog && (
+        <AddPaymentDialog
+          employeeName={selectedStaffForAction.name}
+          onClose={() => {
+            setShowAddPaymentDialog(false);
+            setSelectedStaffForAction(null);
+          }}
+          onSubmit={handlePaymentSubmit}
+        />
+      )}
+
+      {/* Add Attendance Dialog */}
+      {selectedStaffForAction && showAddAttendanceDialog && (
+        <AttendanceDialog
+          employeeName={selectedStaffForAction.name}
+          onClose={() => {
+            setShowAddAttendanceDialog(false);
+            setSelectedStaffForAction(null);
+          }}
+          onSubmit={handleAttendanceSubmit}
+        />
+      )}
     </div>
   );
 };

@@ -8,21 +8,27 @@ import {
   Search,
   Filter,
   Calendar,
-  DollarSign,
+  IndianRupee,
+  AlertTriangle,
+  Package,
 } from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InvoiceDetailDialog } from "./dialogs/InvoiceDetailDialog";
+import { useInventorySync } from "@/hooks/useInventorySync";
+import { formatInventoryValue } from "@/utils/inventoryManager";
 
 interface InvoiceItem {
   id: string;
+  itemId: number; // Reference to inventory item
   partNumber: string;
   partName: string;
   brand: string;
   quantity: number;
   unitPrice: number;
   totalPrice: number;
+  availableStock?: number; // For validation
 }
 
 interface Invoice {
@@ -40,6 +46,7 @@ interface Invoice {
   paymentTerms: string;
   taxRate: number;
   discountAmount?: number;
+  inventoryProcessed?: boolean; // Track if inventory has been updated
 }
 
 // Define initial invoices data outside component
@@ -181,6 +188,17 @@ export const Invoicing = () => {
   const [showInvoiceDetail, setShowInvoiceDetail] = useState(false);
   const [invoicesList, setInvoicesList] = useState<Invoice[]>(initialInvoices);
 
+  // Use inventory sync hook for real-time inventory management
+  const {
+    inventory,
+    stockAlerts,
+    processInvoiceItems,
+    getItemById,
+    getLowStockItems,
+    checkStockAvailability,
+    isLoading,
+  } = useInventorySync();
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Paid":
@@ -214,6 +232,64 @@ export const Invoicing = () => {
   const overdueInvoices = invoicesList.filter(
     (inv) => inv.status === "Overdue",
   ).length;
+
+  // Process invoice and update inventory
+  const handleProcessInvoice = async (invoice: Invoice) => {
+    if (invoice.inventoryProcessed) {
+      toast.info("Invoice inventory already processed");
+      return;
+    }
+
+    try {
+      // Check stock availability for all items
+      const stockIssues = [];
+      for (const item of invoice.items) {
+        const inventoryItem = getItemById(item.itemId);
+        if (!inventoryItem) {
+          stockIssues.push(`Item ${item.partName} not found in inventory`);
+          continue;
+        }
+        if (!checkStockAvailability(item.itemId, item.quantity)) {
+          stockIssues.push(
+            `Insufficient stock for ${item.partName}. Available: ${inventoryItem.stock}, Required: ${item.quantity}`,
+          );
+        }
+      }
+
+      if (stockIssues.length > 0) {
+        toast.error(`Stock issues: ${stockIssues.join("; ")}`);
+        return;
+      }
+
+      // Process the inventory changes
+      const success = await processInvoiceItems(
+        invoice.id,
+        invoice.items.map((item) => ({
+          itemId: item.itemId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+        })),
+        invoice.customer,
+      );
+
+      if (success) {
+        // Update invoice to mark inventory as processed
+        const updatedInvoice = {
+          ...invoice,
+          inventoryProcessed: true,
+          status: "Processed",
+        };
+        setInvoicesList((prevInvoices) =>
+          prevInvoices.map((inv) =>
+            inv.id === invoice.id ? updatedInvoice : inv,
+          ),
+        );
+        toast.success(`Invoice ${invoice.id} processed - inventory updated`);
+      }
+    } catch (error) {
+      toast.error("Failed to process invoice inventory");
+    }
+  };
 
   const handleInvoiceClick = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
@@ -249,15 +325,44 @@ export const Invoicing = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Low Stock Alert */}
+      {getLowStockItems().length > 0 && (
+        <GlassCard className="p-4 border-l-4 border-l-yellow-500">
+          <div className="flex items-start gap-3">
+            <AlertTriangle
+              className="text-yellow-400 flex-shrink-0 mt-1"
+              size={20}
+            />
+            <div className="flex-1">
+              <h3 className="text-white font-semibold text-sm mb-1">
+                Low Stock Alert
+              </h3>
+              <p className="text-white/70 text-xs">
+                {getLowStockItems().length} items are running low on stock.
+                Check inventory before creating invoices.
+              </p>
+            </div>
+          </div>
+        </GlassCard>
+      )}
+
       {/* Header - Responsive */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">
             Invoice Management
           </h1>
-          <p className="text-white/70 mt-1 text-sm sm:text-base">
-            Create and manage customer invoices
-          </p>
+          <div className="flex items-center gap-4 mt-1">
+            <p className="text-white/70 text-sm sm:text-base">
+              Create and manage customer invoices with real-time inventory
+            </p>
+            {isLoading && (
+              <div className="flex items-center gap-2 text-blue-400">
+                <div className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-xs">Syncing...</span>
+              </div>
+            )}
+          </div>
         </div>
         <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 w-full sm:w-auto">
           <Plus size={20} className="mr-2" />
@@ -286,7 +391,7 @@ export const Invoicing = () => {
         <GlassCard className="p-4 sm:p-6">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-r from-green-500 to-teal-600 flex-shrink-0">
-              <DollarSign className="text-white" size={20} />
+              <IndianRupee className="text-white" size={20} />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white/70 text-xs sm:text-sm">Total Amount</p>

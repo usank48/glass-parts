@@ -10,7 +10,7 @@ import {
   Star,
   Edit,
   Trash2,
-  DollarSign,
+  IndianRupee,
   Clock,
   TrendingUp,
   Award,
@@ -331,7 +331,7 @@ export const StaffDetail: React.FC<StaffDetailProps> = ({
           <GlassCard className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-semibold text-white flex items-center gap-3">
-                <DollarSign className="text-green-400" size={24} />
+                <IndianRupee className="text-green-400" size={24} />
                 SALARY
               </h3>
               <Button

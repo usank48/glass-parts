@@ -94,15 +94,15 @@ export const AddAttendanceDialog: React.FC<AddAttendanceDialogProps> = ({
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "present":
-        return <CheckCircle className="text-green-400" size={16} />;
+        return <CheckCircle className="text-green-400" size={14} />;
       case "absent":
-        return <XCircle className="text-red-400" size={16} />;
+        return <XCircle className="text-red-400" size={14} />;
       case "late":
-        return <AlertCircle className="text-yellow-400" size={16} />;
+        return <AlertCircle className="text-yellow-400" size={14} />;
       case "half-day":
-        return <Clock className="text-blue-400" size={16} />;
+        return <Clock className="text-blue-400" size={14} />;
       default:
-        return <Clock className="text-gray-400" size={16} />;
+        return <Clock className="text-gray-400" size={14} />;
     }
   };
 
@@ -110,177 +110,187 @@ export const AddAttendanceDialog: React.FC<AddAttendanceDialogProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <GlassCard className="w-full max-w-lg">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
+      <div className="w-full max-w-lg max-h-[90vh] flex flex-col">
+        <GlassCard className="flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-white/10">
             <div>
-              <h2 className="text-xl font-bold text-white">
+              <h2 className="text-lg font-bold text-white">
                 Add Attendance Record
               </h2>
-              <p className="text-white/70 text-sm">For {employeeName}</p>
+              <p className="text-white/70 text-xs">For {employeeName}</p>
             </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="text-white hover:bg-white/10"
+              className="text-white hover:bg-white/10 h-8 w-8"
             >
               ×
             </Button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Date */}
-            <div className="space-y-2">
-              <Label className="text-white flex items-center gap-2">
-                <Calendar size={16} />
-                Date
-              </Label>
-              <Input
-                type="date"
-                value={formData.date}
-                onChange={(e) => handleInputChange("date", e.target.value)}
-                className="bg-white/10 border-white/20 text-white"
-                required
-              />
-            </div>
+          {/* Form Content */}
+          <form onSubmit={handleSubmit}>
+            <div
+              className="p-4 space-y-3 max-h-[60vh] overflow-y-auto"
+              style={{ scrollTop: 0 }}
+            >
+              {/* Date Field */}
+              <div className="space-y-1 bg-red-500/20 p-2 rounded">
+                <Label className="text-white flex items-center gap-2 text-sm font-bold">
+                  <Calendar size={14} />
+                  Date
+                </Label>
+                <Input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => handleInputChange("date", e.target.value)}
+                  className="bg-white/10 border-white/20 text-white h-9"
+                  required
+                />
+              </div>
 
-            {/* Status */}
-            <div className="space-y-2">
-              <Label className="text-white flex items-center gap-2">
-                {getStatusIcon(formData.status)}
-                Attendance Status
-              </Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value) => handleInputChange("status", value)}
-              >
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-600">
-                  <SelectItem
-                    value="present"
-                    className="text-white focus:bg-gray-700"
-                  >
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="text-green-400" size={16} />
-                      Present
-                    </div>
-                  </SelectItem>
-                  <SelectItem
-                    value="late"
-                    className="text-white focus:bg-gray-700"
-                  >
-                    <div className="flex items-center gap-2">
-                      <AlertCircle className="text-yellow-400" size={16} />
-                      Late
-                    </div>
-                  </SelectItem>
-                  <SelectItem
-                    value="half-day"
-                    className="text-white focus:bg-gray-700"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Clock className="text-blue-400" size={16} />
-                      Half Day
-                    </div>
-                  </SelectItem>
-                  <SelectItem
-                    value="absent"
-                    className="text-white focus:bg-gray-700"
-                  >
-                    <div className="flex items-center gap-2">
-                      <XCircle className="text-red-400" size={16} />
-                      Absent
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+              {/* Status Field */}
+              <div className="space-y-1 bg-blue-500/20 p-2 rounded">
+                <Label className="text-white flex items-center gap-2 text-sm font-bold">
+                  {getStatusIcon(formData.status)}
+                  Attendance Status
+                </Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) => handleInputChange("status", value)}
+                >
+                  <SelectTrigger className="bg-white/10 border-white/20 text-white h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="!bg-gray-900/95 backdrop-blur-md border border-white/20 text-white">
+                    <SelectItem
+                      value="present"
+                      className="text-white focus:bg-white/20 hover:bg-white/10"
+                    >
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="text-green-400" size={14} />
+                        Present
+                      </div>
+                    </SelectItem>
+                    <SelectItem
+                      value="late"
+                      className="text-white focus:bg-white/20 hover:bg-white/10"
+                    >
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="text-yellow-400" size={14} />
+                        Late
+                      </div>
+                    </SelectItem>
+                    <SelectItem
+                      value="half-day"
+                      className="text-white focus:bg-white/20 hover:bg-white/10"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Clock className="text-blue-400" size={14} />
+                        Half Day
+                      </div>
+                    </SelectItem>
+                    <SelectItem
+                      value="absent"
+                      className="text-white focus:bg-white/20 hover:bg-white/10"
+                    >
+                      <div className="flex items-center gap-2">
+                        <XCircle className="text-red-400" size={14} />
+                        Absent
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            {/* Time Fields - Only show if not absent */}
-            {formData.status !== "absent" && (
-              <>
-                {/* Check In Time */}
-                <div className="space-y-2">
-                  <Label className="text-white flex items-center gap-2">
-                    <Clock size={16} />
-                    Check In Time
-                  </Label>
-                  <Input
-                    type="time"
-                    value={formData.checkIn}
-                    onChange={(e) =>
-                      handleInputChange("checkIn", e.target.value)
-                    }
-                    className="bg-white/10 border-white/20 text-white"
-                    required={formData.status !== "absent"}
-                  />
-                </div>
-
-                {/* Check Out Time */}
-                <div className="space-y-2">
-                  <Label className="text-white flex items-center gap-2">
-                    <Clock size={16} />
-                    Check Out Time
-                  </Label>
-                  <Input
-                    type="time"
-                    value={formData.checkOut}
-                    onChange={(e) =>
-                      handleInputChange("checkOut", e.target.value)
-                    }
-                    className="bg-white/10 border-white/20 text-white"
-                  />
-                </div>
-
-                {/* Hours Worked Display */}
-                {hoursWorked > 0 && (
-                  <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-                    <div className="flex justify-between items-center">
-                      <span className="text-white/70">Hours Worked:</span>
-                      <span className="text-white font-bold">
-                        {hoursWorked} hours
-                      </span>
-                    </div>
+              {/* Time Fields - Only show if not absent */}
+              {formData.status !== "absent" && (
+                <>
+                  {/* Check In Time */}
+                  <div className="space-y-1">
+                    <Label className="text-white flex items-center gap-2 text-sm">
+                      <Clock size={14} />
+                      Check In Time
+                    </Label>
+                    <Input
+                      type="time"
+                      value={formData.checkIn}
+                      onChange={(e) =>
+                        handleInputChange("checkIn", e.target.value)
+                      }
+                      className="bg-white/10 border-white/20 text-white h-9"
+                      required={formData.status !== "absent"}
+                    />
                   </div>
-                )}
-              </>
-            )}
 
-            {/* Notes */}
-            <div className="space-y-2">
-              <Label className="text-white">Notes (Optional)</Label>
-              <Textarea
-                placeholder="Add any additional notes about attendance..."
-                value={formData.notes}
-                onChange={(e) => handleInputChange("notes", e.target.value)}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/50 resize-none"
-                rows={3}
-              />
+                  {/* Check Out Time */}
+                  <div className="space-y-1">
+                    <Label className="text-white flex items-center gap-2 text-sm">
+                      <Clock size={14} />
+                      Check Out Time
+                    </Label>
+                    <Input
+                      type="time"
+                      value={formData.checkOut}
+                      onChange={(e) =>
+                        handleInputChange("checkOut", e.target.value)
+                      }
+                      className="bg-white/10 border-white/20 text-white h-9"
+                    />
+                  </div>
+
+                  {/* Hours Worked Display */}
+                  {hoursWorked > 0 && (
+                    <div className="p-2 rounded-lg bg-white/5 border border-white/10">
+                      <div className="flex justify-between items-center">
+                        <span className="text-white/70 text-sm">
+                          Hours Worked:
+                        </span>
+                        <span className="text-white font-bold">
+                          {hoursWorked} hours
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Notes */}
+              <div className="space-y-1">
+                <Label className="text-white text-sm">Notes (Optional)</Label>
+                <Textarea
+                  placeholder="Add any additional notes about attendance..."
+                  value={formData.notes}
+                  onChange={(e) => handleInputChange("notes", e.target.value)}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50 resize-none text-sm h-16"
+                />
+              </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                className="flex-1 border-white/20 text-white hover:bg-white/10"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="flex-1 bg-blue-600/80 hover:bg-blue-700 text-white border-0"
-              >
-                Add Attendance
-              </Button>
+            {/* Footer Buttons */}
+            <div className="p-4 pt-3 border-t border-white/10">
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  className="flex-1 border-white/20 text-white hover:bg-white/10 h-9 text-sm"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1 bg-blue-600/80 hover:bg-blue-700 text-white border-0 h-9 text-sm"
+                >
+                  Add Attendance
+                </Button>
+              </div>
             </div>
           </form>
-        </div>
-      </GlassCard>
+        </GlassCard>
+      </div>
     </div>
   );
 };

@@ -14,7 +14,7 @@ import {
   Printer,
   MessageCircle,
   Calendar,
-  DollarSign,
+  IndianRupee,
   Package,
   User,
   X,
@@ -300,7 +300,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
             <p style="margin: 5px 0;">contact@autopartspro.com</p>
             <h2 style="font-size: 24px; font-weight: bold; margin-top: 20px; margin-bottom: 0;">INVOICE</h2>
           </div>
-          
+
           <div style="margin-bottom: 30px;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
               <span>Invoice #:</span>
@@ -311,7 +311,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
               <span style="font-weight: 500;">${currentInvoice.date}</span>
             </div>
           </div>
-          
+
           <div style="margin-bottom: 30px;">
             <h3 style="font-weight: bold; margin-bottom: 10px; margin-top: 0;">Bill To:</h3>
             <div>
@@ -319,7 +319,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
               <p style="margin: 5px 0;">${currentInvoice.customerAddress}</p>
             </div>
           </div>
-          
+
           <table style="width: 100%; margin-bottom: 30px; border-collapse: collapse;">
             <thead>
               <tr style="border-bottom: 2px solid black;">
@@ -342,7 +342,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                 .join("")}
             </tbody>
           </table>
-          
+
           <div style="display: flex; justify-content: flex-end;">
             <div style="width: 250px;">
               <div style="display: flex; justify-content: space-between; padding: 5px 0;">
@@ -369,7 +369,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
               </div>
             </div>
           </div>
-          
+
           <div style="text-align: center; margin-top: 40px;">
             <p style="font-weight: 500;">Thank you for your business!</p>
           </div>
@@ -426,10 +426,10 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
         <head>
           <title>Invoice ${currentInvoice.id}</title>
           <style>
-            body { 
-              font-family: Arial, sans-serif; 
-              background: white; 
-              color: black; 
+            body {
+              font-family: Arial, sans-serif;
+              background: white;
+              color: black;
               margin: 0;
               padding: 20px;
             }
@@ -516,7 +516,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
               <p>contact@autopartspro.com</p>
               <h2 class="invoice-title">INVOICE</h2>
             </div>
-            
+
             <div class="invoice-details">
               <div class="detail-row">
                 <span>Invoice #:</span>
@@ -527,7 +527,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                 <span><strong>${currentInvoice.date}</strong></span>
               </div>
             </div>
-            
+
             <div class="bill-to">
               <h3><strong>Bill To:</strong></h3>
               <div>
@@ -535,7 +535,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                 <p>${currentInvoice.customerAddress}</p>
               </div>
             </div>
-            
+
             <table class="items-table">
               <thead>
                 <tr>
@@ -558,7 +558,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                   .join("")}
               </tbody>
             </table>
-            
+
             <div class="totals">
               <div class="totals-inner">
                 <div class="total-row">
@@ -585,7 +585,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
                 </div>
               </div>
             </div>
-            
+
             <div class="footer">
               <p>Thank you for your business!</p>
             </div>
@@ -1031,7 +1031,7 @@ export const InvoiceDetailDialog: React.FC<InvoiceDetailDialogProps> = ({
             {/* Totals */}
             <div className="p-4 bg-white/5 border border-white/10 rounded-lg">
               <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-                <DollarSign size={20} />
+                <IndianRupee size={20} />
                 Invoice Summary
               </h3>
               <div className="space-y-2">
