@@ -841,12 +841,36 @@ export const Staff = () => {
         ))}
       </div>
 
-      {/* Add Staff Dialog */}
+      {/* Dialog Components */}
       <AddStaffDialog
         isOpen={showAddStaffDialog}
         onClose={() => setShowAddStaffDialog(false)}
         onAddStaff={handleAddStaff}
       />
+
+      {/* Add Payment Dialog */}
+      {selectedStaffForAction && (
+        <AddPaymentDialog
+          employeeName={selectedStaffForAction.name}
+          onClose={() => {
+            setShowAddPaymentDialog(false);
+            setSelectedStaffForAction(null);
+          }}
+          onSubmit={handlePaymentSubmit}
+        />
+      )}
+
+      {/* Add Attendance Dialog */}
+      {selectedStaffForAction && (
+        <AddAttendanceDialog
+          employeeName={selectedStaffForAction.name}
+          onClose={() => {
+            setShowAddAttendanceDialog(false);
+            setSelectedStaffForAction(null);
+          }}
+          onSubmit={handleAttendanceSubmit}
+        />
+      )}
     </div>
   );
 };
