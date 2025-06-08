@@ -665,11 +665,11 @@ export const Inventory = () => {
         </div>
       </GlassCard>
 
-      {/* Search, Filter, and Sort - Responsive */}
+      {/* Search and Sort - Side by Side */}
       <GlassCard className="p-4 sm:p-6">
-        <div className="flex flex-col gap-3 sm:gap-4">
-          {/* Search Bar - Full Width on Mobile */}
-          <div className="w-full relative">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+          {/* Search Bar */}
+          <div className="flex-1 relative">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50"
               size={18}
@@ -682,46 +682,35 @@ export const Inventory = () => {
             />
           </div>
 
-          {/* Controls Row - Responsive Layout */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-            {/* Sort Dropdown */}
-            <div className="flex items-center gap-2 flex-1 sm:flex-none">
-              <SortIcon className="text-white/70 flex-shrink-0" size={18} />
-              <Select
-                value={sortMethod}
-                onValueChange={(value: SortMethod) => setSortMethod(value)}
-              >
-                <SelectTrigger className="w-full sm:w-48 bg-white/10 border-white/20 text-white text-sm">
-                  <SelectValue placeholder="Sort by..." />
-                </SelectTrigger>
-                <SelectContent className="bg-white/90 backdrop-blur-md border border-white/20">
-                  <SelectItem value="category" className="text-black text-sm">
-                    <div className="flex items-center gap-2">
-                      <Grid3X3 size={14} />
-                      <span>Categories</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="vehicle" className="text-black text-sm">
-                    <div className="flex items-center gap-2">
-                      <Car size={14} />
-                      <span>Vehicle Compatibility</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Button
-              size="sm"
-              className="bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm w-full sm:w-auto text-sm"
+          {/* Sort Dropdown */}
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <SortIcon className="text-white/70 flex-shrink-0" size={18} />
+            <Select
+              value={sortMethod}
+              onValueChange={(value: SortMethod) => setSortMethod(value)}
             >
-              <Filter size={16} className="mr-2" />
-              Filter
-            </Button>
+              <SelectTrigger className="w-full sm:w-56 bg-white/10 border-white/20 text-white text-sm">
+                <SelectValue placeholder="Sort by..." />
+              </SelectTrigger>
+              <SelectContent className="bg-white/90 backdrop-blur-md border border-white/20">
+                <SelectItem value="category" className="text-black text-sm">
+                  <div className="flex items-center gap-2">
+                    <Grid3X3 size={14} />
+                    <span>Categories</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="vehicle" className="text-black text-sm">
+                  <div className="flex items-center gap-2">
+                    <Car size={14} />
+                    <span>Vehicle Compatibility</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        {/* Sort Info - Responsive */}
+        {/* Sort Info */}
         <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs sm:text-sm text-white/70">
           <div className="flex items-center gap-2">
             <SortDesc size={14} />
@@ -729,47 +718,6 @@ export const Inventory = () => {
           </div>
           <span className="hidden sm:inline">•</span>
           <span>{sortDisplayInfo.description}</span>
-        </div>
-      </GlassCard>
-
-      {/* Excel Import/Export Info Card - Responsive */}
-      <GlassCard className="p-4 sm:p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-1">
-            <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-r from-green-500 to-teal-600 flex-shrink-0">
-              <FileSpreadsheet className="text-white" size={20} />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-white font-semibold text-base sm:text-lg">
-                Bulk Operations
-              </h3>
-              <p className="text-white/70 text-xs sm:text-sm mt-1">
-                Import multiple products at once using Excel files or export
-                your current inventory
-              </p>
-            </div>
-          </div>
-
-          {/* Buttons - Stack on Mobile */}
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            <Button
-              onClick={() => setShowExcelImport(true)}
-              size="sm"
-              className="bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm w-full sm:w-auto"
-            >
-              <Upload size={14} className="mr-1 sm:mr-2" />
-              Import Excel
-            </Button>
-            <Button
-              onClick={handleExcelExport}
-              size="sm"
-              variant="outline"
-              className="border-white/20 text-white hover:bg-white/10 text-xs sm:text-sm w-full sm:w-auto"
-            >
-              <Download size={14} className="mr-1 sm:mr-2" />
-              Export Excel
-            </Button>
-          </div>
         </div>
       </GlassCard>
 
