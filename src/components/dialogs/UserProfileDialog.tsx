@@ -97,7 +97,7 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
                 <Button
                   size="sm"
                   onClick={() => setEditMode(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-blue-600 hover:bg-blue-700 text-white border-0"
                 >
                   <Edit size={16} className="mr-1" />
                   Edit
@@ -107,7 +107,7 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
                 size="sm"
                 variant="ghost"
                 onClick={handleClose}
-                className="text-white/70 hover:text-white hover:bg-white/10"
+                className="text-white/70 hover:text-white hover:bg-white/10 bg-transparent"
               >
                 <X size={16} />
               </Button>
