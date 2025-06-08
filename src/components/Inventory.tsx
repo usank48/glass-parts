@@ -883,7 +883,11 @@ export const Inventory = () => {
                                 <Package className="text-white" size={16} />
                               </div>
                               <div>
-                                <h4 className="text-white font-semibold text-sm">
+                                <h4
+                                  className="text-white font-semibold text-sm cursor-pointer hover:text-blue-300 transition-colors duration-200"
+                                  onClick={() => handleProductClick(product)}
+                                  title="Click to view product details"
+                                >
                                   {product.name}
                                 </h4>
                                 <p className="text-white/70 text-xs">
