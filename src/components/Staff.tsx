@@ -1,8 +1,18 @@
 import React, { useState } from "react";
-import { User, Mail, Phone, Shield, Plus } from "lucide-react";
+import {
+  User,
+  Mail,
+  Phone,
+  Shield,
+  Plus,
+  DollarSign,
+  Calendar,
+} from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import { StaffDetail } from "./StaffDetail";
 import { AddStaffDialog } from "./dialogs/AddStaffDialog";
+import { AddPaymentDialog } from "./dialogs/AddPaymentDialog";
+import { AddAttendanceDialog } from "./dialogs/AddAttendanceDialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
