@@ -4,6 +4,7 @@ import { toast } from "sonner";
 export interface InventoryItem {
   id: number;
   partNumber: string;
+  oemPartNumber?: string;
   name: string;
   brand: string;
   vehicle: string;
