@@ -1108,6 +1108,42 @@ export const Inventory = () => {
         transactions={transactions}
         onSave={handleProductSave}
       />
+
+      {/* Add Product Dialog */}
+      {showAddProductDialog && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900/95 backdrop-blur-md border border-white/20 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
+                    <Package className="text-white" size={20} />
+                  </div>
+                  <div>
+                    <h2 className="text-lg sm:text-xl font-bold text-white">
+                      Add New Product
+                    </h2>
+                    <p className="text-white/70 text-sm">
+                      Add a new product to your inventory
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => setShowAddProductDialog(false)}
+                  variant="ghost"
+                  className="text-white/70 hover:text-white p-2"
+                >
+                  <X size={20} />
+                </Button>
+              </div>
+
+              <AddProductDialog
+                onClose={() => setShowAddProductDialog(false)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
