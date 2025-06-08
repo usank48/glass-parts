@@ -73,23 +73,23 @@ export const AddPaymentDialog: React.FC<AddPaymentDialogProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      {/* Container with proper height constraints for mobile with bottom nav */}
-      <div className="w-full max-w-lg max-h-[calc(100vh-160px)] md:max-h-[calc(100vh-80px)] flex flex-col">
+      {/* Container with aggressive height constraints for mobile with bottom nav */}
+      <div className="w-full max-w-lg max-h-[calc(100vh-180px)] md:max-h-[calc(100vh-100px)] flex flex-col">
         <GlassCard className="flex-1 flex flex-col overflow-hidden">
           {/* Fixed Header */}
-          <div className="flex-shrink-0 p-6 pb-4 border-b border-white/10">
+          <div className="flex-shrink-0 p-4 pb-3 border-b border-white/10">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-white">
+                <h2 className="text-lg font-bold text-white">
                   Add Payment Record
                 </h2>
-                <p className="text-white/70 text-sm">For {employeeName}</p>
+                <p className="text-white/70 text-xs">For {employeeName}</p>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onClose}
-                className="text-white hover:bg-white/10"
+                className="text-white hover:bg-white/10 h-8 w-8"
               >
                 ×
               </Button>
@@ -99,11 +99,11 @@ export const AddPaymentDialog: React.FC<AddPaymentDialogProps> = ({
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto">
             <form onSubmit={handleSubmit} className="flex flex-col h-full">
-              <div className="flex-1 p-6 space-y-4">
+              <div className="flex-1 p-4 space-y-3">
                 {/* Payment Date */}
-                <div className="space-y-2">
-                  <Label className="text-white flex items-center gap-2">
-                    <Calendar size={16} />
+                <div className="space-y-1">
+                  <Label className="text-white flex items-center gap-2 text-sm">
+                    <Calendar size={14} />
                     Payment Date
                   </Label>
                   <Input
@@ -116,9 +116,9 @@ export const AddPaymentDialog: React.FC<AddPaymentDialogProps> = ({
                 </div>
 
                 {/* Base Amount */}
-                <div className="space-y-2">
-                  <Label className="text-white flex items-center gap-2">
-                    <IndianRupee size={16} />
+                <div className="space-y-1">
+                  <Label className="text-white flex items-center gap-2 text-sm">
+                    <IndianRupee size={14} />
                     Base Amount
                   </Label>
                   <Input
@@ -129,15 +129,15 @@ export const AddPaymentDialog: React.FC<AddPaymentDialogProps> = ({
                     onChange={(e) =>
                       handleInputChange("amount", e.target.value)
                     }
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-9"
                     required
                   />
                 </div>
 
                 {/* Bonus */}
-                <div className="space-y-2">
-                  <Label className="text-white flex items-center gap-2">
-                    <Plus size={16} />
+                <div className="space-y-1">
+                  <Label className="text-white flex items-center gap-2 text-sm">
+                    <Plus size={14} />
                     Bonus (Optional)
                   </Label>
                   <Input
@@ -146,14 +146,14 @@ export const AddPaymentDialog: React.FC<AddPaymentDialogProps> = ({
                     placeholder="Enter bonus amount"
                     value={formData.bonus}
                     onChange={(e) => handleInputChange("bonus", e.target.value)}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-9"
                   />
                 </div>
 
                 {/* Deductions */}
-                <div className="space-y-2">
-                  <Label className="text-white flex items-center gap-2">
-                    <Minus size={16} />
+                <div className="space-y-1">
+                  <Label className="text-white flex items-center gap-2 text-sm">
+                    <Minus size={14} />
                     Deductions (Optional)
                   </Label>
                   <Input
@@ -164,47 +164,47 @@ export const AddPaymentDialog: React.FC<AddPaymentDialogProps> = ({
                     onChange={(e) =>
                       handleInputChange("deductions", e.target.value)
                     }
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-9"
                   />
                 </div>
 
                 {/* Net Amount Display */}
-                <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                <div className="p-2 rounded-lg bg-white/5 border border-white/10">
                   <div className="flex justify-between items-center">
-                    <span className="text-white/70">Net Amount:</span>
-                    <span className="text-white font-bold text-lg">
+                    <span className="text-white/70 text-sm">Net Amount:</span>
+                    <span className="text-white font-bold">
                       ₹{netAmount.toFixed(2)}
                     </span>
                   </div>
                 </div>
 
                 {/* Notes */}
-                <div className="space-y-2">
-                  <Label className="text-white">Notes (Optional)</Label>
+                <div className="space-y-1">
+                  <Label className="text-white text-sm">Notes (Optional)</Label>
                   <Textarea
                     placeholder="Add any additional notes..."
                     value={formData.notes}
                     onChange={(e) => handleInputChange("notes", e.target.value)}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 resize-none"
-                    rows={3}
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 resize-none text-sm"
+                    rows={2}
                   />
                 </div>
               </div>
 
               {/* Fixed Footer with Action Buttons */}
-              <div className="flex-shrink-0 p-6 pt-4 border-t border-white/10">
-                <div className="flex gap-3">
+              <div className="flex-shrink-0 p-4 pt-3 border-t border-white/10">
+                <div className="flex gap-2">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={onClose}
-                    className="flex-1 border-white/20 text-white hover:bg-white/10"
+                    className="flex-1 border-white/20 text-white hover:bg-white/10 h-9 text-sm"
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
-                    className="flex-1 bg-green-600/80 hover:bg-green-700 text-white border-0"
+                    className="flex-1 bg-green-600/80 hover:bg-green-700 text-white border-0 h-9 text-sm"
                   >
                     Add Payment
                   </Button>
