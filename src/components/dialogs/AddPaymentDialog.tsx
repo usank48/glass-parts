@@ -73,8 +73,8 @@ export const AddPaymentDialog: React.FC<AddPaymentDialogProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      {/* Container with very small height to ensure buttons are always visible */}
-      <div className="w-full max-w-lg h-[240px] md:h-[380px] flex flex-col">
+      {/* Container with height to show all fields while keeping buttons visible */}
+      <div className="w-full max-w-lg h-[320px] md:h-[450px] flex flex-col">
         <GlassCard className="flex-1 flex flex-col overflow-hidden">
           {/* Fixed Header */}
           <div className="flex-shrink-0 p-4 pb-3 border-b border-white/10">
