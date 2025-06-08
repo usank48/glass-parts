@@ -308,21 +308,100 @@ export const Inventory = () => {
   };
 
   const handleExcelImport = (importedData: InventoryData[]) => {
-    const newProducts: Product[] = importedData.map((item, index) => ({
-      id: Math.max(...products.map((p) => p.id), 0) + index + 1,
-      partNumber: item.partNumber,
-      name: item.partName,
-      brand: item.brand,
-      vehicle: item.vehicleCompatibility || "Not specified",
-      stock: item.quantity,
-      costPrice: item.costPrice,
-      sellingPrice: item.sellingPrice,
-      status: item.quantity > 10 ? "In Stock" : "Low Stock",
-      category: item.category.toUpperCase(),
-    }));
+    let updatedCount = 0;
+    let newCount = 0;
+    const updatedItems: Array<{
+      partNumber: string;
+      partName: string;
+      oldStock: number;
+      newStock: number;
+    }> = [];
+    const newItems: Array<{
+      partNumber: string;
+      partName: string;
+      stock: number;
+    }> = [];
 
-    setProducts((prevProducts) => [...prevProducts, ...newProducts]);
-    toast.success(`Successfully imported ${newProducts.length} products!`);
+    const updatedProducts = [...products];
+    const nextId = Math.max(...products.map((p) => p.id), 0) + 1;
+    let currentId = nextId;
+
+    importedData.forEach((item) => {
+      // Find existing product by part number (priority) or by name
+      const existingIndex = updatedProducts.findIndex(
+        (product) =>
+          product.partNumber.toLowerCase() === item.partNumber.toLowerCase() ||
+          product.name.toLowerCase() === item.partName.toLowerCase(),
+      );
+
+      if (existingIndex !== -1) {
+        // Update existing product
+        const existingProduct = updatedProducts[existingIndex];
+        const oldStock = existingProduct.stock;
+
+        updatedProducts[existingIndex] = {
+          ...existingProduct,
+          stock: item.quantity,
+          costPrice: item.costPrice,
+          sellingPrice: item.sellingPrice,
+          status: item.quantity > 10 ? "In Stock" : "Low Stock",
+          // Update other fields if they're different
+          brand: item.brand || existingProduct.brand,
+          vehicle: item.vehicleCompatibility || existingProduct.vehicle,
+          category: item.category.toUpperCase() || existingProduct.category,
+        };
+
+        updatedCount++;
+        updatedItems.push({
+          partNumber: item.partNumber,
+          partName: item.partName,
+          oldStock,
+          newStock: item.quantity,
+        });
+      } else {
+        // Add new product
+        const newProduct: Product = {
+          id: currentId++,
+          partNumber: item.partNumber,
+          name: item.partName,
+          brand: item.brand,
+          vehicle: item.vehicleCompatibility || "Not specified",
+          stock: item.quantity,
+          costPrice: item.costPrice,
+          sellingPrice: item.sellingPrice,
+          status: item.quantity > 10 ? "In Stock" : "Low Stock",
+          category: item.category.toUpperCase(),
+        };
+
+        updatedProducts.push(newProduct);
+        newCount++;
+        newItems.push({
+          partNumber: item.partNumber,
+          partName: item.partName,
+          stock: item.quantity,
+        });
+      }
+    });
+
+    setProducts(updatedProducts);
+
+    // Show detailed feedback
+    if (updatedCount > 0 && newCount > 0) {
+      toast.success(
+        `Import completed! Updated ${updatedCount} existing products and added ${newCount} new products.`,
+      );
+    } else if (updatedCount > 0) {
+      toast.success(`Updated stock for ${updatedCount} existing products.`);
+    } else if (newCount > 0) {
+      toast.success(`Added ${newCount} new products to inventory.`);
+    }
+
+    // Log detailed results for debugging
+    console.log("Import Results:", {
+      updated: updatedItems,
+      new: newItems,
+      totalProcessed: importedData.length,
+    });
   };
 
   const handleExcelExport = () => {
