@@ -862,7 +862,7 @@ export const Staff = () => {
                 <Button
                   variant="outline"
                   onClick={handleCancelStaffSelection}
-                  className="border-white/20 text-white hover:bg-white/10"
+                  className="!bg-transparent border-white/20 text-white hover:bg-white/10"
                 >
                   Cancel
                 </Button>

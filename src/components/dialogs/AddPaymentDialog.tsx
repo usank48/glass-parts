@@ -197,7 +197,7 @@ export const AddPaymentDialog: React.FC<AddPaymentDialogProps> = ({
                     type="button"
                     variant="outline"
                     onClick={onClose}
-                    className="flex-1 border-white/20 text-white hover:bg-white/10 h-9 text-sm"
+                    className="flex-1 !bg-transparent border-white/20 text-white hover:bg-white/10 h-9 text-sm"
                   >
                     Cancel
                   </Button>

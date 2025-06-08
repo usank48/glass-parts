@@ -154,8 +154,8 @@ export const AttendanceDialog: React.FC<AttendanceDialogProps> = ({
                       onClick={() => handleInputChange("status", "present")}
                       className={`h-12 flex flex-col items-center justify-center gap-1 text-xs transition-all ${
                         formData.status === "present"
-                          ? "bg-green-600/80 hover:bg-green-700 text-white border-green-400"
-                          : "bg-white/10 hover:bg-white/20 text-white border-white/20"
+                          ? "!bg-green-600/80 hover:!bg-green-700 text-white border-green-400"
+                          : "!bg-white/10 hover:!bg-white/20 text-white border-white/20"
                       }`}
                       variant="outline"
                     >
@@ -168,8 +168,8 @@ export const AttendanceDialog: React.FC<AttendanceDialogProps> = ({
                       onClick={() => handleInputChange("status", "late")}
                       className={`h-12 flex flex-col items-center justify-center gap-1 text-xs transition-all ${
                         formData.status === "late"
-                          ? "bg-yellow-600/80 hover:bg-yellow-700 text-white border-yellow-400"
-                          : "bg-white/10 hover:bg-white/20 text-white border-white/20"
+                          ? "!bg-yellow-600/80 hover:!bg-yellow-700 text-white border-yellow-400"
+                          : "!bg-white/10 hover:!bg-white/20 text-white border-white/20"
                       }`}
                       variant="outline"
                     >
@@ -182,8 +182,8 @@ export const AttendanceDialog: React.FC<AttendanceDialogProps> = ({
                       onClick={() => handleInputChange("status", "half-day")}
                       className={`h-12 flex flex-col items-center justify-center gap-1 text-xs transition-all ${
                         formData.status === "half-day"
-                          ? "bg-blue-600/80 hover:bg-blue-700 text-white border-blue-400"
-                          : "bg-white/10 hover:bg-white/20 text-white border-white/20"
+                          ? "!bg-blue-600/80 hover:!bg-blue-700 text-white border-blue-400"
+                          : "!bg-white/10 hover:!bg-white/20 text-white border-white/20"
                       }`}
                       variant="outline"
                     >
@@ -196,8 +196,8 @@ export const AttendanceDialog: React.FC<AttendanceDialogProps> = ({
                       onClick={() => handleInputChange("status", "absent")}
                       className={`h-12 flex flex-col items-center justify-center gap-1 text-xs transition-all ${
                         formData.status === "absent"
-                          ? "bg-red-600/80 hover:bg-red-700 text-white border-red-400"
-                          : "bg-white/10 hover:bg-white/20 text-white border-white/20"
+                          ? "!bg-red-600/80 hover:!bg-red-700 text-white border-red-400"
+                          : "!bg-white/10 hover:!bg-white/20 text-white border-white/20"
                       }`}
                       variant="outline"
                     >
@@ -278,7 +278,7 @@ export const AttendanceDialog: React.FC<AttendanceDialogProps> = ({
                     type="button"
                     variant="outline"
                     onClick={onClose}
-                    className="flex-1 border-white/20 text-white hover:bg-white/10 h-9 text-sm"
+                    className="flex-1 !bg-transparent border-white/20 text-white hover:bg-white/10 h-9 text-sm"
                   >
                     Cancel
                   </Button>
