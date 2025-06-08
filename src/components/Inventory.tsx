@@ -875,20 +875,21 @@ export const Inventory = () => {
                       {group.products.map((product) => (
                         <div
                           key={product.id}
-                          className="p-3 sm:p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-200 backdrop-blur-sm"
+                          className="p-3 sm:p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/15 hover:border-blue-400/30 transition-all duration-200 backdrop-blur-sm cursor-pointer group"
+                          onClick={() => handleProductClick(product)}
+                          title="Click to view product details"
                         >
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex items-center gap-3">
-                              <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
+                              <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 group-hover:from-blue-400 group-hover:to-purple-500 transition-all duration-200">
                                 <Package className="text-white" size={16} />
                               </div>
                               <div>
-                                <h4
-                                  className="text-white font-semibold text-sm cursor-pointer hover:text-blue-300 transition-colors duration-200"
-                                  onClick={() => handleProductClick(product)}
-                                  title="Click to view product details"
-                                >
+                                <h4 className="text-white font-semibold text-sm group-hover:text-blue-300 transition-colors duration-200 flex items-center gap-1">
                                   {product.name}
+                                  <span className="text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                    →
+                                  </span>
                                 </h4>
                                 <p className="text-white/70 text-xs">
                                   {product.brand}
