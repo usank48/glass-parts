@@ -1,6 +1,14 @@
-
-import React from 'react';
-import { Home, Package, Users, FileText, User, Calculator, X } from 'lucide-react';
+import React, { useState } from "react";
+import {
+  Home,
+  Package,
+  Users,
+  FileText,
+  User,
+  Calculator,
+  X,
+} from "lucide-react";
+import { UserDropdown } from "./UserDropdown";
 
 interface SidebarProps {
   activeModule: string;
@@ -9,32 +17,39 @@ interface SidebarProps {
   setIsOpen: (open: boolean) => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeModule, setActiveModule, isOpen, setIsOpen }) => {
+export const Sidebar: React.FC<SidebarProps> = ({
+  activeModule,
+  setActiveModule,
+  isOpen,
+  setIsOpen,
+}) => {
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'inventory', label: 'Inventory', icon: Package },
-    { id: 'suppliers', label: 'Suppliers', icon: Users },
-    { id: 'invoicing', label: 'Invoicing', icon: FileText },
-    { id: 'staff', label: 'Staff', icon: User },
-    { id: 'accounting', label: 'Accounting', icon: Calculator },
+    { id: "dashboard", label: "Dashboard", icon: Home },
+    { id: "inventory", label: "Inventory", icon: Package },
+    { id: "suppliers", label: "Suppliers", icon: Users },
+    { id: "invoicing", label: "Invoicing", icon: FileText },
+    { id: "staff", label: "Staff", icon: User },
+    { id: "accounting", label: "Accounting", icon: Calculator },
   ];
 
   return (
     <>
       {/* Mobile overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 md:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
-      
-      <div className={`
-        fixed top-0 left-0 z-50 h-full bg-white/10 backdrop-blur-md border-r border-white/20 
+
+      <div
+        className={`
+        fixed top-0 left-0 z-50 h-full bg-white/10 backdrop-blur-md border-r border-white/20
         transition-all duration-300 ease-in-out w-64
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
         md:relative md:translate-x-0 md:block
-      `}>
+      `}
+      >
         {/* Header with close button */}
         <div className="p-4 border-b border-white/20 flex items-center justify-between">
           <div>
@@ -48,7 +63,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeModule, setActiveModule,
             <X size={20} />
           </button>
         </div>
-        
+
         {/* Navigation */}
         <nav className="flex-1 p-4">
           {menuItems.map((item) => {
@@ -65,8 +80,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeModule, setActiveModule,
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all duration-200 ${
                   activeModule === item.id
-                    ? 'bg-white/20 text-white shadow-lg'
-                    : 'text-white/70 hover:bg-white/10 hover:text-white'
+                    ? "bg-white/20 text-white shadow-lg"
+                    : "text-white/70 hover:bg-white/10 hover:text-white"
                 }`}
               >
                 <Icon size={20} />
@@ -75,7 +90,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeModule, setActiveModule,
             );
           })}
         </nav>
-        
+
         {/* User info */}
         <div className="p-4 border-t border-white/20">
           <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
