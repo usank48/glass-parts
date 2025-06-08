@@ -657,6 +657,7 @@ export const Invoicing = () => {
           setSelectedInvoice(null);
         }}
         invoice={selectedInvoice}
+        onSave={handleSaveInvoice}
       />
     </div>
   );
