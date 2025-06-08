@@ -38,6 +38,7 @@ export const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
   open,
   onClose,
   onImport,
+  existingProducts = [],
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [validationResult, setValidationResult] =
