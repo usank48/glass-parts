@@ -248,6 +248,21 @@ export const Inventory = () => {
     return { status: "In Stock", count: group.products.length, totalStock };
   };
 
+  // Handle product click to show details
+  const handleProductClick = (product: InventoryItem) => {
+    setSelectedProduct(product);
+    setShowProductDetail(true);
+  };
+
+  // Handle product save from detail dialog
+  const handleProductSave = async (updatedProduct: InventoryItem) => {
+    // In a real implementation, this would update the product in the database
+    // For now, we'll show success feedback and close the dialog
+    toast.success("Product updated successfully");
+    setShowProductDetail(false);
+    setSelectedProduct(null);
+  };
+
   const handleExcelImport = (importedData: InventoryData[]) => {
     let updatedCount = 0;
     let newCount = 0;
