@@ -430,7 +430,7 @@ export const Invoicing = () => {
   };
 
   // Filter invoices based on search term
-  const filteredInvoices = invoices.filter(
+  const filteredInvoices = invoicesList.filter(
     (invoice) =>
       invoice.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       invoice.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -438,13 +438,15 @@ export const Invoicing = () => {
   );
 
   // Calculate summary stats
-  const totalInvoices = invoices.length;
-  const totalAmount = invoices.reduce(
+  const totalInvoices = invoicesList.length;
+  const totalAmount = invoicesList.reduce(
     (sum, invoice) => sum + invoice.amount,
     0,
   );
-  const paidInvoices = invoices.filter((inv) => inv.status === "Paid").length;
-  const overdueInvoices = invoices.filter(
+  const paidInvoices = invoicesList.filter(
+    (inv) => inv.status === "Paid",
+  ).length;
+  const overdueInvoices = invoicesList.filter(
     (inv) => inv.status === "Overdue",
   ).length;
 
