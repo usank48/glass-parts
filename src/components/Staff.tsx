@@ -940,7 +940,7 @@ export const Staff = () => {
       />
 
       {/* Add Payment Dialog */}
-      {selectedStaffForAction && (
+      {selectedStaffForAction && showAddPaymentDialog && (
         <AddPaymentDialog
           employeeName={selectedStaffForAction.name}
           onClose={() => {
@@ -952,7 +952,7 @@ export const Staff = () => {
       )}
 
       {/* Add Attendance Dialog */}
-      {selectedStaffForAction && (
+      {selectedStaffForAction && showAddAttendanceDialog && (
         <AddAttendanceDialog
           employeeName={selectedStaffForAction.name}
           onClose={() => {
