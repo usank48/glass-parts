@@ -9,11 +9,15 @@ import {
   Filter,
   Calendar,
   IndianRupee,
+  AlertTriangle,
+  Package,
 } from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InvoiceDetailDialog } from "./dialogs/InvoiceDetailDialog";
+import { useInventorySync } from "@/hooks/useInventorySync";
+import { formatInventoryValue } from "@/utils/inventoryManager";
 
 interface InvoiceItem {
   id: string;
