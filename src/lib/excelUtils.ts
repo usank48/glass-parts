@@ -113,7 +113,7 @@ export const generateSampleExcelFile = (): void => {
     ...sampleData,
   ];
 
-  const worksheet = XLSX.utils.json_to_sheet(sampleData);
+  const worksheet = XLSX.utils.json_to_sheet(instructionsData);
   const workbook = XLSX.utils.book_new();
 
   // Set column widths for better readability
