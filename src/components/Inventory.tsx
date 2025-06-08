@@ -906,89 +906,179 @@ export const Inventory = () => {
                   }
                 >
                   <div className="p-4 sm:p-6 pt-3 sm:pt-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                      {group.products.map((product) => (
-                        <div
-                          key={product.id}
-                          className="p-3 sm:p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/15 hover:border-blue-400/30 transition-all duration-200 backdrop-blur-sm cursor-pointer group"
-                          onClick={() => handleProductClick(product)}
-                          title="Click to view product details"
-                        >
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 group-hover:from-blue-400 group-hover:to-purple-500 transition-all duration-200">
-                                <Package className="text-white" size={16} />
-                              </div>
-                              <div>
-                                <h4 className="text-white font-semibold text-sm group-hover:text-blue-300 transition-colors duration-200 flex items-center gap-1">
-                                  {product.name}
-                                  <span className="text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                    →
-                                  </span>
-                                </h4>
-                                <p className="text-white/70 text-xs">
-                                  {product.brand}
-                                </p>
-                                {sortMethod === "category" && (
-                                  <p className="text-white/60 text-xs">
-                                    {product.vehicle}
+                    {viewMode === "tile" ? (
+                      // Tile View
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                        {group.products.map((product) => (
+                          <div
+                            key={product.id}
+                            className="p-3 sm:p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/15 hover:border-blue-400/30 transition-all duration-200 backdrop-blur-sm cursor-pointer group"
+                            onClick={() => handleProductClick(product)}
+                            title="Click to view product details"
+                          >
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 group-hover:from-blue-400 group-hover:to-purple-500 transition-all duration-200">
+                                  <Package className="text-white" size={16} />
+                                </div>
+                                <div>
+                                  <h4 className="text-white font-semibold text-sm group-hover:text-blue-300 transition-colors duration-200 flex items-center gap-1">
+                                    {product.name}
+                                    <span className="text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                      →
+                                    </span>
+                                  </h4>
+                                  <p className="text-white/70 text-xs">
+                                    {product.brand}
                                   </p>
-                                )}
-                                {sortMethod === "vehicle" && (
-                                  <p className="text-white/60 text-xs">
-                                    {product.category}
-                                  </p>
-                                )}
-                                {sortMethod === "all" && (
-                                  <>
-                                    <p className="text-white/60 text-xs">
-                                      {product.category}
-                                    </p>
+                                  {sortMethod === "category" && (
                                     <p className="text-white/60 text-xs">
                                       {product.vehicle}
                                     </p>
-                                  </>
-                                )}
+                                  )}
+                                  {sortMethod === "vehicle" && (
+                                    <p className="text-white/60 text-xs">
+                                      {product.category}
+                                    </p>
+                                  )}
+                                  {sortMethod === "all" && (
+                                    <>
+                                      <p className="text-white/60 text-xs">
+                                        {product.category}
+                                      </p>
+                                      <p className="text-white/60 text-xs">
+                                        {product.vehicle}
+                                      </p>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium border ${getInventoryStatusColor(product)}`}
+                              >
+                                {product.status}
+                              </span>
+                            </div>
+
+                            <div className="space-y-1 text-xs">
+                              <div className="flex justify-between">
+                                <span className="text-white/70">Part #:</span>
+                                <span className="text-white font-medium">
+                                  {product.partNumber}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-white/70">Stock:</span>
+                                <span className="text-white font-medium">
+                                  {product.stock} units
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-white/70">Purchase:</span>
+                                <span className="text-white font-medium">
+                                  ₹{product.costPrice}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-white/70">Sale:</span>
+                                <span className="text-white font-medium">
+                                  ₹{product.sellingPrice}
+                                </span>
                               </div>
                             </div>
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium border ${getInventoryStatusColor(product)}`}
-                            >
-                              {product.status}
-                            </span>
-                          </div>
 
-                          <div className="space-y-1 text-xs">
-                            <div className="flex justify-between">
-                              <span className="text-white/70">Part #:</span>
-                              <span className="text-white font-medium">
-                                {product.partNumber}
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-white/70">Stock:</span>
-                              <span className="text-white font-medium">
-                                {product.stock} units
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-white/70">Price:</span>
-                              <span className="text-white font-medium">
-                                ₹{product.sellingPrice}
-                              </span>
+                            {/* Tap for details indicator */}
+                            <div className="mt-3 pt-2 border-t border-white/10">
+                              <div className="flex items-center justify-center gap-1 text-blue-300/70 group-hover:text-blue-300 transition-colors duration-200">
+                                <Eye size={12} />
+                                <span className="text-xs">Tap for details</span>
+                              </div>
                             </div>
                           </div>
+                        ))}
+                      </div>
+                    ) : (
+                      // List View
+                      <div className="space-y-2">
+                        {group.products.map((product) => (
+                          <div
+                            key={product.id}
+                            className="p-3 sm:p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/15 hover:border-blue-400/30 transition-all duration-200 backdrop-blur-sm cursor-pointer group"
+                            onClick={() => handleProductClick(product)}
+                            title="Click to view product details"
+                          >
+                            <div className="flex items-center gap-4">
+                              {/* Product Icon */}
+                              <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 group-hover:from-blue-400 group-hover:to-purple-500 transition-all duration-200 flex-shrink-0">
+                                <Package className="text-white" size={16} />
+                              </div>
 
-                          {/* Tap for details indicator */}
-                          <div className="mt-3 pt-2 border-t border-white/10">
-                            <div className="flex items-center justify-center gap-1 text-blue-300/70 group-hover:text-blue-300 transition-colors duration-200">
-                              <Eye size={12} />
-                              <span className="text-xs">Tap for details</span>
+                              {/* Product Info */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h4 className="text-white font-semibold text-sm group-hover:text-blue-300 transition-colors duration-200 flex items-center gap-1 truncate">
+                                    {product.name}
+                                    <span className="text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                      →
+                                    </span>
+                                  </h4>
+                                  <span
+                                    className={`px-2 py-1 rounded-full text-xs font-medium border ${getInventoryStatusColor(product)} flex-shrink-0`}
+                                  >
+                                    {product.status}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-4 text-xs text-white/70">
+                                  <span>{product.brand}</span>
+                                  <span>•</span>
+                                  <span>{product.partNumber}</span>
+                                  <span>•</span>
+                                  <span>{product.stock} units</span>
+                                  {sortMethod === "all" && (
+                                    <>
+                                      <span>•</span>
+                                      <span>{product.category}</span>
+                                    </>
+                                  )}
+                                </div>
+                                {(sortMethod === "category" ||
+                                  sortMethod === "all") && (
+                                  <div className="text-xs text-white/60 mt-1">
+                                    {product.vehicle}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Pricing */}
+                              <div className="flex items-center gap-6 text-right flex-shrink-0">
+                                <div>
+                                  <div className="text-xs text-white/70">
+                                    Purchase
+                                  </div>
+                                  <div className="text-sm text-white font-medium">
+                                    ₹{product.costPrice}
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="text-xs text-white/70">
+                                    Sale
+                                  </div>
+                                  <div className="text-sm text-white font-medium">
+                                    ₹{product.sellingPrice}
+                                  </div>
+                                </div>
+                                <div className="w-8 flex justify-center">
+                                  <Eye
+                                    size={16}
+                                    className="text-blue-300/70 group-hover:text-blue-300 transition-colors duration-200"
+                                  />
+                                </div>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
