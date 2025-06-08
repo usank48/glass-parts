@@ -523,7 +523,7 @@ export const AddProductDialog: React.FC<AddProductDialogProps> = ({
           </div>
         </div>
 
-        <div className="flex gap-2 pt-4">
+        <div className="flex gap-2 pt-4 pb-6">
           <Button
             type="submit"
             className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0"
@@ -535,7 +535,7 @@ export const AddProductDialog: React.FC<AddProductDialogProps> = ({
             type="button"
             onClick={onClose}
             variant="outline"
-            className="px-6 bg-white/10 border-white/20 text-white hover:bg-white/20"
+            className="px-6 !bg-transparent border-white/20 text-white hover:bg-white/20"
           >
             Cancel
           </Button>
