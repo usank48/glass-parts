@@ -1,6 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Search, Menu, User, Bell, ChevronDown } from "lucide-react";
-import { UserDropdown } from "./UserDropdown";
+import {
+  Search,
+  Menu,
+  User,
+  Bell,
+  ChevronDown,
+  Settings,
+  Edit,
+  Shield,
+} from "lucide-react";
+import { UserProfileDialog } from "./dialogs/UserProfileDialog";
+import { UserSettingsDialog } from "./dialogs/UserSettingsDialog";
+import { ChangePasswordDialog } from "./dialogs/ChangePasswordDialog";
 
 interface TopBarProps {
   onMenuClick: () => void;
