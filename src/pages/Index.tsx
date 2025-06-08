@@ -91,11 +91,13 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Bottom Bar */}
-      <BottomBar
-        activeModule={activeModule}
-        setActiveModule={setActiveModule}
-      />
+      {/* Bottom Bar - Mobile Only */}
+      <div className="block md:hidden">
+        <BottomBar
+          activeModule={activeModule}
+          setActiveModule={setActiveModule}
+        />
+      </div>
 
       {/* Floating Action Button */}
       <FloatingActionButton
