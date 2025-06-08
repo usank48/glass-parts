@@ -36,6 +36,7 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
   onAddProduct,
   onAddSale,
   onAddPurchase,
+  existingProducts = [],
 }) => {
   const [dialogType, setDialogType] = useState<
     | "product"
