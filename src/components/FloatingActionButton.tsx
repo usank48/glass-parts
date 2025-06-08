@@ -23,6 +23,12 @@ interface FloatingActionButtonProps {
   onAddProduct: () => void;
   onAddSale: () => void;
   onAddPurchase: () => void;
+  existingProducts?: Array<{
+    id: number;
+    partNumber: string;
+    name: string;
+    stock: number;
+  }>;
 }
 
 export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
