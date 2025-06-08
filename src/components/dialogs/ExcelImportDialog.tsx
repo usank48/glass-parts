@@ -26,6 +26,12 @@ interface ExcelImportDialogProps {
   open: boolean;
   onClose: () => void;
   onImport: (data: InventoryData[]) => void;
+  existingProducts?: Array<{
+    id: number;
+    partNumber: string;
+    name: string;
+    stock: number;
+  }>;
 }
 
 export const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
