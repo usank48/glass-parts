@@ -960,6 +960,18 @@ export const Inventory = () => {
         onImport={handleExcelImport}
         existingProducts={products}
       />
+
+      {/* Product Detail Dialog */}
+      <ProductDetailDialog
+        open={showProductDetail}
+        onClose={() => {
+          setShowProductDetail(false);
+          setSelectedProduct(null);
+        }}
+        product={selectedProduct}
+        transactions={transactions}
+        onSave={handleProductSave}
+      />
     </div>
   );
 };
