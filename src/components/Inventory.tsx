@@ -456,7 +456,7 @@ export const Inventory = () => {
             </Button>
           </div>
           <Button
-            onClick={() => setShowAddForm(true)}
+            onClick={() => setShowAddProductDialog(true)}
             size="sm"
             className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 w-full sm:w-auto text-xs sm:text-sm"
           >
