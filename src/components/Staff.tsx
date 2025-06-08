@@ -625,6 +625,82 @@ export const Staff = () => {
     );
   };
 
+  const handleAddPayment = () => {
+    if (staff.length === 0) {
+      toast.error("No staff members available. Please add staff first.");
+      return;
+    }
+    // For now, let's select the first active staff member as default
+    const activeStaff = staff.find((s) => s.status === "Active");
+    if (activeStaff) {
+      setSelectedStaffForAction(activeStaff);
+      setShowAddPaymentDialog(true);
+    } else {
+      toast.error("No active staff members found.");
+    }
+  };
+
+  const handleAddAttendance = () => {
+    if (staff.length === 0) {
+      toast.error("No staff members available. Please add staff first.");
+      return;
+    }
+    // For now, let's select the first active staff member as default
+    const activeStaff = staff.find((s) => s.status === "Active");
+    if (activeStaff) {
+      setSelectedStaffForAction(activeStaff);
+      setShowAddAttendanceDialog(true);
+    } else {
+      toast.error("No active staff members found.");
+    }
+  };
+
+  const handlePaymentSubmit = (payment: PaymentRecord) => {
+    if (!selectedStaffForAction) return;
+
+    // Update the selected staff member's payment history
+    setStaff((prevStaff) =>
+      prevStaff.map((member) =>
+        member.id === selectedStaffForAction.id
+          ? {
+              ...member,
+              paymentHistory: [payment, ...(member.paymentHistory || [])],
+              currentMonthPay: payment.amount,
+            }
+          : member,
+      ),
+    );
+
+    toast.success(
+      `Payment of ₹${payment.amount} added for ${selectedStaffForAction.name}!`,
+    );
+    setSelectedStaffForAction(null);
+  };
+
+  const handleAttendanceSubmit = (attendance: AttendanceRecord) => {
+    if (!selectedStaffForAction) return;
+
+    // Update the selected staff member's attendance records
+    setStaff((prevStaff) =>
+      prevStaff.map((member) =>
+        member.id === selectedStaffForAction.id
+          ? {
+              ...member,
+              recentAttendance: [
+                attendance,
+                ...(member.recentAttendance || []).slice(0, 4),
+              ], // Keep only 5 recent records
+            }
+          : member,
+      ),
+    );
+
+    toast.success(
+      `Attendance record added for ${selectedStaffForAction.name}!`,
+    );
+    setSelectedStaffForAction(null);
+  };
+
   // If a staff member is selected, show the detail view
   if (selectedStaff) {
     return (
