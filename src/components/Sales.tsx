@@ -123,6 +123,22 @@ export const Sales = () => {
     },
   ]);
 
+  // Handle product click to show details
+  const handleProductClick = (itemId: number) => {
+    const product = getItemById(itemId);
+    if (product) {
+      setSelectedProduct(product);
+      setShowProductDetail(true);
+    }
+  };
+
+  // Handle product save from detail dialog
+  const handleProductSave = async (updatedProduct: InventoryItem) => {
+    toast.success("Product updated successfully");
+    setShowProductDetail(false);
+    setSelectedProduct(null);
+  };
+
   // Process a sale and update inventory
   const handleCompleteSale = async (sale: Sale) => {
     try {
