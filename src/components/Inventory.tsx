@@ -49,17 +49,14 @@ import {
   Cell,
 } from "recharts";
 import { useInventorySync, InventoryItem } from "@/hooks/useInventorySync";
-import {
-  formatInventoryValue,
-  getInventoryStatusColor,
-} from "@/utils/inventoryManager";
+import { formatInventoryValue, getInventoryStatusColor } from "@/utils/inventoryManager";
 
 // Use InventoryItem instead of Product interface
 
 interface GroupedData {
   id: string;
   name: string;
-  products: Product[];
+  products: InventoryItem[];
 }
 
 type SortMethod = "category" | "vehicle" | "all";
@@ -74,7 +71,19 @@ export const Inventory = () => {
     useState<ProductSortMethod>("quantity-desc");
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
-  const [products, setProducts] = useState<Product[]>([
+  // Use the inventory sync hook instead of local state
+  const {
+    inventory: products,
+    stockAlerts,
+    dismissAlert,
+    getStockValue,
+    getLowStockItems,
+    refreshInventory,
+    isLoading,
+    error
+  } = useInventorySync();
+
+  // Remove the hardcoded products array and use the hook data instead
     // Brake Pads
     {
       id: 1,
