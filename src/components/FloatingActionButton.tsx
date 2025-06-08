@@ -88,14 +88,14 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
 
   return (
     <>
-      {/* Positioned above bottom navigation bar */}
-      <div className="fixed bottom-20 right-4 z-50">
+      {/* FAB positioned above bottom navigation bar on mobile, bottom-right on desktop */}
+      <div className="fixed bottom-24 right-4 md:bottom-6 md:right-6 z-50">
         <button
           onClick={contextAction.onClick}
-          className={`w-14 h-14 rounded-full bg-gradient-to-r ${contextAction.color} backdrop-blur-md border border-white/20 text-white shadow-lg hover:scale-110 transition-all duration-200 flex items-center justify-center group`}
+          className={`w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-r ${contextAction.color} backdrop-blur-md border border-white/20 text-white shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 flex items-center justify-center group`}
           title={contextAction.label}
         >
-          <ActionIcon size={24} />
+          <ActionIcon size={24} className="md:w-6 md:h-6" />
 
           {/* Tooltip */}
           <div className="absolute right-16 top-1/2 -translate-y-1/2 bg-black/80 backdrop-blur-md border border-white/20 text-white px-3 py-1 rounded-lg text-sm whitespace-nowrap shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
