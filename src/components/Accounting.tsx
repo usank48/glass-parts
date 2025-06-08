@@ -109,6 +109,8 @@ export const Accounting = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [showDialog, setShowDialog] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showAccountSearch, setShowAccountSearch] = useState(false);
+  const [accountSearchQuery, setAccountSearchQuery] = useState("");
 
   // Sample data
   const [chartOfAccounts] = useState<ChartOfAccount[]>([
@@ -288,6 +290,22 @@ export const Accounting = () => {
       default:
         return "bg-orange-500/20 text-orange-300";
     }
+  };
+
+  // Filter accounts based on search query
+  const filteredAccounts = chartOfAccounts.filter(
+    (account) =>
+      account.name.toLowerCase().includes(accountSearchQuery.toLowerCase()) ||
+      account.code.toLowerCase().includes(accountSearchQuery.toLowerCase()) ||
+      account.type.toLowerCase().includes(accountSearchQuery.toLowerCase()) ||
+      account.subType.toLowerCase().includes(accountSearchQuery.toLowerCase()),
+  );
+
+  const handleAccountSelect = (account: ChartOfAccount) => {
+    toast.success(`Selected account: ${account.name} (${account.code})`);
+    setShowAccountSearch(false);
+    setAccountSearchQuery("");
+    // You can add additional logic here to handle what happens when an account is selected
   };
 
   const navigationTabs = [
@@ -1061,6 +1079,13 @@ export const Accounting = () => {
             Complete accounting and financial control
           </p>
         </div>
+        <Button
+          onClick={() => setShowAccountSearch(true)}
+          className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white border-0"
+        >
+          <Search size={16} className="mr-2" />
+          Search Accounts
+        </Button>
       </div>
 
       {/* Navigation */}
@@ -1089,6 +1114,135 @@ export const Accounting = () => {
 
       {/* Content */}
       {renderContent()}
+
+      {/* Account Search Dialog */}
+      <Dialog open={showAccountSearch} onOpenChange={setShowAccountSearch}>
+        <DialogContent className="!bg-gray-900/95 backdrop-blur-md border border-white/20 text-white max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-white">Search Accounts</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Search Bar */}
+            <div className="relative">
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60"
+                size={16}
+              />
+              <Input
+                placeholder="Search by account name, code, or type..."
+                value={accountSearchQuery}
+                onChange={(e) => setAccountSearchQuery(e.target.value)}
+                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+              />
+            </div>
+
+            {/* Account List */}
+            <div className="max-h-96 overflow-y-auto space-y-2">
+              {filteredAccounts.map((account) => (
+                <div
+                  key={account.id}
+                  onClick={() => handleAccountSelect(account)}
+                  className="p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-white/10"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`p-2 rounded-lg ${
+                          account.type === "assets"
+                            ? "bg-green-500/20"
+                            : account.type === "liabilities"
+                              ? "bg-red-500/20"
+                              : account.type === "equity"
+                                ? "bg-blue-500/20"
+                                : account.type === "revenue"
+                                  ? "bg-purple-500/20"
+                                  : "bg-orange-500/20"
+                        }`}
+                      >
+                        {account.type === "assets" && (
+                          <TrendingUp className="text-green-400" size={20} />
+                        )}
+                        {account.type === "liabilities" && (
+                          <TrendingDown className="text-red-400" size={20} />
+                        )}
+                        {account.type === "equity" && (
+                          <PieChart className="text-blue-400" size={20} />
+                        )}
+                        {account.type === "revenue" && (
+                          <IndianRupee className="text-purple-400" size={20} />
+                        )}
+                        {account.type === "expenses" && (
+                          <Calculator className="text-orange-400" size={20} />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="text-white font-medium">
+                          {account.name}
+                        </h3>
+                        <p className="text-white/60 text-sm">
+                          Code: {account.code} • {account.subType}
+                        </p>
+                        <p className="text-white/40 text-xs capitalize">
+                          {account.type}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p
+                        className={`font-bold ${
+                          account.balance >= 0
+                            ? "text-green-300"
+                            : "text-red-300"
+                        }`}
+                      >
+                        {formatCurrency(Math.abs(account.balance))}
+                      </p>
+                      <p className="text-white/60 text-xs">
+                        {account.balance >= 0 ? "Debit" : "Credit"}
+                      </p>
+                      <Badge
+                        className={
+                          account.isActive
+                            ? "bg-green-500/20 text-green-300 mt-1"
+                            : "bg-gray-500/20 text-gray-300 mt-1"
+                        }
+                      >
+                        {account.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {filteredAccounts.length === 0 && (
+                <div className="text-center py-8">
+                  <Search className="mx-auto text-white/40 mb-2" size={24} />
+                  <p className="text-white/60">
+                    No accounts found matching your search
+                  </p>
+                  <p className="text-white/40 text-sm mt-1">
+                    Try searching by account name, code, or type
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end pt-4 border-t border-white/20">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAccountSearch(false);
+                  setAccountSearchQuery("");
+                }}
+                className="!bg-transparent border-white/20 text-white hover:bg-white/10"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Dialog placeholder for various forms */}
       {showDialog && (
