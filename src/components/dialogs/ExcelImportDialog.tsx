@@ -268,49 +268,123 @@ export const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
         )}
 
         {/* Preview of valid data */}
-        {validationResult.validRows > 0 && (
-          <div className="space-y-3">
-            <h4 className="text-white font-medium">
-              Preview of Valid Records:
-            </h4>
-            <div className="max-h-60 overflow-y-auto">
-              <div className="space-y-2">
-                {validationResult.data.slice(0, 5).map((item, index) => (
-                  <div
-                    key={index}
-                    className="p-3 bg-white/5 border border-white/10 rounded-lg"
-                  >
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div>
-                        <span className="text-white/70">Part:</span>
-                        <span className="text-white ml-2">{item.partName}</span>
-                      </div>
-                      <div>
-                        <span className="text-white/70">Brand:</span>
-                        <span className="text-white ml-2">{item.brand}</span>
-                      </div>
-                      <div>
-                        <span className="text-white/70">Part Number:</span>
-                        <span className="text-white ml-2">
-                          {item.partNumber}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-white/70">Quantity:</span>
-                        <span className="text-white ml-2">{item.quantity}</span>
-                      </div>
+        {validationResult.validRows > 0 &&
+          (() => {
+            // Categorize data into updates vs new additions
+            const updates: Array<{
+              item: InventoryData;
+              existingStock: number;
+            }> = [];
+            const additions: InventoryData[] = [];
+
+            validationResult.data.forEach((item) => {
+              const existing = existingProducts.find(
+                (product) =>
+                  product.partNumber.toLowerCase() ===
+                    item.partNumber.toLowerCase() ||
+                  product.name.toLowerCase() === item.partName.toLowerCase(),
+              );
+
+              if (existing) {
+                updates.push({ item, existingStock: existing.stock });
+              } else {
+                additions.push(item);
+              }
+            });
+
+            return (
+              <div className="space-y-4">
+                {/* Summary */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg text-center">
+                    <div className="text-lg font-bold text-blue-300">
+                      {updates.length}
+                    </div>
+                    <div className="text-blue-200 text-sm">
+                      Products to Update
                     </div>
                   </div>
-                ))}
-                {validationResult.data.length > 5 && (
-                  <div className="text-center text-white/60 text-sm py-2">
-                    ... and {validationResult.data.length - 5} more records
+                  <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-center">
+                    <div className="text-lg font-bold text-green-300">
+                      {additions.length}
+                    </div>
+                    <div className="text-green-200 text-sm">
+                      New Products to Add
+                    </div>
+                  </div>
+                </div>
+
+                {/* Updates Preview */}
+                {updates.length > 0 && (
+                  <div className="space-y-2">
+                    <h5 className="text-white font-medium flex items-center gap-2">
+                      <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
+                      Stock Updates Preview:
+                    </h5>
+                    <div className="max-h-32 overflow-y-auto space-y-1">
+                      {updates.slice(0, 3).map((update, index) => (
+                        <div
+                          key={index}
+                          className="p-2 bg-blue-500/5 border border-blue-500/10 rounded text-sm"
+                        >
+                          <div className="flex justify-between items-center">
+                            <span className="text-white">
+                              {update.item.partName}
+                            </span>
+                            <span className="text-blue-300">
+                              {update.existingStock} → {update.item.quantity}{" "}
+                              units
+                            </span>
+                          </div>
+                          <div className="text-white/60 text-xs">
+                            {update.item.partNumber}
+                          </div>
+                        </div>
+                      ))}
+                      {updates.length > 3 && (
+                        <div className="text-center text-white/60 text-xs py-1">
+                          ... and {updates.length - 3} more updates
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* New Additions Preview */}
+                {additions.length > 0 && (
+                  <div className="space-y-2">
+                    <h5 className="text-white font-medium flex items-center gap-2">
+                      <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                      New Products Preview:
+                    </h5>
+                    <div className="max-h-32 overflow-y-auto space-y-1">
+                      {additions.slice(0, 3).map((item, index) => (
+                        <div
+                          key={index}
+                          className="p-2 bg-green-500/5 border border-green-500/10 rounded text-sm"
+                        >
+                          <div className="flex justify-between items-center">
+                            <span className="text-white">{item.partName}</span>
+                            <span className="text-green-300">
+                              {item.quantity} units
+                            </span>
+                          </div>
+                          <div className="text-white/60 text-xs">
+                            {item.partNumber} • {item.brand}
+                          </div>
+                        </div>
+                      ))}
+                      {additions.length > 3 && (
+                        <div className="text-center text-white/60 text-xs py-1">
+                          ... and {additions.length - 3} more additions
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
-            </div>
-          </div>
-        )}
+            );
+          })()}
 
         {/* Action Buttons */}
         <div className="flex gap-3">
