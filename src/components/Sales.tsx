@@ -15,33 +15,134 @@ import { useInventorySync } from "@/hooks/useInventorySync";
 import { formatInventoryValue } from "@/utils/inventoryManager";
 import { toast } from "sonner";
 
+interface Sale {
+  id: string;
+  customerName: string;
+  customerPhone: string;
+  items: Array<{
+    itemId: number;
+    partNumber: string;
+    itemName: string;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
+  }>;
+  total: number;
+  date: string;
+  status: "completed" | "pending" | "processing";
+  paymentMethod: string;
+}
+
 export const Sales = () => {
-  const salesData = [
+  const [showNewSale, setShowNewSale] = useState(false);
+  const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
+  const [showSaleDetail, setShowSaleDetail] = useState(false);
+
+  // Use inventory sync hook for real-time inventory management
+  const {
+    inventory,
+    stockAlerts,
+    processSale,
+    getItemById,
+    getLowStockItems,
+    isLoading,
+  } = useInventorySync();
+
+  // Sample sales data with inventory integration
+  const [salesData, setSalesData] = useState<Sale[]>([
     {
-      id: 1,
+      id: "SALE-2024-001",
       customerName: "John Smith",
-      items: "Brake Pads, Oil Filter",
-      total: 1255.5,
+      customerPhone: "+91 98765 43210",
+      items: [
+        {
+          itemId: 1,
+          partNumber: "BP-BMW-X5-2020",
+          itemName: "Premium Brake Pad Set",
+          quantity: 2,
+          unitPrice: 129.99,
+          totalPrice: 259.98,
+        },
+        {
+          itemId: 2,
+          partNumber: "BP-TOY-CAM-2019",
+          itemName: "Ceramic Brake Pads",
+          quantity: 1,
+          unitPrice: 95.99,
+          totalPrice: 95.99,
+        },
+      ],
+      total: 355.97,
       date: "2024-01-15",
-      status: "Completed",
+      status: "completed",
+      paymentMethod: "Cash",
     },
     {
-      id: 2,
+      id: "SALE-2024-002",
       customerName: "Sarah Johnson",
-      items: "Engine Oil, Air Filter",
-      total: 899.99,
+      customerPhone: "+91 87654 32109",
+      items: [
+        {
+          itemId: 4,
+          partNumber: "SUS-BMW-X5-2020",
+          itemName: "Air Suspension Strut",
+          quantity: 1,
+          unitPrice: 449.99,
+          totalPrice: 449.99,
+        },
+      ],
+      total: 449.99,
       date: "2024-01-15",
-      status: "Pending",
+      status: "pending",
+      paymentMethod: "Card",
     },
     {
-      id: 3,
+      id: "SALE-2024-003",
       customerName: "Mike Wilson",
-      items: "Spark Plugs, Battery",
-      total: 2450.0,
+      customerPhone: "+91 76543 21098",
+      items: [
+        {
+          itemId: 3,
+          partNumber: "BP-HON-CIV-2021",
+          itemName: "Sport Brake Pads",
+          quantity: 4,
+          unitPrice: 159.99,
+          totalPrice: 639.96,
+        },
+      ],
+      total: 639.96,
       date: "2024-01-14",
-      status: "Completed",
+      status: "completed",
+      paymentMethod: "UPI",
     },
-  ];
+  ]);
+
+  // Process a sale and update inventory
+  const handleCompleteSale = async (sale: Sale) => {
+    try {
+      const success = await processSale(
+        sale.id,
+        sale.items.map((item) => ({
+          itemId: item.itemId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+        })),
+        sale.customerName,
+      );
+
+      if (success) {
+        // Update sale status
+        setSalesData((prevSales) =>
+          prevSales.map((s) =>
+            s.id === sale.id ? { ...s, status: "completed" as const } : s,
+          ),
+        );
+        toast.success(`Sale ${sale.id} completed and inventory updated`);
+      }
+    } catch (error) {
+      toast.error("Failed to complete sale");
+    }
+  };
 
   const stats = [
     {
