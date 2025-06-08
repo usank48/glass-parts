@@ -21,12 +21,14 @@ import { formatInventoryValue } from "@/utils/inventoryManager";
 
 interface InvoiceItem {
   id: string;
+  itemId: number; // Reference to inventory item
   partNumber: string;
   partName: string;
   brand: string;
   quantity: number;
   unitPrice: number;
   totalPrice: number;
+  availableStock?: number; // For validation
 }
 
 interface Invoice {
@@ -44,6 +46,7 @@ interface Invoice {
   paymentTerms: string;
   taxRate: number;
   discountAmount?: number;
+  inventoryProcessed?: boolean; // Track if inventory has been updated
 }
 
 // Define initial invoices data outside component
