@@ -384,7 +384,18 @@ export const Sales = () => {
                     </span>
                   </div>
                   <p className="text-white/70 text-xs sm:text-sm mb-1">
-                    {sale.items.map((item) => item.itemName).join(", ")}
+                    {sale.items.map((item, index) => (
+                      <span key={item.itemId}>
+                        <span
+                          className="cursor-pointer hover:text-blue-300 transition-colors duration-200"
+                          onClick={() => handleProductClick(item.itemId)}
+                          title="Click to view product details"
+                        >
+                          {item.itemName}
+                        </span>
+                        {index < sale.items.length - 1 && ", "}
+                      </span>
+                    ))}
                   </p>
                   <div className="flex items-center gap-4 text-xs text-white/50">
                     <span>{sale.date}</span>
