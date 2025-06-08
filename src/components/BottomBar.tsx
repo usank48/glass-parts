@@ -24,8 +24,8 @@ export const BottomBar: React.FC<BottomBarProps> = ({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/10 backdrop-blur-md border-t border-white/20 safe-area-pb md:left-64">
-      <div className="flex items-center justify-around py-2 px-2 min-h-[60px] md:min-h-[50px]">
+    <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/10 backdrop-blur-md border-t border-white/20 safe-area-pb">
+      <div className="flex items-center justify-around py-2 px-2 min-h-[60px]">
         {bottomMenuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeModule === item.id;
