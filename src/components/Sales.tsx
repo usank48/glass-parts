@@ -11,9 +11,10 @@ import {
 } from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import { Button } from "@/components/ui/button";
-import { useInventorySync } from "@/hooks/useInventorySync";
+import { useInventorySync, InventoryItem } from "@/hooks/useInventorySync";
 import { formatInventoryValue } from "@/utils/inventoryManager";
 import { toast } from "sonner";
+import { ProductDetailDialog } from "./dialogs/ProductDetailDialog";
 
 interface Sale {
   id: string;
