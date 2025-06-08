@@ -47,7 +47,12 @@ export const Invoicing = () => {
   const [showInvoiceDetail, setShowInvoiceDetail] = useState(false);
   const [invoicesList, setInvoicesList] = useState<Invoice[]>([]);
 
-  const invoices: Invoice[] = [
+  // Initialize invoices data
+  React.useEffect(() => {
+    setInvoicesList(initialInvoices);
+  }, []);
+
+  const initialInvoices: Invoice[] = [
     {
       id: "INV-2024-0156",
       customer: "Johnson Auto Repair",
