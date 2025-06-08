@@ -32,7 +32,13 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
   onAddPurchase,
 }) => {
   const [dialogType, setDialogType] = useState<
-    "product" | "sale" | "purchase" | "dashboard" | null
+    | "product"
+    | "sale"
+    | "purchase"
+    | "dashboard"
+    | "inventory"
+    | "excel-import"
+    | null
   >(null);
 
   // Get context-specific action based on active module
