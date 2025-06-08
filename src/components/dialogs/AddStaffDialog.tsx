@@ -203,20 +203,10 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-md border border-white/20 text-white">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-bold text-white flex items-center gap-3">
-              <User size={24} />
-              Add New Staff Member
-            </DialogTitle>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleClose}
-              className="text-white/70 hover:text-white hover:bg-white/10 bg-transparent"
-            >
-              <X size={16} />
-            </Button>
-          </div>
+          <DialogTitle className="text-xl font-bold text-white flex items-center gap-3">
+            <User size={24} />
+            Add New Staff Member
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -227,13 +217,13 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
               Basic Information
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label className="text-white/90">Full Name *</Label>
                 <Input
                   value={formData.name}
                   onChange={(e) => handleInputChange("name", e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  className="w-full bg-white/10 border-white/20 text-white placeholder:text-white/50 h-10"
                   placeholder="John Doe"
                   required
                 />
@@ -246,7 +236,7 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
                   onChange={(e) =>
                     handleInputChange("employeeId", e.target.value)
                   }
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  className="w-full bg-white/10 border-white/20 text-white placeholder:text-white/50 h-10"
                   placeholder="Auto-generated if empty"
                 />
               </div>
@@ -260,7 +250,7 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  className="w-full bg-white/10 border-white/20 text-white placeholder:text-white/50 h-10"
                   placeholder="john@autoparts.com"
                   required
                 />
@@ -274,7 +264,7 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
                 <Input
                   value={formData.phone}
                   onChange={(e) => handleInputChange("phone", e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  className="w-full bg-white/10 border-white/20 text-white placeholder:text-white/50 h-10"
                   placeholder="+1 (555) 123-4567"
                   required
                 />
@@ -289,14 +279,14 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
               Role & Department
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label className="text-white/90">Role *</Label>
                 <Select
                   value={formData.role}
                   onValueChange={(value) => handleInputChange("role", value)}
                 >
-                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                  <SelectTrigger className="w-full bg-white/10 border-white/20 text-white h-10">
                     <SelectValue placeholder="Select role..." />
                   </SelectTrigger>
                   <SelectContent className="bg-white/90 backdrop-blur-md border border-white/20">
@@ -324,7 +314,7 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
                     handleInputChange("department", value)
                   }
                 >
-                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                  <SelectTrigger className="w-full bg-white/10 border-white/20 text-white h-10">
                     <SelectValue placeholder="Select department..." />
                   </SelectTrigger>
                   <SelectContent className="bg-white/90 backdrop-blur-md border border-white/20">
@@ -349,7 +339,7 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
                 <Input
                   value={formData.salary}
                   onChange={(e) => handleInputChange("salary", e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  className="w-full bg-white/10 border-white/20 text-white placeholder:text-white/50 h-10"
                   placeholder="₹50,000"
                 />
               </div>
@@ -360,7 +350,7 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
                   value={formData.status}
                   onValueChange={(value) => handleInputChange("status", value)}
                 >
-                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                  <SelectTrigger className="w-full bg-white/10 border-white/20 text-white h-10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-white/90 backdrop-blur-md border border-white/20">
@@ -386,7 +376,7 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
               Additional Details
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label className="text-white/90 flex items-center gap-2">
                   <Calendar size={16} />
@@ -398,7 +388,7 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
                   onChange={(e) =>
                     handleInputChange("joinDate", e.target.value)
                   }
-                  className="bg-white/10 border-white/20 text-white"
+                  className="w-full bg-white/10 border-white/20 text-white h-10"
                 />
               </div>
 
@@ -409,7 +399,7 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
                   onChange={(e) =>
                     handleInputChange("workingHours", e.target.value)
                   }
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  className="w-full bg-white/10 border-white/20 text-white placeholder:text-white/50 h-10"
                   placeholder="9:00 AM - 5:00 PM"
                 />
               </div>
@@ -420,7 +410,7 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
               <Textarea
                 value={formData.address}
                 onChange={(e) => handleInputChange("address", e.target.value)}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[80px]"
+                className="w-full bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[80px] resize-none"
                 placeholder="Street address, City, State, ZIP"
               />
             </div>
@@ -434,11 +424,11 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
             </h3>
 
             <div className="space-y-3">
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <Input
                   value={skillInput}
                   onChange={(e) => setSkillInput(e.target.value)}
-                  className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white/50 h-10"
                   placeholder="Add a skill..."
                   onKeyPress={(e) =>
                     e.key === "Enter" && (e.preventDefault(), addSkill())
@@ -448,7 +438,7 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
                   type="button"
                   onClick={addSkill}
                   size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white border-0"
+                  className="bg-blue-600 hover:bg-blue-700 text-white border-0 h-10 px-4"
                 >
                   Add
                 </Button>
