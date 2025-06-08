@@ -506,92 +506,111 @@ export const Inventory = () => {
   const SortIcon = sortDisplayInfo.icon;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-white">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header Section - Responsive */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">
             Inventory Management
           </h1>
-          <p className="text-white/70 mt-1">Manage your car parts inventory</p>
+          <p className="text-white/70 mt-1 text-sm sm:text-base">
+            Manage your car parts inventory
+          </p>
         </div>
-        <div className="flex gap-3">
-          <Button
-            onClick={() => setShowExcelImport(true)}
-            className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white border-0"
-          >
-            <Upload size={20} className="mr-2" />
-            Import Excel
-          </Button>
-          <Button
-            onClick={handleExcelExport}
-            variant="outline"
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-          >
-            <Download size={20} className="mr-2" />
-            Export Excel
-          </Button>
+
+        {/* Action Buttons - Responsive Grid */}
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+          <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3">
+            <Button
+              onClick={() => setShowExcelImport(true)}
+              size="sm"
+              className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white border-0 text-xs sm:text-sm"
+            >
+              <Upload size={16} className="mr-1 sm:mr-2" />
+              <span className="hidden xs:inline">Import</span>
+              <span className="xs:hidden">Import</span>
+            </Button>
+            <Button
+              onClick={handleExcelExport}
+              size="sm"
+              variant="outline"
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs sm:text-sm"
+            >
+              <Download size={16} className="mr-1 sm:mr-2" />
+              <span className="hidden xs:inline">Export</span>
+              <span className="xs:hidden">Export</span>
+            </Button>
+          </div>
           <Button
             onClick={() => setShowAddForm(true)}
-            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0"
+            size="sm"
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 w-full sm:w-auto text-xs sm:text-sm"
           >
-            <Plus size={20} className="mr-2" />
+            <Plus size={16} className="mr-1 sm:mr-2" />
             Add Product
           </Button>
         </div>
       </div>
 
-      {/* Top 10 Stock Chart */}
-      <GlassCard className="p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600">
-            <BarChart3 className="text-white" size={24} />
-          </div>
-          <div>
-            <h3 className="text-white font-semibold text-lg">
-              Top 10 Items by Stock
-            </h3>
-            <p className="text-white/70 text-sm">
-              Current inventory levels for highest stocked items
-            </p>
+      {/* Top 10 Stock Chart - Responsive */}
+      <GlassCard className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600">
+              <BarChart3 className="text-white" size={20} />
+            </div>
+            <div>
+              <h3 className="text-white font-semibold text-base sm:text-lg">
+                Top 10 Items by Stock
+              </h3>
+              <p className="text-white/70 text-xs sm:text-sm">
+                Current inventory levels for highest stocked items
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="h-80 bg-white/5 rounded-lg p-4">
+        {/* Chart Container - Responsive Height */}
+        <div className="h-64 sm:h-80 bg-white/5 rounded-lg p-2 sm:p-4 overflow-hidden">
           <ChartContainer config={chartConfig}>
             <BarChart
               data={getTop10StockData()}
               margin={{
-                top: 20,
-                right: 30,
-                left: 20,
-                bottom: 60,
+                top: 10,
+                right: 10,
+                left: 10,
+                bottom: 40,
               }}
             >
               <XAxis
                 dataKey="name"
-                angle={-45}
+                angle={-35}
                 textAnchor="end"
-                height={80}
+                height={60}
                 interval={0}
-                tick={{ fontSize: 12, fill: "#ffffff" }}
+                tick={{ fontSize: 10, fill: "#ffffff" }}
                 axisLine={{ stroke: "#ffffff", strokeOpacity: 0.3 }}
                 tickLine={{ stroke: "#ffffff", strokeOpacity: 0.3 }}
               />
               <YAxis
-                tick={{ fontSize: 12, fill: "#ffffff" }}
+                tick={{ fontSize: 10, fill: "#ffffff" }}
                 axisLine={{ stroke: "#ffffff", strokeOpacity: 0.3 }}
                 tickLine={{ stroke: "#ffffff", strokeOpacity: 0.3 }}
                 label={{
-                  value: "Stock Quantity",
+                  value: "Stock",
                   angle: -90,
                   position: "insideLeft",
-                  style: { textAnchor: "middle", fill: "#ffffff" },
+                  style: {
+                    textAnchor: "middle",
+                    fill: "#ffffff",
+                    fontSize: "10px",
+                  },
                 }}
               />
               <ChartTooltip
                 content={
                   <ChartTooltipContent
-                    className="bg-slate-900/90 backdrop-blur-md border border-white/20 text-white rounded-lg shadow-lg"
+                    className="bg-slate-900/90 backdrop-blur-md border border-white/20 text-white rounded-lg shadow-lg text-xs"
                     formatter={(value, name, props) => [
                       `${value} units`,
                       "Stock",
@@ -600,14 +619,14 @@ export const Inventory = () => {
                       const data = payload?.[0]?.payload;
                       return data ? (
                         <div className="space-y-1">
-                          <div className="font-medium text-white">
+                          <div className="font-medium text-white text-xs">
                             {data.fullName}
                           </div>
-                          <div className="text-sm text-gray-300">
+                          <div className="text-xs text-gray-300">
                             {data.partNumber}
                           </div>
                           <div
-                            className={`text-sm font-medium ${data.status === "Low Stock" ? "text-red-300" : "text-green-300"}`}
+                            className={`text-xs font-medium ${data.status === "Low Stock" ? "text-red-300" : "text-green-300"}`}
                           >
                             {data.status}
                           </div>
@@ -619,7 +638,7 @@ export const Inventory = () => {
                   />
                 }
               />
-              <Bar dataKey="stock" radius={[4, 4, 0, 0]}>
+              <Bar dataKey="stock" radius={[2, 2, 0, 0]}>
                 {getTop10StockData().map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
@@ -633,8 +652,8 @@ export const Inventory = () => {
           </ChartContainer>
         </div>
 
-        {/* Chart Legend */}
-        <div className="flex items-center justify-center gap-6 mt-4 text-sm">
+        {/* Chart Legend - Responsive */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 mt-3 sm:mt-4 text-xs sm:text-sm">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded bg-green-500"></div>
             <span className="text-white/70">In Stock (10+ units)</span>
@@ -646,104 +665,117 @@ export const Inventory = () => {
         </div>
       </GlassCard>
 
-      {/* Search, Filter, and Sort */}
-      <GlassCard className="p-6">
-        <div className="flex gap-4">
-          <div className="flex-1 relative">
+      {/* Search, Filter, and Sort - Responsive */}
+      <GlassCard className="p-4 sm:p-6">
+        <div className="flex flex-col gap-3 sm:gap-4">
+          {/* Search Bar - Full Width on Mobile */}
+          <div className="w-full relative">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50"
-              size={20}
+              size={18}
             />
             <Input
               placeholder="Search products..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+              className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50 text-sm sm:text-base"
             />
           </div>
 
-          {/* Sort Dropdown */}
-          <div className="flex items-center gap-2">
-            <SortIcon className="text-white/70" size={20} />
-            <Select
-              value={sortMethod}
-              onValueChange={(value: SortMethod) => setSortMethod(value)}
-            >
-              <SelectTrigger className="w-48 bg-white/10 border-white/20 text-white">
-                <SelectValue placeholder="Sort by..." />
-              </SelectTrigger>
-              <SelectContent className="bg-white/90 backdrop-blur-md border border-white/20">
-                <SelectItem value="category" className="text-black">
-                  <div className="flex items-center gap-2">
-                    <Grid3X3 size={16} />
-                    <span>Categories</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="vehicle" className="text-black">
-                  <div className="flex items-center gap-2">
-                    <Car size={16} />
-                    <span>Vehicle Compatibility</span>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Controls Row - Responsive Layout */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            {/* Sort Dropdown */}
+            <div className="flex items-center gap-2 flex-1 sm:flex-none">
+              <SortIcon className="text-white/70 flex-shrink-0" size={18} />
+              <Select
+                value={sortMethod}
+                onValueChange={(value: SortMethod) => setSortMethod(value)}
+              >
+                <SelectTrigger className="w-full sm:w-48 bg-white/10 border-white/20 text-white text-sm">
+                  <SelectValue placeholder="Sort by..." />
+                </SelectTrigger>
+                <SelectContent className="bg-white/90 backdrop-blur-md border border-white/20">
+                  <SelectItem value="category" className="text-black text-sm">
+                    <div className="flex items-center gap-2">
+                      <Grid3X3 size={14} />
+                      <span>Categories</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="vehicle" className="text-black text-sm">
+                    <div className="flex items-center gap-2">
+                      <Car size={14} />
+                      <span>Vehicle Compatibility</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          <Button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm">
-            <Filter size={20} className="mr-2" />
-            Filter
-          </Button>
+            <Button
+              size="sm"
+              className="bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm w-full sm:w-auto text-sm"
+            >
+              <Filter size={16} className="mr-2" />
+              Filter
+            </Button>
+          </div>
         </div>
 
-        {/* Sort Info */}
-        <div className="mt-3 flex items-center gap-2 text-sm text-white/70">
-          <SortDesc size={16} />
-          <span>Sorted by {sortDisplayInfo.label}</span>
-          <span>•</span>
+        {/* Sort Info - Responsive */}
+        <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs sm:text-sm text-white/70">
+          <div className="flex items-center gap-2">
+            <SortDesc size={14} />
+            <span>Sorted by {sortDisplayInfo.label}</span>
+          </div>
+          <span className="hidden sm:inline">•</span>
           <span>{sortDisplayInfo.description}</span>
         </div>
       </GlassCard>
 
-      {/* Excel Import/Export Info Card */}
-      <GlassCard className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-lg bg-gradient-to-r from-green-500 to-teal-600">
-              <FileSpreadsheet className="text-white" size={24} />
+      {/* Excel Import/Export Info Card - Responsive */}
+      <GlassCard className="p-4 sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-1">
+            <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-r from-green-500 to-teal-600 flex-shrink-0">
+              <FileSpreadsheet className="text-white" size={20} />
             </div>
-            <div>
-              <h3 className="text-white font-semibold">Bulk Operations</h3>
-              <p className="text-white/70 text-sm">
+            <div className="flex-1">
+              <h3 className="text-white font-semibold text-base sm:text-lg">
+                Bulk Operations
+              </h3>
+              <p className="text-white/70 text-xs sm:text-sm mt-1">
                 Import multiple products at once using Excel files or export
                 your current inventory
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
+
+          {/* Buttons - Stack on Mobile */}
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <Button
               onClick={() => setShowExcelImport(true)}
               size="sm"
-              className="bg-green-600 hover:bg-green-700 text-white"
+              className="bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm w-full sm:w-auto"
             >
-              <Upload size={16} className="mr-1" />
-              Import
+              <Upload size={14} className="mr-1 sm:mr-2" />
+              Import Excel
             </Button>
             <Button
               onClick={handleExcelExport}
               size="sm"
               variant="outline"
-              className="border-white/20 text-white hover:bg-white/10"
+              className="border-white/20 text-white hover:bg-white/10 text-xs sm:text-sm w-full sm:w-auto"
             >
-              <Download size={16} className="mr-1" />
-              Export
+              <Download size={14} className="mr-1 sm:mr-2" />
+              Export Excel
             </Button>
           </div>
         </div>
       </GlassCard>
 
-      {/* Groups */}
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-white mb-4">
+      {/* Groups - Responsive */}
+      <div className="space-y-3 sm:space-y-4">
+        <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">
           {sortMethod === "category" ? "CATEGORIES" : "VEHICLE COMPATIBILITY"}
         </h2>
 
@@ -753,48 +785,51 @@ export const Inventory = () => {
 
           return (
             <GlassCard key={group.id} className="overflow-hidden">
-              {/* Group Header */}
+              {/* Group Header - Responsive */}
               <div
-                className="p-6 cursor-pointer hover:bg-white/10 transition-all duration-200"
+                className="p-4 sm:p-6 cursor-pointer hover:bg-white/10 transition-all duration-200"
                 onClick={() => toggleGroup(group.id)}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-2 sm:gap-4 flex-1">
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       {isExpanded ? (
-                        <ChevronDown className="text-white" size={24} />
+                        <ChevronDown className="text-white" size={20} />
                       ) : (
-                        <ChevronRight className="text-white" size={24} />
+                        <ChevronRight className="text-white" size={20} />
                       )}
-                      <div className="flex items-center gap-3">
-                        {sortMethod === "vehicle" ? (
-                          <Car className="text-white/70" size={20} />
-                        ) : (
-                          <Package className="text-white/70" size={20} />
-                        )}
-                        <h3 className="text-xl font-bold text-white tracking-wide">
-                          {group.name}
-                        </h3>
-                      </div>
+                      {sortMethod === "vehicle" ? (
+                        <Car className="text-white/70" size={18} />
+                      ) : (
+                        <Package className="text-white/70" size={18} />
+                      )}
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <span className="text-white/70">
-                        {getTotalProductsInGroup(group)}{" "}
-                        {getTotalProductsInGroup(group) === 1
-                          ? "Product"
-                          : "Products"}
-                      </span>
-                      <span className="text-white/70">•</span>
-                      <span className="text-white/70">
-                        {stockStatus.totalStock} Total Stock
-                      </span>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                      <h3 className="text-lg sm:text-xl font-bold text-white tracking-wide truncate">
+                        {group.name}
+                      </h3>
+
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm">
+                        <span className="text-white/70">
+                          {getTotalProductsInGroup(group)}{" "}
+                          {getTotalProductsInGroup(group) === 1
+                            ? "Product"
+                            : "Products"}
+                        </span>
+                        <span className="text-white/70 hidden sm:inline">
+                          •
+                        </span>
+                        <span className="text-white/70">
+                          {stockStatus.totalStock} Total Stock
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-end sm:justify-start">
                     <span
-                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
                         stockStatus.status === "In Stock"
                           ? "bg-green-500/20 text-green-300"
                           : "bg-red-500/20 text-red-300"
@@ -808,15 +843,15 @@ export const Inventory = () => {
                 </div>
               </div>
 
-              {/* Expanded Products */}
+              {/* Expanded Products - Responsive Grid */}
               {isExpanded && (
                 <div className="border-t border-white/20">
-                  <div className="p-6 pt-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="p-4 sm:p-6 pt-3 sm:pt-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                       {group.products.map((product) => (
                         <div
                           key={product.id}
-                          className="p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-200 backdrop-blur-sm"
+                          className="p-3 sm:p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-200 backdrop-blur-sm"
                         >
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex items-center gap-3">
