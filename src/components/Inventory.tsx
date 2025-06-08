@@ -57,6 +57,7 @@ import {
   getInventoryStatusColor,
 } from "@/utils/inventoryManager";
 import { ProductDetailDialog } from "./dialogs/ProductDetailDialog";
+import { AddProductDialog } from "./dialogs/AddProductDialog";
 
 interface GroupedData {
   id: string;
