@@ -233,6 +233,64 @@ export const Invoicing = () => {
     (inv) => inv.status === "Overdue",
   ).length;
 
+  // Process invoice and update inventory
+  const handleProcessInvoice = async (invoice: Invoice) => {
+    if (invoice.inventoryProcessed) {
+      toast.info("Invoice inventory already processed");
+      return;
+    }
+
+    try {
+      // Check stock availability for all items
+      const stockIssues = [];
+      for (const item of invoice.items) {
+        const inventoryItem = getItemById(item.itemId);
+        if (!inventoryItem) {
+          stockIssues.push(`Item ${item.partName} not found in inventory`);
+          continue;
+        }
+        if (!checkStockAvailability(item.itemId, item.quantity)) {
+          stockIssues.push(
+            `Insufficient stock for ${item.partName}. Available: ${inventoryItem.stock}, Required: ${item.quantity}`,
+          );
+        }
+      }
+
+      if (stockIssues.length > 0) {
+        toast.error(`Stock issues: ${stockIssues.join("; ")}`);
+        return;
+      }
+
+      // Process the inventory changes
+      const success = await processInvoiceItems(
+        invoice.id,
+        invoice.items.map((item) => ({
+          itemId: item.itemId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+        })),
+        invoice.customer,
+      );
+
+      if (success) {
+        // Update invoice to mark inventory as processed
+        const updatedInvoice = {
+          ...invoice,
+          inventoryProcessed: true,
+          status: "Processed",
+        };
+        setInvoicesList((prevInvoices) =>
+          prevInvoices.map((inv) =>
+            inv.id === invoice.id ? updatedInvoice : inv,
+          ),
+        );
+        toast.success(`Invoice ${invoice.id} processed - inventory updated`);
+      }
+    } catch (error) {
+      toast.error("Failed to process invoice inventory");
+    }
+  };
+
   const handleInvoiceClick = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
     setShowInvoiceDetail(true);
