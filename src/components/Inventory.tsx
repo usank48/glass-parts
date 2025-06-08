@@ -18,6 +18,9 @@ import {
   ArrowUp,
   ArrowDown,
   AlignLeft,
+  AlertTriangle,
+  Bell,
+  X,
 } from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import { Button } from "@/components/ui/button";
@@ -45,19 +48,13 @@ import {
   YAxis,
   Cell,
 } from "recharts";
+import { useInventorySync, InventoryItem } from "@/hooks/useInventorySync";
+import {
+  formatInventoryValue,
+  getInventoryStatusColor,
+} from "@/utils/inventoryManager";
 
-interface Product {
-  id: number;
-  partNumber: string;
-  name: string;
-  brand: string;
-  vehicle: string;
-  stock: number;
-  costPrice: number;
-  sellingPrice: number;
-  status: string;
-  category: string;
-}
+// Use InventoryItem instead of Product interface
 
 interface GroupedData {
   id: string;
