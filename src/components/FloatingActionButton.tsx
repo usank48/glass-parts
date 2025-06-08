@@ -5,6 +5,7 @@ import {
   ShoppingCart,
   ShoppingBag,
   BarChart3,
+  Upload,
 } from "lucide-react";
 import {
   Dialog,
@@ -15,6 +16,7 @@ import {
 import { AddProductDialog } from "./dialogs/AddProductDialog";
 import { AddSaleDialog } from "./dialogs/AddSaleDialog";
 import { AddPurchaseDialog } from "./dialogs/AddPurchaseDialog";
+import { ExcelImportDialog } from "./dialogs/ExcelImportDialog";
 
 interface FloatingActionButtonProps {
   activeModule: string;
