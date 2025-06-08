@@ -107,6 +107,7 @@ export const useInventorySync = (
     {
       id: 1,
       partNumber: "BP-BMW-X5-2020",
+      oemPartNumber: "34116794300",
       name: "Premium Brake Pad Set",
       brand: "Bosch",
       vehicle: "BMW X5 2020",
@@ -120,6 +121,7 @@ export const useInventorySync = (
     {
       id: 2,
       partNumber: "BP-TOY-CAM-2019",
+      oemPartNumber: "04465-06120",
       name: "Ceramic Brake Pads",
       brand: "Akebono",
       vehicle: "Toyota Camry 2019",
@@ -133,6 +135,7 @@ export const useInventorySync = (
     {
       id: 3,
       partNumber: "BP-HON-CIV-2021",
+      oemPartNumber: "45022-TGH-A00",
       name: "Sport Brake Pads",
       brand: "Brembo",
       vehicle: "Honda Civic 2021",
@@ -146,6 +149,7 @@ export const useInventorySync = (
     {
       id: 4,
       partNumber: "SUS-BMW-X5-2020",
+      oemPartNumber: "37116761444",
       name: "Air Suspension Strut",
       brand: "Bilstein",
       vehicle: "BMW X5 2020",
