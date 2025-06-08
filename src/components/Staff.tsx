@@ -1,7 +1,10 @@
 import React, { useState } from "react";
-import { User, Mail, Phone, Shield } from "lucide-react";
+import { User, Mail, Phone, Shield, Plus } from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import { StaffDetail } from "./StaffDetail";
+import { AddStaffDialog } from "./dialogs/AddStaffDialog";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface AttendanceRecord {
   date: string;
@@ -66,12 +69,28 @@ interface StaffMember {
   };
 }
 
+interface NewStaffMember {
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  department: string;
+  address: string;
+  joinDate: string;
+  salary: string;
+  employeeId: string;
+  skills: string[];
+  workingHours: string;
+  status: string;
+}
+
 export const Staff = () => {
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
+  const [showAddStaffDialog, setShowAddStaffDialog] = useState(false);
 
   console.log("🔄 Staff component rendered, selectedStaff:", selectedStaff);
 
-  const staff: StaffMember[] = [
+  const [staff, setStaff] = useState<StaffMember[]>([
     {
       id: 1,
       name: "John Doe",
@@ -514,7 +533,7 @@ export const Staff = () => {
         reviewer: "John Doe",
       },
     },
-  ];
+  ]);
 
   const handleStaffClick = (member: StaffMember) => {
     console.log("🎯 Staff clicked:", member.name, "ID:", member.id);
@@ -534,6 +553,62 @@ export const Staff = () => {
   const handleDeleteStaff = (staffId: number) => {
     // TODO: Implement delete functionality
     console.log("Delete staff:", staffId);
+  };
+
+  const handleAddStaff = (newStaffData: NewStaffMember) => {
+    const newId = Math.max(...staff.map((s) => s.id), 0) + 1;
+
+    // Convert salary string to number for calculations
+    const salaryNumber =
+      parseInt(newStaffData.salary.replace(/[₹,]/g, "")) || 50000;
+
+    const newStaffMember: StaffMember = {
+      id: newId,
+      name: newStaffData.name,
+      email: newStaffData.email,
+      phone: newStaffData.phone,
+      role: newStaffData.role,
+      department: newStaffData.department,
+      status: newStaffData.status,
+      address: newStaffData.address,
+      joinDate: new Date(newStaffData.joinDate).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }),
+      salary: newStaffData.salary,
+      skills: newStaffData.skills,
+      reports: [],
+      projects: [],
+      // Enhanced HR data with defaults
+      employeeId: newStaffData.employeeId,
+      totalSalary: salaryNumber,
+      currentMonthPay: Math.round(salaryNumber / 12),
+      attendancePercentage: 100, // New employee starts with 100%
+      leaveBalance: {
+        annual: 25, // Standard annual leave
+        sick: 12,
+        personal: 5,
+      },
+      recentAttendance: [], // Empty for new employee
+      paymentHistory: [],
+      performanceMetrics: [],
+      workingHours: {
+        standard: newStaffData.workingHours,
+        overtime: 0,
+        flexible: true,
+      },
+      lastReview: {
+        date: "Not yet reviewed",
+        rating: 0,
+        reviewer: "Pending",
+      },
+    };
+
+    setStaff((prevStaff) => [...prevStaff, newStaffMember]);
+    toast.success(
+      `${newStaffData.name} has been successfully added to the team!`,
+    );
   };
 
   // If a staff member is selected, show the detail view
@@ -558,6 +633,10 @@ export const Staff = () => {
         return "from-green-500 to-teal-600";
       case "Accountant":
         return "from-orange-500 to-yellow-600";
+      case "Manager":
+        return "from-purple-500 to-indigo-600";
+      case "Team Lead":
+        return "from-cyan-500 to-blue-600";
       default:
         return "from-gray-500 to-gray-600";
     }
@@ -565,19 +644,33 @@ export const Staff = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Staff Management</h1>
-          <p className="text-white/70 mt-1">
+      {/* Header with Add New Staff Button */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">
+            Staff Management
+          </h1>
+          <p className="text-white/70 mt-1 text-sm sm:text-base">
             Manage your team members and their roles
           </p>
-          <p className="text-white/50 text-sm mt-2">
-            Selected Staff: {selectedStaff ? selectedStaff.name : "None"} |
-            Total Staff: {staff.length}
+          <p className="text-white/50 text-xs sm:text-sm mt-2">
+            Total Staff: {staff.length} • Active:{" "}
+            {staff.filter((s) => s.status === "Active").length} • On Leave:{" "}
+            {staff.filter((s) => s.status === "On Leave").length}
           </p>
         </div>
+
+        {/* Add New Staff Button */}
+        <Button
+          onClick={() => setShowAddStaffDialog(true)}
+          className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 w-full sm:w-auto"
+        >
+          <Plus size={20} className="mr-2" />
+          Add New Staff
+        </Button>
       </div>
 
+      {/* Staff Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {staff.map((member) => (
           <GlassCard
@@ -607,7 +700,7 @@ export const Staff = () => {
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-3">
                 <Mail className="text-white/50" size={16} />
-                <span className="text-white">{member.email}</span>
+                <span className="text-white truncate">{member.email}</span>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="text-white/50" size={16} />
@@ -636,6 +729,13 @@ export const Staff = () => {
           </GlassCard>
         ))}
       </div>
+
+      {/* Add Staff Dialog */}
+      <AddStaffDialog
+        isOpen={showAddStaffDialog}
+        onClose={() => setShowAddStaffDialog(false)}
+        onAddStaff={handleAddStaff}
+      />
     </div>
   );
 };
