@@ -144,16 +144,51 @@ export const Sales = () => {
     }
   };
 
+  // Calculate dynamic stats based on actual sales data
+  const todaysSales = salesData
+    .filter((sale) => sale.date === new Date().toISOString().split("T")[0])
+    .reduce((sum, sale) => sum + sale.total, 0);
+
+  const totalOrders = salesData.length;
+  const uniqueCustomers = new Set(salesData.map((sale) => sale.customerName))
+    .size;
+  const totalRevenue = salesData.reduce((sum, sale) => sum + sale.total, 0);
+  const completedSales = salesData.filter(
+    (sale) => sale.status === "completed",
+  ).length;
+  const pendingSales = salesData.filter(
+    (sale) => sale.status === "pending",
+  ).length;
+
   const stats = [
     {
       title: "Today's Sales",
-      value: "₹12,340",
+      value: formatInventoryValue(todaysSales),
       icon: IndianRupee,
       change: "+12%",
+      color: "from-green-500 to-teal-600",
     },
-    { title: "Total Orders", value: "24", icon: ShoppingCart, change: "+8%" },
-    { title: "Customers", value: "18", icon: Users, change: "+5%" },
-    { title: "Revenue", value: "₹34,560", icon: TrendingUp, change: "+15%" },
+    {
+      title: "Total Orders",
+      value: totalOrders.toString(),
+      icon: ShoppingCart,
+      change: "+8%",
+      color: "from-blue-500 to-purple-600",
+    },
+    {
+      title: "Customers",
+      value: uniqueCustomers.toString(),
+      icon: Users,
+      change: "+5%",
+      color: "from-purple-500 to-pink-600",
+    },
+    {
+      title: "Total Revenue",
+      value: formatInventoryValue(totalRevenue, true),
+      icon: TrendingUp,
+      change: "+15%",
+      color: "from-orange-500 to-red-600",
+    },
   ];
 
   return (
