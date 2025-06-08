@@ -22,8 +22,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
   setIsOpen,
 }) => {
-  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
-
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: Home },
     { id: "inventory", label: "Inventory", icon: Package },
@@ -92,13 +90,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
           })}
         </nav>
 
-        {/* User info */}
+        {/* App info */}
         <div className="p-4 border-t border-white/20">
-          <UserDropdown
-            isOpen={isUserDropdownOpen}
-            onToggle={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-            onClose={() => setIsUserDropdownOpen(false)}
-          />
+          <div className="bg-white/5 backdrop-blur-sm rounded-lg p-3 text-center">
+            <p className="text-white/90 text-sm font-medium">AutoParts Pro</p>
+            <p className="text-white/60 text-xs">v1.0.0</p>
+          </div>
         </div>
       </div>
     </>
