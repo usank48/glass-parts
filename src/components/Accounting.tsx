@@ -10,6 +10,8 @@ import {
   Building,
   Calendar,
   Filter,
+  Search,
+  Users,
 } from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import { Button } from "@/components/ui/button";
@@ -62,6 +64,8 @@ interface AccountStatement {
 export const Accounting = () => {
   const [selectedParty, setSelectedParty] = useState<string>("");
   const [showAddTransaction, setShowAddTransaction] = useState(false);
+  const [showPartySelection, setShowPartySelection] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [transactionForm, setTransactionForm] = useState({
     description: "",
     type: "debit" as "debit" | "credit",
@@ -221,6 +225,19 @@ export const Accounting = () => {
     ? accountStatements[selectedParty]
     : null;
 
+  // Filter parties based on search query
+  const filteredParties = parties.filter(
+    (party) =>
+      party.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      party.type.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
+  const handlePartySelect = (partyId: string) => {
+    setSelectedParty(partyId);
+    setShowPartySelection(false);
+    setSearchQuery("");
+  };
+
   const handleAddTransaction = () => {
     if (
       !selectedParty ||
@@ -300,6 +317,13 @@ export const Accounting = () => {
               Track your financial performance
             </p>
           </div>
+          <Button
+            onClick={() => setShowPartySelection(true)}
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0"
+          >
+            <Users size={16} className="mr-2" />
+            Select Party Account
+          </Button>
         </div>
 
         {/* Financial Stats */}
@@ -336,53 +360,6 @@ export const Accounting = () => {
             );
           })}
         </div>
-
-        {/* Party Selection */}
-        <GlassCard className="p-6">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-white mb-4">
-              Select Party Account
-            </h2>
-            <p className="text-white/70 mb-6">
-              Choose a customer or supplier to view their account statement
-            </p>
-
-            <div className="max-w-md mx-auto">
-              <Select value={selectedParty} onValueChange={setSelectedParty}>
-                <SelectTrigger className="!bg-white/10 border-white/20 text-white h-12">
-                  <SelectValue placeholder="Select a party to view account" />
-                </SelectTrigger>
-                <SelectContent className="!bg-gray-900/95 backdrop-blur-md border border-white/20 text-white">
-                  {parties.map((party) => (
-                    <SelectItem
-                      key={party.id}
-                      value={party.id}
-                      className="text-white focus:bg-white/20 hover:bg-white/10"
-                    >
-                      <div className="flex items-center gap-3">
-                        {party.type === "customer" ? (
-                          <User className="text-blue-400" size={16} />
-                        ) : (
-                          <Building className="text-orange-400" size={16} />
-                        )}
-                        <div className="text-left">
-                          <div className="font-medium">{party.name}</div>
-                          <div className="text-xs text-white/60">
-                            {party.type === "customer"
-                              ? "Customer"
-                              : "Supplier"}{" "}
-                            • Balance: {formatCurrency(Math.abs(party.balance))}
-                            {party.balance >= 0 ? " (Dr)" : " (Cr)"}
-                          </div>
-                        </div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </GlassCard>
 
         {/* Parties Overview */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -483,13 +460,23 @@ export const Accounting = () => {
             </p>
           </div>
         </div>
-        <Button
-          onClick={() => setShowAddTransaction(true)}
-          className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white border-0"
-        >
-          <Plus size={16} className="mr-2" />
-          Add Transaction
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => setShowPartySelection(true)}
+            variant="outline"
+            className="!bg-transparent border-white/20 text-white hover:bg-white/10"
+          >
+            <Users size={16} className="mr-2" />
+            Select Party
+          </Button>
+          <Button
+            onClick={() => setShowAddTransaction(true)}
+            className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white border-0"
+          >
+            <Plus size={16} className="mr-2" />
+            Add Transaction
+          </Button>
+        </div>
       </div>
 
       {/* Account Summary Cards */}
@@ -631,6 +618,102 @@ export const Accounting = () => {
           </table>
         </div>
       </GlassCard>
+
+      {/* Party Selection Dialog */}
+      <Dialog open={showPartySelection} onOpenChange={setShowPartySelection}>
+        <DialogContent className="!bg-gray-900/95 backdrop-blur-md border border-white/20 text-white max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-white">
+              Select Party Account
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Search Bar */}
+            <div className="relative">
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60"
+                size={16}
+              />
+              <Input
+                placeholder="Search party name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+              />
+            </div>
+
+            {/* Party List */}
+            <div className="max-h-96 overflow-y-auto space-y-2">
+              {filteredParties.map((party) => (
+                <div
+                  key={party.id}
+                  onClick={() => handlePartySelect(party.id)}
+                  className="p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-white/10"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {party.type === "customer" ? (
+                        <div className="p-2 rounded-lg bg-blue-500/20">
+                          <User className="text-blue-400" size={20} />
+                        </div>
+                      ) : (
+                        <div className="p-2 rounded-lg bg-orange-500/20">
+                          <Building className="text-orange-400" size={20} />
+                        </div>
+                      )}
+                      <div>
+                        <h3 className="text-white font-medium">{party.name}</h3>
+                        <p className="text-white/60 text-sm">
+                          {party.type === "customer" ? "Customer" : "Supplier"}{" "}
+                          • {party.email}
+                        </p>
+                        {party.pending > 0 && (
+                          <p className="text-orange-300 text-xs">
+                            Pending: {formatCurrency(party.pending)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p
+                        className={`font-bold ${party.balance >= 0 ? "text-green-300" : "text-red-300"}`}
+                      >
+                        {formatCurrency(Math.abs(party.balance))}
+                      </p>
+                      <p className="text-white/60 text-xs">
+                        {party.balance >= 0 ? "Receivable" : "Payable"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {filteredParties.length === 0 && (
+                <div className="text-center py-8">
+                  <Users className="mx-auto text-white/40 mb-2" size={24} />
+                  <p className="text-white/60">
+                    No parties found matching your search
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end pt-4 border-t border-white/20">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowPartySelection(false);
+                  setSearchQuery("");
+                }}
+                className="!bg-transparent border-white/20 text-white hover:bg-white/10"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Add Transaction Dialog */}
       <Dialog open={showAddTransaction} onOpenChange={setShowAddTransaction}>
