@@ -188,6 +188,17 @@ export const Invoicing = () => {
   const [showInvoiceDetail, setShowInvoiceDetail] = useState(false);
   const [invoicesList, setInvoicesList] = useState<Invoice[]>(initialInvoices);
 
+  // Use inventory sync hook for real-time inventory management
+  const {
+    inventory,
+    stockAlerts,
+    processInvoiceItems,
+    getItemById,
+    getLowStockItems,
+    checkStockAvailability,
+    isLoading,
+  } = useInventorySync();
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Paid":
