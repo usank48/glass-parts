@@ -6,10 +6,45 @@ import {
   Filter,
   ChevronDown,
   ChevronRight,
+  Upload,
+  Download,
+  FileSpreadsheet,
+  SortDesc,
+  Car,
+  Grid3X3,
+  BarChart3,
+  List,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  AlignLeft,
 } from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ExcelImportDialog } from "./dialogs/ExcelImportDialog";
+import { exportInventoryToExcel, InventoryData } from "@/lib/excelUtils";
+import { toast } from "sonner";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Cell,
+} from "recharts";
 
 interface Product {
   id: number;
@@ -24,20 +59,25 @@ interface Product {
   category: string;
 }
 
-interface Category {
+interface GroupedData {
   id: string;
   name: string;
   products: Product[];
 }
 
+type SortMethod = "category" | "vehicle" | "all";
+type ProductSortMethod = "alphabetical" | "quantity-asc" | "quantity-desc";
+
 export const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(),
-  );
+  const [showExcelImport, setShowExcelImport] = useState(false);
+  const [sortMethod, setSortMethod] = useState<SortMethod>("category");
+  const [productSortMethod, setProductSortMethod] =
+    useState<ProductSortMethod>("quantity-desc");
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
-  const products: Product[] = [
+  const [products, setProducts] = useState<Product[]>([
     // Brake Pads
     {
       id: 1,
@@ -80,12 +120,12 @@ export const Inventory = () => {
     {
       id: 4,
       partNumber: "SUS-BMW-X5-2020",
-      name: "Front Strut Assembly",
-      brand: "Monroe",
+      name: "Air Suspension Strut",
+      brand: "Bilstein",
       vehicle: "BMW X5 2020",
-      stock: 15,
-      costPrice: 185.0,
-      sellingPrice: 275.99,
+      stock: 18,
+      costPrice: 299.99,
+      sellingPrice: 449.99,
       status: "In Stock",
       category: "SUSPENSION",
     },
@@ -96,18 +136,6 @@ export const Inventory = () => {
       brand: "KYB",
       vehicle: "Toyota Camry 2019",
       stock: 22,
-      costPrice: 95.75,
-      sellingPrice: 149.99,
-      status: "In Stock",
-      category: "SUSPENSION",
-    },
-    {
-      id: 6,
-      partNumber: "SUS-HON-CIV-2021",
-      name: "Coil Spring Set",
-      brand: "Eibach",
-      vehicle: "Honda Civic 2021",
-      stock: 18,
       costPrice: 125.0,
       sellingPrice: 189.99,
       status: "In Stock",
@@ -115,6 +143,18 @@ export const Inventory = () => {
     },
 
     // Engine Valve
+    {
+      id: 6,
+      partNumber: "EV-HON-CIV-2021",
+      name: "Performance Valve Kit",
+      brand: "Comp Cams",
+      vehicle: "Honda Civic 2021",
+      stock: 5,
+      costPrice: 189.99,
+      sellingPrice: 279.99,
+      status: "Low Stock",
+      category: "ENGINE VALVE",
+    },
     {
       id: 7,
       partNumber: "EV-BMW-X5-2020",
@@ -169,13 +209,13 @@ export const Inventory = () => {
     // Packing Kits
     {
       id: 11,
-      partNumber: "PK-BMW-X5-2020",
+      partNumber: "PK-HON-CIV-2021",
       name: "Engine Gasket Kit",
-      brand: "Felpro",
-      vehicle: "BMW X5 2020",
+      brand: "Fel-Pro",
+      vehicle: "Honda Civic 2021",
       stock: 28,
-      costPrice: 125.0,
-      sellingPrice: 189.99,
+      costPrice: 67.25,
+      sellingPrice: 99.99,
       status: "In Stock",
       category: "PACKING KITS",
     },
@@ -217,172 +257,688 @@ export const Inventory = () => {
       status: "In Stock",
       category: "HEAD GASKET",
     },
-  ];
+  ]);
 
-  // Group products by category
-  const categories: Category[] = [
-    {
-      id: "brake-pads",
-      name: "BRAKE PADS",
-      products: products.filter((p) => p.category === "BRAKE PADS"),
-    },
-    {
-      id: "suspension",
-      name: "SUSPENSION",
-      products: products.filter((p) => p.category === "SUSPENSION"),
-    },
-    {
-      id: "engine-valve",
-      name: "ENGINE VALVE",
-      products: products.filter((p) => p.category === "ENGINE VALVE"),
-    },
-    {
-      id: "core",
-      name: "CORE",
-      products: products.filter((p) => p.category === "CORE"),
-    },
-    {
-      id: "packing-kits",
-      name: "PACKING KITS",
-      products: products.filter((p) => p.category === "PACKING KITS"),
-    },
-    {
-      id: "head-gasket",
-      name: "HEAD GASKET",
-      products: products.filter((p) => p.category === "HEAD GASKET"),
-    },
-  ];
+  // Get top 10 items by stock for chart with proper color coding
+  const getTop10StockData = () => {
+    return products
+      .sort((a, b) => b.stock - a.stock)
+      .slice(0, 10)
+      .map((product, index) => ({
+        name:
+          product.name.length > 20
+            ? product.name.substring(0, 20) + "..."
+            : product.name,
+        fullName: product.name,
+        partNumber: product.partNumber,
+        stock: product.stock,
+        status: product.status,
+        // Use more vibrant and distinct colors
+        fill: product.status === "Low Stock" ? "#ef4444" : "#10b981",
+        // Alternative gradient colors for better visibility
+        color:
+          product.status === "Low Stock"
+            ? "hsl(0, 84%, 60%)" // Red for low stock
+            : "hsl(142, 76%, 36%)", // Green for in stock
+        index,
+      }));
+  };
 
-  // Filter categories and products based on search term
-  const filteredCategories = categories
-    .map((category) => ({
-      ...category,
-      products: category.products.filter(
+  const chartConfig = {
+    stock: {
+      label: "Stock Quantity",
+    },
+    inStock: {
+      label: "In Stock",
+      color: "hsl(142, 76%, 36%)",
+    },
+    lowStock: {
+      label: "Low Stock",
+      color: "hsl(0, 84%, 60%)",
+    },
+  };
+
+  // Sort products for All Products view
+  const getSortedProducts = (products: Product[]): Product[] => {
+    switch (productSortMethod) {
+      case "alphabetical":
+        return [...products].sort((a, b) => a.name.localeCompare(b.name));
+      case "quantity-asc":
+        return [...products].sort((a, b) => a.stock - b.stock);
+      case "quantity-desc":
+        return [...products].sort((a, b) => b.stock - a.stock);
+      default:
+        return products;
+    }
+  };
+
+  // Group products by selected sort method
+  const getGroupedData = (): GroupedData[] => {
+    if (sortMethod === "category") {
+      // Group by category
+      const categoryGroups = products.reduce(
+        (acc, product) => {
+          const category = product.category;
+          if (!acc[category]) {
+            acc[category] = [];
+          }
+          acc[category].push(product);
+          return acc;
+        },
+        {} as Record<string, Product[]>,
+      );
+
+      return Object.entries(categoryGroups)
+        .map(([category, products]) => ({
+          id: category.toLowerCase().replace(/\s+/g, "-"),
+          name: category,
+          products: products.sort((a, b) => a.name.localeCompare(b.name)),
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortMethod === "vehicle") {
+      // Group by vehicle
+      const vehicleGroups = products.reduce(
+        (acc, product) => {
+          const vehicle = product.vehicle;
+          if (!acc[vehicle]) {
+            acc[vehicle] = [];
+          }
+          acc[vehicle].push(product);
+          return acc;
+        },
+        {} as Record<string, Product[]>,
+      );
+
+      return Object.entries(vehicleGroups)
+        .map(([vehicle, products]) => ({
+          id: vehicle.toLowerCase().replace(/\s+/g, "-"),
+          name: vehicle,
+          products: products.sort((a, b) => a.name.localeCompare(b.name)),
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+    } else {
+      // All products view - return as single group
+      return [
+        {
+          id: "all-products",
+          name: "All Products",
+          products: getSortedProducts(products),
+        },
+      ];
+    }
+  };
+
+  // Filter groups and products based on search term
+  const filteredGroups = getGroupedData()
+    .map((group) => ({
+      ...group,
+      products: group.products.filter(
         (product) =>
           product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           product.partNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
           product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.vehicle.toLowerCase().includes(searchTerm.toLowerCase()),
+          product.vehicle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          product.category.toLowerCase().includes(searchTerm.toLowerCase()),
       ),
     }))
     .filter(
-      (category) =>
-        category.products.length > 0 ||
-        category.name.toLowerCase().includes(searchTerm.toLowerCase()),
+      (group) =>
+        group.products.length > 0 ||
+        group.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
-  const toggleCategory = (categoryId: string) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(categoryId)) {
-      newExpanded.delete(categoryId);
+  const toggleGroup = (groupId: string) => {
+    const newExpanded = new Set(expandedGroups);
+    if (newExpanded.has(groupId)) {
+      newExpanded.delete(groupId);
     } else {
-      newExpanded.add(categoryId);
+      newExpanded.add(groupId);
     }
-    setExpandedCategories(newExpanded);
+    setExpandedGroups(newExpanded);
   };
 
-  const getTotalProductsInCategory = (category: Category) => {
-    return category.products.length;
+  const getTotalProductsInGroup = (group: GroupedData) => {
+    return group.products.length;
   };
 
-  const getCategoryStockStatus = (category: Category) => {
-    const totalStock = category.products.reduce(
+  const getGroupStockStatus = (group: GroupedData) => {
+    const totalStock = group.products.reduce(
       (sum, product) => sum + product.stock,
       0,
     );
-    const lowStockCount = category.products.filter(
+    const lowStockCount = group.products.filter(
       (product) => product.status === "Low Stock",
     ).length;
 
     if (lowStockCount > 0) {
       return { status: "Low Stock", count: lowStockCount, totalStock };
     }
-    return { status: "In Stock", count: category.products.length, totalStock };
+    return { status: "In Stock", count: group.products.length, totalStock };
   };
 
+  const handleExcelImport = (importedData: InventoryData[]) => {
+    let updatedCount = 0;
+    let newCount = 0;
+    const updatedItems: Array<{
+      partNumber: string;
+      partName: string;
+      oldStock: number;
+      newStock: number;
+    }> = [];
+    const newItems: Array<{
+      partNumber: string;
+      partName: string;
+      stock: number;
+    }> = [];
+
+    const updatedProducts = [...products];
+    const nextId = Math.max(...products.map((p) => p.id), 0) + 1;
+    let currentId = nextId;
+
+    importedData.forEach((item) => {
+      // Find existing product by part number (priority) or by name
+      const existingIndex = updatedProducts.findIndex(
+        (product) =>
+          product.partNumber.toLowerCase() === item.partNumber.toLowerCase() ||
+          product.name.toLowerCase() === item.partName.toLowerCase(),
+      );
+
+      if (existingIndex !== -1) {
+        // Update existing product
+        const existingProduct = updatedProducts[existingIndex];
+        const oldStock = existingProduct.stock;
+
+        updatedProducts[existingIndex] = {
+          ...existingProduct,
+          stock: item.quantity,
+          costPrice: item.costPrice,
+          sellingPrice: item.sellingPrice,
+          status: item.quantity > 10 ? "In Stock" : "Low Stock",
+          // Update other fields if they're different
+          brand: item.brand || existingProduct.brand,
+          vehicle: item.vehicleCompatibility || existingProduct.vehicle,
+          category: item.category.toUpperCase() || existingProduct.category,
+        };
+
+        updatedCount++;
+        updatedItems.push({
+          partNumber: item.partNumber,
+          partName: item.partName,
+          oldStock,
+          newStock: item.quantity,
+        });
+      } else {
+        // Add new product
+        const newProduct: Product = {
+          id: currentId++,
+          partNumber: item.partNumber,
+          name: item.partName,
+          brand: item.brand,
+          vehicle: item.vehicleCompatibility || "Not specified",
+          stock: item.quantity,
+          costPrice: item.costPrice,
+          sellingPrice: item.sellingPrice,
+          status: item.quantity > 10 ? "In Stock" : "Low Stock",
+          category: item.category.toUpperCase(),
+        };
+
+        updatedProducts.push(newProduct);
+        newCount++;
+        newItems.push({
+          partNumber: item.partNumber,
+          partName: item.partName,
+          stock: item.quantity,
+        });
+      }
+    });
+
+    setProducts(updatedProducts);
+
+    // Show detailed feedback
+    if (updatedCount > 0 && newCount > 0) {
+      toast.success(
+        `Import completed! Updated ${updatedCount} existing products and added ${newCount} new products.`,
+      );
+    } else if (updatedCount > 0) {
+      toast.success(`Updated stock for ${updatedCount} existing products.`);
+    } else if (newCount > 0) {
+      toast.success(`Added ${newCount} new products to inventory.`);
+    }
+
+    // Log detailed results for debugging
+    console.log("Import Results:", {
+      updated: updatedItems,
+      new: newItems,
+      totalProcessed: importedData.length,
+    });
+  };
+
+  const handleExcelExport = () => {
+    exportInventoryToExcel(products);
+    toast.success("Inventory exported successfully!");
+  };
+
+  // Get current sort method display info
+  const getSortDisplayInfo = () => {
+    if (sortMethod === "category") {
+      return {
+        icon: Grid3X3,
+        label: "Categories",
+        description: "Grouped by product categories",
+      };
+    } else if (sortMethod === "vehicle") {
+      return {
+        icon: Car,
+        label: "Vehicle Compatibility",
+        description: "Grouped by vehicle models",
+      };
+    } else {
+      return {
+        icon: List,
+        label: "All Products",
+        description: "All products in a single list",
+      };
+    }
+  };
+
+  // Get product sort display info
+  const getProductSortDisplayInfo = () => {
+    switch (productSortMethod) {
+      case "alphabetical":
+        return {
+          icon: AlignLeft,
+          label: "Alphabetical",
+          description: "Sorted A-Z by name",
+        };
+      case "quantity-asc":
+        return {
+          icon: ArrowUp,
+          label: "Quantity Low to High",
+          description: "Sorted by stock quantity ascending",
+        };
+      case "quantity-desc":
+        return {
+          icon: ArrowDown,
+          label: "Quantity High to Low",
+          description: "Sorted by stock quantity descending",
+        };
+      default:
+        return {
+          icon: ArrowUpDown,
+          label: "Default",
+          description: "Default sorting",
+        };
+    }
+  };
+
+  const sortDisplayInfo = getSortDisplayInfo();
+  const productSortDisplayInfo = getProductSortDisplayInfo();
+  const SortIcon = sortDisplayInfo.icon;
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-white">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header Section - Responsive */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">
             Inventory Management
           </h1>
-          <p className="text-white/70 mt-1">Manage your car parts inventory</p>
+          <p className="text-white/70 mt-1 text-sm sm:text-base">
+            Manage your car parts inventory
+          </p>
         </div>
-        <Button
-          onClick={() => setShowAddForm(true)}
-          className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0"
-        >
-          <Plus size={20} className="mr-2" />
-          Add Product
-        </Button>
+
+        {/* Action Buttons - Responsive Grid */}
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+          <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3">
+            <Button
+              onClick={() => setShowExcelImport(true)}
+              size="sm"
+              className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white border-0 text-xs sm:text-sm"
+            >
+              <Upload size={16} className="mr-1 sm:mr-2" />
+              <span className="hidden xs:inline">Import</span>
+              <span className="xs:hidden">Import</span>
+            </Button>
+            <Button
+              onClick={handleExcelExport}
+              size="sm"
+              variant="outline"
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs sm:text-sm backdrop-blur-sm"
+            >
+              <Download size={16} className="mr-1 sm:mr-2" />
+              <span className="hidden xs:inline">Export</span>
+              <span className="xs:hidden">Export</span>
+            </Button>
+          </div>
+          <Button
+            onClick={() => setShowAddForm(true)}
+            size="sm"
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 w-full sm:w-auto text-xs sm:text-sm"
+          >
+            <Plus size={16} className="mr-1 sm:mr-2" />
+            Add Product
+          </Button>
+        </div>
       </div>
 
-      {/* Search and Filter */}
-      <GlassCard className="p-6">
-        <div className="flex gap-4">
+      {/* Top 10 Stock Chart - Responsive */}
+      <GlassCard className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600">
+              <BarChart3 className="text-white" size={20} />
+            </div>
+            <div>
+              <h3 className="text-white font-semibold text-base sm:text-lg">
+                Top 10 Items by Stock
+              </h3>
+              <p className="text-white/70 text-xs sm:text-sm">
+                Current inventory levels for highest stocked items
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Chart Container - Responsive Height */}
+        <div className="h-64 sm:h-80 bg-white/5 rounded-lg p-2 sm:p-4 overflow-hidden">
+          <ChartContainer config={chartConfig}>
+            <BarChart
+              data={getTop10StockData()}
+              margin={{
+                top: 10,
+                right: 10,
+                left: 10,
+                bottom: 40,
+              }}
+            >
+              <XAxis
+                dataKey="name"
+                angle={-35}
+                textAnchor="end"
+                height={60}
+                interval={0}
+                tick={{ fontSize: 10, fill: "#ffffff" }}
+                axisLine={{ stroke: "#ffffff", strokeOpacity: 0.3 }}
+                tickLine={{ stroke: "#ffffff", strokeOpacity: 0.3 }}
+              />
+              <YAxis
+                tick={{ fontSize: 10, fill: "#ffffff" }}
+                axisLine={{ stroke: "#ffffff", strokeOpacity: 0.3 }}
+                tickLine={{ stroke: "#ffffff", strokeOpacity: 0.3 }}
+                label={{
+                  value: "Stock",
+                  angle: -90,
+                  position: "insideLeft",
+                  style: {
+                    textAnchor: "middle",
+                    fill: "#ffffff",
+                    fontSize: "10px",
+                  },
+                }}
+              />
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    className="bg-slate-900/90 backdrop-blur-md border border-white/20 text-white rounded-lg shadow-lg text-xs"
+                    formatter={(value, name, props) => [
+                      `${value} units`,
+                      "Stock",
+                    ]}
+                    labelFormatter={(label, payload) => {
+                      const data = payload?.[0]?.payload;
+                      return data ? (
+                        <div className="space-y-1">
+                          <div className="font-medium text-white text-xs">
+                            {data.fullName}
+                          </div>
+                          <div className="text-xs text-gray-300">
+                            {data.partNumber}
+                          </div>
+                          <div
+                            className={`text-xs font-medium ${data.status === "Low Stock" ? "text-red-300" : "text-green-300"}`}
+                          >
+                            {data.status}
+                          </div>
+                        </div>
+                      ) : (
+                        label
+                      );
+                    }}
+                  />
+                }
+              />
+              <Bar dataKey="stock" radius={[2, 2, 0, 0]}>
+                {getTop10StockData().map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.fill}
+                    stroke={entry.fill}
+                    strokeWidth={1}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ChartContainer>
+        </div>
+
+        {/* Chart Legend - Responsive */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 mt-3 sm:mt-4 text-xs sm:text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded bg-green-500"></div>
+            <span className="text-white/70">In Stock (10+ units)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded bg-red-500"></div>
+            <span className="text-white/70">Low Stock (&lt; 10 units)</span>
+          </div>
+        </div>
+      </GlassCard>
+
+      {/* Search and Sort - Side by Side */}
+      <GlassCard className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+          {/* Search Bar */}
           <div className="flex-1 relative">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50"
-              size={20}
+              size={18}
             />
             <Input
               placeholder="Search products..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+              className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50 text-sm sm:text-base"
             />
           </div>
-          <Button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm">
-            <Filter size={20} className="mr-2" />
-            Filter
-          </Button>
+
+          {/* View Type Dropdown */}
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <SortIcon className="text-white/70 flex-shrink-0" size={18} />
+            <Select
+              value={sortMethod}
+              onValueChange={(value: SortMethod) => setSortMethod(value)}
+            >
+              <SelectTrigger className="w-full sm:w-56 bg-white/10 border-white/20 text-white text-sm">
+                <SelectValue placeholder="View by..." />
+              </SelectTrigger>
+              <SelectContent className="bg-white/90 backdrop-blur-md border border-white/20">
+                <SelectItem value="all" className="text-black text-sm">
+                  <div className="flex items-center gap-2">
+                    <List size={14} />
+                    <span>All Products</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="category" className="text-black text-sm">
+                  <div className="flex items-center gap-2">
+                    <Grid3X3 size={14} />
+                    <span>Categories</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="vehicle" className="text-black text-sm">
+                  <div className="flex items-center gap-2">
+                    <Car size={14} />
+                    <span>Vehicle Compatibility</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Product Sort Dropdown - Only show for All Products view */}
+          {sortMethod === "all" && (
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <ArrowUpDown className="text-white/70 flex-shrink-0" size={18} />
+              <Select
+                value={productSortMethod}
+                onValueChange={(value: ProductSortMethod) =>
+                  setProductSortMethod(value)
+                }
+              >
+                <SelectTrigger className="w-full sm:w-56 bg-white/10 border-white/20 text-white text-sm">
+                  <SelectValue placeholder="Sort by..." />
+                </SelectTrigger>
+                <SelectContent className="bg-white/90 backdrop-blur-md border border-white/20">
+                  <SelectItem
+                    value="quantity-desc"
+                    className="text-black text-sm"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ArrowDown size={14} />
+                      <span>Quantity: High to Low</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem
+                    value="quantity-asc"
+                    className="text-black text-sm"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ArrowUp size={14} />
+                      <span>Quantity: Low to High</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem
+                    value="alphabetical"
+                    className="text-black text-sm"
+                  >
+                    <div className="flex items-center gap-2">
+                      <AlignLeft size={14} />
+                      <span>Alphabetical A-Z</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </div>
+
+        {/* Sort Info */}
+        <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs sm:text-sm text-white/70">
+          <div className="flex items-center gap-2">
+            <SortDesc size={14} />
+            <span>View: {sortDisplayInfo.label}</span>
+          </div>
+          <span className="hidden sm:inline">•</span>
+          <span>{sortDisplayInfo.description}</span>
+          {sortMethod === "all" && (
+            <>
+              <span className="hidden sm:inline">•</span>
+              <span>Sort: {productSortDisplayInfo.label}</span>
+            </>
+          )}
         </div>
       </GlassCard>
 
-      {/* Categories */}
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-white mb-4">CATEGORIES</h2>
+      {/* Groups - Responsive */}
+      <div className="space-y-3 sm:space-y-4">
+        <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">
+          {sortMethod === "category"
+            ? "CATEGORIES"
+            : sortMethod === "vehicle"
+              ? "VEHICLE COMPATIBILITY"
+              : "ALL PRODUCTS"}
+        </h2>
 
-        {filteredCategories.map((category) => {
-          const isExpanded = expandedCategories.has(category.id);
-          const stockStatus = getCategoryStockStatus(category);
+        {filteredGroups.map((group) => {
+          const isExpanded =
+            expandedGroups.has(group.id) || sortMethod === "all";
+          const stockStatus = getGroupStockStatus(group);
 
           return (
-            <GlassCard key={category.id} className="overflow-hidden">
-              {/* Category Header */}
-              <div
-                className="p-6 cursor-pointer hover:bg-white/10 transition-all duration-200"
-                onClick={() => toggleCategory(category.id)}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      {isExpanded ? (
-                        <ChevronDown className="text-white" size={24} />
-                      ) : (
-                        <ChevronRight className="text-white" size={24} />
-                      )}
-                      <h3 className="text-xl font-bold text-white tracking-wide">
-                        {category.name}
-                      </h3>
+            <GlassCard key={group.id} className="overflow-hidden">
+              {/* Group Header - Only show for grouped views or make non-clickable for All Products */}
+              {sortMethod !== "all" ? (
+                <div
+                  className="p-4 sm:p-6 cursor-pointer hover:bg-white/10 transition-all duration-200"
+                  onClick={() => toggleGroup(group.id)}
+                >
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-2 sm:gap-4 flex-1">
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {isExpanded ? (
+                          <ChevronDown className="text-white" size={20} />
+                        ) : (
+                          <ChevronRight className="text-white" size={20} />
+                        )}
+                        {sortMethod === "vehicle" ? (
+                          <Car className="text-white/70" size={18} />
+                        ) : (
+                          <Package className="text-white/70" size={18} />
+                        )}
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                        <h3 className="text-lg sm:text-xl font-bold text-white tracking-wide truncate">
+                          {group.name}
+                        </h3>
+
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm">
+                          <span className="text-white/70">
+                            {getTotalProductsInGroup(group)}{" "}
+                            {getTotalProductsInGroup(group) === 1
+                              ? "Product"
+                              : "Products"}
+                          </span>
+                          <span className="text-white/70 hidden sm:inline">
+                            •
+                          </span>
+                          <span className="text-white/70">
+                            {stockStatus.totalStock} Total Stock
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <span className="text-white/70">
-                        {getTotalProductsInCategory(category)}{" "}
-                        {getTotalProductsInCategory(category) === 1
-                          ? "Product"
-                          : "Products"}
-                      </span>
-                      <span className="text-white/70">•</span>
-                      <span className="text-white/70">
-                        {stockStatus.totalStock} Total Stock
+                    <div className="flex items-center justify-end sm:justify-start">
+                      <span
+                        className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
+                          stockStatus.status === "In Stock"
+                            ? "bg-green-500/20 text-green-300"
+                            : "bg-red-500/20 text-red-300"
+                        }`}
+                      >
+                        {stockStatus.status === "Low Stock"
+                          ? `${stockStatus.count} Low Stock`
+                          : "All In Stock"}
                       </span>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-3">
+                </div>
+              ) : (
+                <div className="p-4 sm:p-6 bg-white/5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <List className="text-white/70" size={20} />
+                      <div>
+                        <h3 className="text-lg sm:text-xl font-bold text-white">
+                          All Products
+                        </h3>
+                        <p className="text-white/70 text-sm">
+                          {getTotalProductsInGroup(group)} products •{" "}
+                          {productSortDisplayInfo.description}
+                        </p>
+                      </div>
+                    </div>
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-medium ${
                         stockStatus.status === "In Stock"
@@ -396,50 +952,73 @@ export const Inventory = () => {
                     </span>
                   </div>
                 </div>
-              </div>
+              )}
 
-              {/* Expanded Products */}
+              {/* Expanded Products - Responsive Grid */}
               {isExpanded && (
-                <div className="border-t border-white/20">
-                  <div className="p-6 pt-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {category.products.map((product) => (
+                <div
+                  className={
+                    sortMethod !== "all" ? "border-t border-white/20" : ""
+                  }
+                >
+                  <div className="p-4 sm:p-6 pt-3 sm:pt-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                      {group.products.map((product) => (
                         <div
                           key={product.id}
-                          className="p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-200 backdrop-blur-sm"
+                          className="p-3 sm:p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-200 backdrop-blur-sm"
                         >
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex items-center gap-3">
                               <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
-                                <Package className="text-white" size={16} />₹
-                                {product.sellingPrice}
-                                <div>
-                                  <h4 className="text-white font-semibold text-sm">
-                                    {product.name}
-                                  </h4>
-                                  <p className="text-white/70 text-xs">
-                                    {product.brand}
+                                <Package className="text-white" size={16} />
+                              </div>
+                              <div>
+                                <h4 className="text-white font-semibold text-sm">
+                                  {product.name}
+                                </h4>
+                                <p className="text-white/70 text-xs">
+                                  {product.brand}
+                                </p>
+                                {sortMethod === "category" && (
+                                  <p className="text-white/60 text-xs">
+                                    {product.vehicle}
                                   </p>
-                                </div>
+                                )}
+                                {sortMethod === "vehicle" && (
+                                  <p className="text-white/60 text-xs">
+                                    {product.category}
+                                  </p>
+                                )}
+                                {sortMethod === "all" && (
+                                  <>
+                                    <p className="text-white/60 text-xs">
+                                      {product.category}
+                                    </p>
+                                    <p className="text-white/60 text-xs">
+                                      {product.vehicle}
+                                    </p>
+                                  </>
+                                )}
                               </div>
-                              <span
-                                className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                  product.status === "In Stock"
-                                    ? "bg-green-500/20 text-green-300"
-                                    : "bg-red-500/20 text-red-300"
-                                }`}
-                              >
-                                {product.status}
-                              </span>
                             </div>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                product.status === "In Stock"
+                                  ? "bg-green-500/20 text-green-300"
+                                  : "bg-red-500/20 text-red-300"
+                              }`}
+                            >
+                              {product.status}
+                            </span>
+                          </div>
 
-                            <div className="space-y-1 text-xs">
-                              <div className="flex justify-between">
-                                <span className="text-white/70">Price:</span>
-                                <span className="text-white font-semibold">
-                                  ₹{product.sellingPrice}
-                                </span>
-                              </div>
+                          <div className="space-y-1 text-xs">
+                            <div className="flex justify-between">
+                              <span className="text-white/70">Part #:</span>
+                              <span className="text-white font-medium">
+                                {product.partNumber}
+                              </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-white/70">Stock:</span>
@@ -449,25 +1028,10 @@ export const Inventory = () => {
                             </div>
                             <div className="flex justify-between">
                               <span className="text-white/70">Price:</span>
-                              <span className="text-white font-semibold">
+                              <span className="text-white font-medium">
                                 ₹{product.sellingPrice}
                               </span>
                             </div>
-                          </div>
-
-                          <div className="mt-3 flex gap-2">
-                            <Button
-                              size="sm"
-                              className="flex-1 text-xs h-8 bg-blue-600/70 hover:bg-blue-600/90 text-white border border-white/20 backdrop-blur-sm font-medium transition-all duration-200"
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              size="sm"
-                              className="flex-1 text-xs h-8 bg-purple-600/70 hover:bg-purple-600/90 text-white border border-white/20 backdrop-blur-sm font-medium transition-all duration-200"
-                            >
-                              Details
-                            </Button>
                           </div>
                         </div>
                       ))}
@@ -480,15 +1044,13 @@ export const Inventory = () => {
         })}
       </div>
 
-      {filteredCategories.length === 0 && (
-        <GlassCard className="p-8 text-center">
-          <Package className="mx-auto text-white/50 mb-4" size={48} />
-          <h3 className="text-white text-lg font-semibold mb-2">
-            No products found
-          </h3>
-          <p className="text-white/70">Try adjusting your search criteria</p>
-        </GlassCard>
-      )}
+      {/* Excel Import Dialog */}
+      <ExcelImportDialog
+        isOpen={showExcelImport}
+        onClose={() => setShowExcelImport(false)}
+        onImport={handleExcelImport}
+        existingProducts={products}
+      />
     </div>
   );
 };
