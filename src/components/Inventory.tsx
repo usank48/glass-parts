@@ -82,6 +82,7 @@ export const Inventory = () => {
   );
   const [showProductDetail, setShowProductDetail] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("tile");
+  const [showAddProductDialog, setShowAddProductDialog] = useState(false);
 
   // Use the inventory sync hook
   const {
