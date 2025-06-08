@@ -634,14 +634,8 @@ export const Staff = () => {
       toast.error("No staff members available. Please add staff first.");
       return;
     }
-    // For now, let's select the first active staff member as default
-    const activeStaff = staff.find((s) => s.status === "Active");
-    if (activeStaff) {
-      setSelectedStaffForAction(activeStaff);
-      setShowAddPaymentDialog(true);
-    } else {
-      toast.error("No active staff members found.");
-    }
+    setActionType("payment");
+    setShowStaffSelection(true);
   };
 
   const handleAddAttendance = () => {
@@ -649,14 +643,26 @@ export const Staff = () => {
       toast.error("No staff members available. Please add staff first.");
       return;
     }
-    // For now, let's select the first active staff member as default
-    const activeStaff = staff.find((s) => s.status === "Active");
-    if (activeStaff) {
-      setSelectedStaffForAction(activeStaff);
+    setActionType("attendance");
+    setShowStaffSelection(true);
+  };
+
+  const handleStaffSelection = (selectedStaff: StaffMember) => {
+    setSelectedStaffForAction(selectedStaff);
+    setShowStaffSelection(false);
+
+    if (actionType === "payment") {
+      setShowAddPaymentDialog(true);
+    } else if (actionType === "attendance") {
       setShowAddAttendanceDialog(true);
-    } else {
-      toast.error("No active staff members found.");
     }
+
+    setActionType(null);
+  };
+
+  const handleCancelStaffSelection = () => {
+    setShowStaffSelection(false);
+    setActionType(null);
   };
 
   const handlePaymentSubmit = (payment: PaymentRecord) => {
