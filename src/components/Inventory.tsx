@@ -9,10 +9,20 @@ import {
   Upload,
   Download,
   FileSpreadsheet,
+  SortDesc,
+  Car,
+  Grid3X3,
 } from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ExcelImportDialog } from "./dialogs/ExcelImportDialog";
 import { exportInventoryToExcel, InventoryData } from "@/lib/excelUtils";
 import { toast } from "sonner";
@@ -30,19 +40,20 @@ interface Product {
   category: string;
 }
 
-interface Category {
+interface GroupedData {
   id: string;
   name: string;
   products: Product[];
 }
 
+type SortMethod = "category" | "vehicle";
+
 export const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [showExcelImport, setShowExcelImport] = useState(false);
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(),
-  );
+  const [sortMethod, setSortMethod] = useState<SortMethod>("category");
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   const [products, setProducts] = useState<Product[]>([
     // Brake Pads
@@ -226,85 +237,99 @@ export const Inventory = () => {
     },
   ]);
 
-  // Group products by category
-  const categories: Category[] = [
-    {
-      id: "brake-pads",
-      name: "BRAKE PADS",
-      products: products.filter((p) => p.category === "BRAKE PADS"),
-    },
-    {
-      id: "suspension",
-      name: "SUSPENSION",
-      products: products.filter((p) => p.category === "SUSPENSION"),
-    },
-    {
-      id: "engine-valve",
-      name: "ENGINE VALVE",
-      products: products.filter((p) => p.category === "ENGINE VALVE"),
-    },
-    {
-      id: "core",
-      name: "CORE",
-      products: products.filter((p) => p.category === "CORE"),
-    },
-    {
-      id: "packing-kits",
-      name: "PACKING KITS",
-      products: products.filter((p) => p.category === "PACKING KITS"),
-    },
-    {
-      id: "head-gasket",
-      name: "HEAD GASKET",
-      products: products.filter((p) => p.category === "HEAD GASKET"),
-    },
-  ];
+  // Group products by selected sort method
+  const getGroupedData = (): GroupedData[] => {
+    if (sortMethod === "category") {
+      // Group by category
+      const categoryGroups = products.reduce(
+        (acc, product) => {
+          const category = product.category;
+          if (!acc[category]) {
+            acc[category] = [];
+          }
+          acc[category].push(product);
+          return acc;
+        },
+        {} as Record<string, Product[]>,
+      );
 
-  // Filter categories and products based on search term
-  const filteredCategories = categories
-    .map((category) => ({
-      ...category,
-      products: category.products.filter(
+      return Object.entries(categoryGroups)
+        .map(([category, products]) => ({
+          id: category.toLowerCase().replace(/\s+/g, "-"),
+          name: category,
+          products: products.sort((a, b) => a.name.localeCompare(b.name)),
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+    } else {
+      // Group by vehicle
+      const vehicleGroups = products.reduce(
+        (acc, product) => {
+          const vehicle = product.vehicle;
+          if (!acc[vehicle]) {
+            acc[vehicle] = [];
+          }
+          acc[vehicle].push(product);
+          return acc;
+        },
+        {} as Record<string, Product[]>,
+      );
+
+      return Object.entries(vehicleGroups)
+        .map(([vehicle, products]) => ({
+          id: vehicle.toLowerCase().replace(/\s+/g, "-"),
+          name: vehicle,
+          products: products.sort((a, b) => a.name.localeCompare(b.name)),
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+    }
+  };
+
+  // Filter groups and products based on search term
+  const filteredGroups = getGroupedData()
+    .map((group) => ({
+      ...group,
+      products: group.products.filter(
         (product) =>
           product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           product.partNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
           product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.vehicle.toLowerCase().includes(searchTerm.toLowerCase()),
+          product.vehicle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          product.category.toLowerCase().includes(searchTerm.toLowerCase()),
       ),
     }))
     .filter(
-      (category) =>
-        category.products.length > 0 ||
-        category.name.toLowerCase().includes(searchTerm.toLowerCase()),
+      (group) =>
+        group.products.length > 0 ||
+        group.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
-  const toggleCategory = (categoryId: string) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(categoryId)) {
-      newExpanded.delete(categoryId);
+  const toggleGroup = (groupId: string) => {
+    const newExpanded = new Set(expandedGroups);
+    if (newExpanded.has(groupId)) {
+      newExpanded.delete(groupId);
     } else {
-      newExpanded.add(categoryId);
+      newExpanded.add(groupId);
     }
-    setExpandedCategories(newExpanded);
+    setExpandedGroups(newExpanded);
   };
 
-  const getTotalProductsInCategory = (category: Category) => {
-    return category.products.length;
+  const getTotalProductsInGroup = (group: GroupedData) => {
+    return group.products.length;
   };
 
-  const getCategoryStockStatus = (category: Category) => {
-    const totalStock = category.products.reduce(
+  const getGroupStockStatus = (group: GroupedData) => {
+    const totalStock = group.products.reduce(
       (sum, product) => sum + product.stock,
       0,
     );
-    const lowStockCount = category.products.filter(
+    const lowStockCount = group.products.filter(
       (product) => product.status === "Low Stock",
     ).length;
 
     if (lowStockCount > 0) {
       return { status: "Low Stock", count: lowStockCount, totalStock };
     }
-    return { status: "In Stock", count: category.products.length, totalStock };
+    return { status: "In Stock", count: group.products.length, totalStock };
   };
 
   const handleExcelImport = (importedData: InventoryData[]) => {
@@ -409,6 +434,24 @@ export const Inventory = () => {
     toast.success("Inventory exported successfully!");
   };
 
+  // Get current sort method display info
+  const getSortDisplayInfo = () => {
+    return sortMethod === "category"
+      ? {
+          icon: Grid3X3,
+          label: "Categories",
+          description: "Grouped by product categories",
+        }
+      : {
+          icon: Car,
+          label: "Vehicle Compatibility",
+          description: "Grouped by vehicle models",
+        };
+  };
+
+  const sortDisplayInfo = getSortDisplayInfo();
+  const SortIcon = sortDisplayInfo.icon;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -444,7 +487,7 @@ export const Inventory = () => {
         </div>
       </div>
 
-      {/* Search and Filter */}
+      {/* Search, Filter, and Sort */}
       <GlassCard className="p-6">
         <div className="flex gap-4">
           <div className="flex-1 relative">
@@ -459,10 +502,46 @@ export const Inventory = () => {
               className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
             />
           </div>
+
+          {/* Sort Dropdown */}
+          <div className="flex items-center gap-2">
+            <SortIcon className="text-white/70" size={20} />
+            <Select
+              value={sortMethod}
+              onValueChange={(value: SortMethod) => setSortMethod(value)}
+            >
+              <SelectTrigger className="w-48 bg-white/10 border-white/20 text-white">
+                <SelectValue placeholder="Sort by..." />
+              </SelectTrigger>
+              <SelectContent className="bg-white/90 backdrop-blur-md border border-white/20">
+                <SelectItem value="category" className="text-black">
+                  <div className="flex items-center gap-2">
+                    <Grid3X3 size={16} />
+                    <span>Categories</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="vehicle" className="text-black">
+                  <div className="flex items-center gap-2">
+                    <Car size={16} />
+                    <span>Vehicle Compatibility</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <Button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm">
             <Filter size={20} className="mr-2" />
             Filter
           </Button>
+        </div>
+
+        {/* Sort Info */}
+        <div className="mt-3 flex items-center gap-2 text-sm text-white/70">
+          <SortDesc size={16} />
+          <span>Sorted by {sortDisplayInfo.label}</span>
+          <span>•</span>
+          <span>{sortDisplayInfo.description}</span>
         </div>
       </GlassCard>
 
@@ -503,20 +582,22 @@ export const Inventory = () => {
         </div>
       </GlassCard>
 
-      {/* Categories */}
+      {/* Groups */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-white mb-4">CATEGORIES</h2>
+        <h2 className="text-2xl font-bold text-white mb-4">
+          {sortMethod === "category" ? "CATEGORIES" : "VEHICLE COMPATIBILITY"}
+        </h2>
 
-        {filteredCategories.map((category) => {
-          const isExpanded = expandedCategories.has(category.id);
-          const stockStatus = getCategoryStockStatus(category);
+        {filteredGroups.map((group) => {
+          const isExpanded = expandedGroups.has(group.id);
+          const stockStatus = getGroupStockStatus(group);
 
           return (
-            <GlassCard key={category.id} className="overflow-hidden">
-              {/* Category Header */}
+            <GlassCard key={group.id} className="overflow-hidden">
+              {/* Group Header */}
               <div
                 className="p-6 cursor-pointer hover:bg-white/10 transition-all duration-200"
-                onClick={() => toggleCategory(category.id)}
+                onClick={() => toggleGroup(group.id)}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -526,15 +607,22 @@ export const Inventory = () => {
                       ) : (
                         <ChevronRight className="text-white" size={24} />
                       )}
-                      <h3 className="text-xl font-bold text-white tracking-wide">
-                        {category.name}
-                      </h3>
+                      <div className="flex items-center gap-3">
+                        {sortMethod === "vehicle" ? (
+                          <Car className="text-white/70" size={20} />
+                        ) : (
+                          <Package className="text-white/70" size={20} />
+                        )}
+                        <h3 className="text-xl font-bold text-white tracking-wide">
+                          {group.name}
+                        </h3>
+                      </div>
                     </div>
 
                     <div className="flex items-center gap-3">
                       <span className="text-white/70">
-                        {getTotalProductsInCategory(category)}{" "}
-                        {getTotalProductsInCategory(category) === 1
+                        {getTotalProductsInGroup(group)}{" "}
+                        {getTotalProductsInGroup(group) === 1
                           ? "Product"
                           : "Products"}
                       </span>
@@ -566,7 +654,7 @@ export const Inventory = () => {
                 <div className="border-t border-white/20">
                   <div className="p-6 pt-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {category.products.map((product) => (
+                      {group.products.map((product) => (
                         <div
                           key={product.id}
                           className="p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-200 backdrop-blur-sm"
@@ -583,6 +671,16 @@ export const Inventory = () => {
                                 <p className="text-white/70 text-xs">
                                   {product.brand}
                                 </p>
+                                {sortMethod === "category" && (
+                                  <p className="text-white/60 text-xs">
+                                    {product.vehicle}
+                                  </p>
+                                )}
+                                {sortMethod === "vehicle" && (
+                                  <p className="text-white/60 text-xs">
+                                    {product.category}
+                                  </p>
+                                )}
                               </div>
                             </div>
                             <span
@@ -597,6 +695,12 @@ export const Inventory = () => {
                           </div>
 
                           <div className="space-y-1 text-xs">
+                            <div className="flex justify-between">
+                              <span className="text-white/70">Part #:</span>
+                              <span className="text-white font-medium">
+                                {product.partNumber}
+                              </span>
+                            </div>
                             <div className="flex justify-between">
                               <span className="text-white/70">Stock:</span>
                               <span className="text-white font-medium">
@@ -636,7 +740,7 @@ export const Inventory = () => {
         })}
       </div>
 
-      {filteredCategories.length === 0 && (
+      {filteredGroups.length === 0 && (
         <GlassCard className="p-8 text-center">
           <Package className="mx-auto text-white/50 mb-4" size={48} />
           <h3 className="text-white text-lg font-semibold mb-2">
