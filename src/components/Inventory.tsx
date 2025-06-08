@@ -1112,7 +1112,7 @@ export const Inventory = () => {
       {showAddProductDialog && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] overflow-y-auto">
           <div className="min-h-full flex items-start justify-center p-4 py-8">
-            <div className="bg-slate-900/95 backdrop-blur-md border border-white/20 rounded-lg w-full max-w-4xl my-8 mb-24">
+            <div className="bg-slate-900/95 backdrop-blur-md border border-white/20 rounded-lg w-full max-w-4xl my-8 mb-32">
               {/* Fixed Header */}
               <div className="p-6 pb-4 border-b border-white/20">
                 <div className="flex items-center justify-between">
