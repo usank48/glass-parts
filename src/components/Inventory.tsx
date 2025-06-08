@@ -744,6 +744,36 @@ export const Inventory = () => {
               </Select>
             </div>
           )}
+
+          {/* View Toggle */}
+          <div className="flex items-center gap-1 bg-white/10 rounded-lg p-1">
+            <Button
+              size="sm"
+              variant={viewMode === "tile" ? "default" : "ghost"}
+              onClick={() => setViewMode("tile")}
+              className={`p-2 h-8 ${
+                viewMode === "tile"
+                  ? "bg-white/20 text-white hover:bg-white/30"
+                  : "!bg-transparent text-white/70 hover:text-white hover:bg-white/10"
+              }`}
+              title="Tile View"
+            >
+              <LayoutGrid size={16} />
+            </Button>
+            <Button
+              size="sm"
+              variant={viewMode === "list" ? "default" : "ghost"}
+              onClick={() => setViewMode("list")}
+              className={`p-2 h-8 ${
+                viewMode === "list"
+                  ? "bg-white/20 text-white hover:bg-white/30"
+                  : "!bg-transparent text-white/70 hover:text-white hover:bg-white/10"
+              }`}
+              title="List View"
+            >
+              <Menu size={16} />
+            </Button>
+          </div>
         </div>
 
         {/* Sort Info */}
