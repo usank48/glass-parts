@@ -9,13 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// Select components removed - using buttons instead
 import { Textarea } from "@/components/ui/textarea";
 import { GlassCard } from "@/components/GlassCard";
 
@@ -149,60 +143,68 @@ export const AttendanceDialog: React.FC<AttendanceDialogProps> = ({
                   />
                 </div>
 
-                {/* Status Field - Always visible */}
-                <div className="space-y-1">
-                  <Label className="text-white flex items-center gap-2 text-sm">
-                    {getStatusIcon(formData.status)}
+                {/* Status Buttons */}
+                <div className="space-y-2">
+                  <Label className="text-white text-sm">
                     Attendance Status
                   </Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value) =>
-                      handleInputChange("status", value)
-                    }
-                  >
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="!bg-gray-900/95 backdrop-blur-md border border-white/20 text-white">
-                      <SelectItem
-                        value="present"
-                        className="text-white focus:bg-white/20 hover:bg-white/10"
-                      >
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="text-green-400" size={14} />
-                          Present
-                        </div>
-                      </SelectItem>
-                      <SelectItem
-                        value="late"
-                        className="text-white focus:bg-white/20 hover:bg-white/10"
-                      >
-                        <div className="flex items-center gap-2">
-                          <AlertCircle className="text-yellow-400" size={14} />
-                          Late
-                        </div>
-                      </SelectItem>
-                      <SelectItem
-                        value="half-day"
-                        className="text-white focus:bg-white/20 hover:bg-white/10"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Clock className="text-blue-400" size={14} />
-                          Half Day
-                        </div>
-                      </SelectItem>
-                      <SelectItem
-                        value="absent"
-                        className="text-white focus:bg-white/20 hover:bg-white/10"
-                      >
-                        <div className="flex items-center gap-2">
-                          <XCircle className="text-red-400" size={14} />
-                          Absent
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      type="button"
+                      onClick={() => handleInputChange("status", "present")}
+                      className={`h-12 flex flex-col items-center justify-center gap-1 text-xs transition-all ${
+                        formData.status === "present"
+                          ? "bg-green-600/80 hover:bg-green-700 text-white border-green-400"
+                          : "bg-white/10 hover:bg-white/20 text-white border-white/20"
+                      }`}
+                      variant="outline"
+                    >
+                      <CheckCircle className="text-green-400" size={16} />
+                      Present
+                    </Button>
+
+                    <Button
+                      type="button"
+                      onClick={() => handleInputChange("status", "late")}
+                      className={`h-12 flex flex-col items-center justify-center gap-1 text-xs transition-all ${
+                        formData.status === "late"
+                          ? "bg-yellow-600/80 hover:bg-yellow-700 text-white border-yellow-400"
+                          : "bg-white/10 hover:bg-white/20 text-white border-white/20"
+                      }`}
+                      variant="outline"
+                    >
+                      <AlertCircle className="text-yellow-400" size={16} />
+                      Late
+                    </Button>
+
+                    <Button
+                      type="button"
+                      onClick={() => handleInputChange("status", "half-day")}
+                      className={`h-12 flex flex-col items-center justify-center gap-1 text-xs transition-all ${
+                        formData.status === "half-day"
+                          ? "bg-blue-600/80 hover:bg-blue-700 text-white border-blue-400"
+                          : "bg-white/10 hover:bg-white/20 text-white border-white/20"
+                      }`}
+                      variant="outline"
+                    >
+                      <Clock className="text-blue-400" size={16} />
+                      Half Day
+                    </Button>
+
+                    <Button
+                      type="button"
+                      onClick={() => handleInputChange("status", "absent")}
+                      className={`h-12 flex flex-col items-center justify-center gap-1 text-xs transition-all ${
+                        formData.status === "absent"
+                          ? "bg-red-600/80 hover:bg-red-700 text-white border-red-400"
+                          : "bg-white/10 hover:bg-white/20 text-white border-white/20"
+                      }`}
+                      variant="outline"
+                    >
+                      <XCircle className="text-red-400" size={16} />
+                      Absent
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Time Fields - Only show if not absent */}
