@@ -167,10 +167,10 @@ export const AddAttendanceDialog: React.FC<AddAttendanceDialogProps> = ({
                     <SelectTrigger className="bg-white/10 border-white/20 text-white h-9">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-600">
+                    <SelectContent className="bg-white/10 backdrop-blur-md border border-white/20">
                       <SelectItem
                         value="present"
-                        className="text-white focus:bg-gray-700"
+                        className="text-white focus:bg-white/20 hover:bg-white/10"
                       >
                         <div className="flex items-center gap-2">
                           <CheckCircle className="text-green-400" size={14} />
@@ -179,7 +179,7 @@ export const AddAttendanceDialog: React.FC<AddAttendanceDialogProps> = ({
                       </SelectItem>
                       <SelectItem
                         value="late"
-                        className="text-white focus:bg-gray-700"
+                        className="text-white focus:bg-white/20 hover:bg-white/10"
                       >
                         <div className="flex items-center gap-2">
                           <AlertCircle className="text-yellow-400" size={14} />
@@ -188,7 +188,7 @@ export const AddAttendanceDialog: React.FC<AddAttendanceDialogProps> = ({
                       </SelectItem>
                       <SelectItem
                         value="half-day"
-                        className="text-white focus:bg-gray-700"
+                        className="text-white focus:bg-white/20 hover:bg-white/10"
                       >
                         <div className="flex items-center gap-2">
                           <Clock className="text-blue-400" size={14} />
@@ -197,7 +197,7 @@ export const AddAttendanceDialog: React.FC<AddAttendanceDialogProps> = ({
                       </SelectItem>
                       <SelectItem
                         value="absent"
-                        className="text-white focus:bg-gray-700"
+                        className="text-white focus:bg-white/20 hover:bg-white/10"
                       >
                         <div className="flex items-center gap-2">
                           <XCircle className="text-red-400" size={14} />
