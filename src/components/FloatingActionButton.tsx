@@ -40,7 +40,7 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
         return {
           label: "Add Product",
           icon: Package,
-          onClick: () => setDialogType("product"),
+          onClick: () => setDialogType("inventory"),
           color: "from-blue-500/80 to-purple-600/80",
         };
       case "purchase":
