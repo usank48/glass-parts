@@ -12,6 +12,19 @@ import {
   Filter,
   Search,
   Users,
+  Home,
+  FileText,
+  CreditCard,
+  Receipt,
+  BarChart3,
+  BookOpen,
+  Clock,
+  Bell,
+  Edit,
+  Eye,
+  Download,
+  Send,
+  Calculator,
 } from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import { Button } from "@/components/ui/button";
@@ -31,270 +44,225 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
-interface Party {
+// Types
+interface ChartOfAccount {
   id: string;
+  code: string;
   name: string;
-  type: "customer" | "supplier";
-  email: string;
-  phone: string;
+  type: "assets" | "liabilities" | "equity" | "revenue" | "expenses";
+  subType: string;
   balance: number;
-  pending: number;
+  isActive: boolean;
 }
 
-interface Transaction {
+interface JournalEntry {
   id: string;
   date: string;
+  reference: string;
   description: string;
-  type: "debit" | "credit";
-  amount: number;
-  reference?: string;
-  status: "completed" | "pending";
+  entries: {
+    accountId: string;
+    accountName: string;
+    debit: number;
+    credit: number;
+  }[];
+  totalDebit: number;
+  totalCredit: number;
+  status: "draft" | "posted";
 }
 
-interface AccountStatement {
-  partyId: string;
-  transactions: Transaction[];
-  openingBalance: number;
-  closingBalance: number;
-  totalPending: number;
+interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  customerId: string;
+  customerName: string;
+  date: string;
+  dueDate: string;
+  amount: number;
+  paidAmount: number;
+  status: "draft" | "sent" | "paid" | "overdue" | "cancelled";
+  items: {
+    description: string;
+    quantity: number;
+    rate: number;
+    amount: number;
+  }[];
+}
+
+interface Bill {
+  id: string;
+  billNumber: string;
+  supplierId: string;
+  supplierName: string;
+  date: string;
+  dueDate: string;
+  amount: number;
+  paidAmount: number;
+  status: "received" | "approved" | "paid" | "overdue";
 }
 
 export const Accounting = () => {
-  const [selectedParty, setSelectedParty] = useState<string>("");
-  const [showAddTransaction, setShowAddTransaction] = useState(false);
-  const [showPartySelection, setShowPartySelection] = useState(false);
+  const [activeSection, setActiveSection] = useState("dashboard");
+  const [showDialog, setShowDialog] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [transactionForm, setTransactionForm] = useState({
-    description: "",
-    type: "debit" as "debit" | "credit",
-    amount: "",
-    reference: "",
-    status: "completed" as "completed" | "pending",
-    date: new Date().toISOString().split("T")[0],
-  });
 
-  const financialStats = [
+  // Sample data
+  const [chartOfAccounts] = useState<ChartOfAccount[]>([
     {
-      title: "Total Revenue",
-      value: "₹4,52,300",
-      change: "+12.5%",
-      icon: TrendingUp,
-      positive: true,
+      id: "1001",
+      code: "1001",
+      name: "Cash",
+      type: "assets",
+      subType: "Current Assets",
+      balance: 150000,
+      isActive: true,
     },
     {
-      title: "Total Expenses",
-      value: "₹2,84,500",
-      change: "+8.2%",
-      icon: TrendingDown,
-      positive: false,
+      id: "1002",
+      code: "1002",
+      name: "Accounts Receivable",
+      type: "assets",
+      subType: "Current Assets",
+      balance: 85000,
+      isActive: true,
     },
     {
-      title: "Net Profit",
-      value: "₹1,67,800",
-      change: "+18.7%",
-      icon: IndianRupee,
-      positive: true,
+      id: "1003",
+      code: "1003",
+      name: "Inventory",
+      type: "assets",
+      subType: "Current Assets",
+      balance: 200000,
+      isActive: true,
     },
     {
-      title: "Profit Margin",
-      value: "37.1%",
-      change: "+2.3%",
-      icon: PieChart,
-      positive: true,
+      id: "2001",
+      code: "2001",
+      name: "Accounts Payable",
+      type: "liabilities",
+      subType: "Current Liabilities",
+      balance: 65000,
+      isActive: true,
     },
-  ];
+    {
+      id: "3001",
+      code: "3001",
+      name: "Owner Equity",
+      type: "equity",
+      subType: "Equity",
+      balance: 300000,
+      isActive: true,
+    },
+    {
+      id: "4001",
+      code: "4001",
+      name: "Sales Revenue",
+      type: "revenue",
+      subType: "Revenue",
+      balance: 450000,
+      isActive: true,
+    },
+    {
+      id: "5001",
+      code: "5001",
+      name: "Cost of Goods Sold",
+      type: "expenses",
+      subType: "Cost of Sales",
+      balance: 180000,
+      isActive: true,
+    },
+  ]);
 
-  const parties: Party[] = [
+  const [journalEntries] = useState<JournalEntry[]>([
     {
-      id: "cust001",
-      name: "Johnson Auto Repair",
-      type: "customer",
-      email: "contact@johnsonrepair.com",
-      phone: "+1-555-0123",
-      balance: 125000,
-      pending: 25000,
-    },
-    {
-      id: "cust002",
-      name: "City Motors Ltd",
-      type: "customer",
-      email: "billing@citymotors.com",
-      phone: "+1-555-0456",
-      balance: 75000,
-      pending: 0,
-    },
-    {
-      id: "supp001",
-      name: "AutoMax Suppliers",
-      type: "supplier",
-      email: "accounts@automax.com",
-      phone: "+1-555-0789",
-      balance: -85000,
-      pending: 15000,
-    },
-    {
-      id: "supp002",
-      name: "Global Parts Inc",
-      type: "supplier",
-      email: "finance@globalparts.com",
-      phone: "+1-555-0321",
-      balance: -45000,
-      pending: 8000,
-    },
-  ];
-
-  const [accountStatements, setAccountStatements] = useState<
-    Record<string, AccountStatement>
-  >({
-    cust001: {
-      partyId: "cust001",
-      openingBalance: 100000,
-      closingBalance: 125000,
-      totalPending: 25000,
-      transactions: [
+      id: "je001",
+      date: "2024-01-15",
+      reference: "JE001",
+      description: "Sales transaction - Invoice #INV-2024-0156",
+      entries: [
         {
-          id: "txn001",
-          date: "2024-01-15",
-          description: "Invoice #INV-2024-0156 - Brake Parts",
-          type: "debit",
-          amount: 45000,
-          reference: "INV-2024-0156",
-          status: "completed",
+          accountId: "1002",
+          accountName: "Accounts Receivable",
+          debit: 45000,
+          credit: 0,
         },
         {
-          id: "txn002",
-          date: "2024-01-12",
-          description: "Payment Received",
-          type: "credit",
-          amount: 20000,
-          reference: "PAY-001",
-          status: "completed",
-        },
-        {
-          id: "txn003",
-          date: "2024-01-10",
-          description: "Invoice #INV-2024-0145 - Engine Components",
-          type: "debit",
-          amount: 25000,
-          reference: "INV-2024-0145",
-          status: "pending",
+          accountId: "4001",
+          accountName: "Sales Revenue",
+          debit: 0,
+          credit: 45000,
         },
       ],
+      totalDebit: 45000,
+      totalCredit: 45000,
+      status: "posted",
     },
-    supp001: {
-      partyId: "supp001",
-      openingBalance: -70000,
-      closingBalance: -85000,
-      totalPending: 15000,
-      transactions: [
+  ]);
+
+  const [invoices] = useState<Invoice[]>([
+    {
+      id: "inv001",
+      invoiceNumber: "INV-2024-0156",
+      customerId: "cust001",
+      customerName: "Johnson Auto Repair",
+      date: "2024-01-15",
+      dueDate: "2024-02-14",
+      amount: 45000,
+      paidAmount: 20000,
+      status: "sent",
+      items: [
         {
-          id: "txn004",
-          date: "2024-01-14",
-          description: "Purchase Order #PO-2024-0089",
-          type: "credit",
+          description: "Brake Pads Set",
+          quantity: 2,
+          rate: 15000,
           amount: 30000,
-          reference: "PO-2024-0089",
-          status: "completed",
         },
-        {
-          id: "txn005",
-          date: "2024-01-08",
-          description: "Payment Made",
-          type: "debit",
-          amount: 15000,
-          reference: "PAY-002",
-          status: "completed",
-        },
-        {
-          id: "txn006",
-          date: "2024-01-16",
-          description: "Purchase Order #PO-2024-0091",
-          type: "credit",
-          amount: 15000,
-          reference: "PO-2024-0091",
-          status: "pending",
-        },
+        { description: "Oil Filter", quantity: 5, rate: 3000, amount: 15000 },
       ],
     },
-  });
+  ]);
 
-  const selectedPartyData = parties.find((p) => p.id === selectedParty);
-  const selectedStatement = selectedParty
-    ? accountStatements[selectedParty]
-    : null;
+  const [bills] = useState<Bill[]>([
+    {
+      id: "bill001",
+      billNumber: "BILL-2024-0089",
+      supplierId: "supp001",
+      supplierName: "AutoMax Suppliers",
+      date: "2024-01-14",
+      dueDate: "2024-02-13",
+      amount: 30000,
+      paidAmount: 15000,
+      status: "approved",
+    },
+  ]);
 
-  // Filter parties based on search query
-  const filteredParties = parties.filter(
-    (party) =>
-      party.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      party.type.toLowerCase().includes(searchQuery.toLowerCase()),
+  // Financial metrics calculations
+  const totalAssets = chartOfAccounts
+    .filter((a) => a.type === "assets")
+    .reduce((sum, a) => sum + a.balance, 0);
+  const totalLiabilities = chartOfAccounts
+    .filter((a) => a.type === "liabilities")
+    .reduce((sum, a) => sum + a.balance, 0);
+  const totalRevenue = chartOfAccounts
+    .filter((a) => a.type === "revenue")
+    .reduce((sum, a) => sum + a.balance, 0);
+  const totalExpenses = chartOfAccounts
+    .filter((a) => a.type === "expenses")
+    .reduce((sum, a) => sum + a.balance, 0);
+  const netProfit = totalRevenue - totalExpenses;
+
+  const outstandingReceivables = invoices.reduce(
+    (sum, inv) => sum + (inv.amount - inv.paidAmount),
+    0,
   );
-
-  const handlePartySelect = (partyId: string) => {
-    setSelectedParty(partyId);
-    setShowPartySelection(false);
-    setSearchQuery("");
-  };
-
-  const handleAddTransaction = () => {
-    if (
-      !selectedParty ||
-      !transactionForm.description ||
-      !transactionForm.amount
-    ) {
-      toast.error("Please fill all required fields");
-      return;
-    }
-
-    const newTransaction: Transaction = {
-      id: `txn${Date.now()}`,
-      date: transactionForm.date,
-      description: transactionForm.description,
-      type: transactionForm.type,
-      amount: parseFloat(transactionForm.amount),
-      reference: transactionForm.reference || undefined,
-      status: transactionForm.status,
-    };
-
-    setAccountStatements((prev) => ({
-      ...prev,
-      [selectedParty]: {
-        ...prev[selectedParty],
-        transactions: [
-          newTransaction,
-          ...(prev[selectedParty]?.transactions || []),
-        ],
-      },
-    }));
-
-    setTransactionForm({
-      description: "",
-      type: "debit",
-      amount: "",
-      reference: "",
-      status: "completed",
-      date: new Date().toISOString().split("T")[0],
-    });
-    setShowAddTransaction(false);
-    toast.success("Transaction added successfully");
-  };
-
-  const handleDeleteTransaction = (transactionId: string) => {
-    if (!selectedParty) return;
-
-    setAccountStatements((prev) => ({
-      ...prev,
-      [selectedParty]: {
-        ...prev[selectedParty],
-        transactions: prev[selectedParty].transactions.filter(
-          (t) => t.id !== transactionId,
-        ),
-      },
-    }));
-    toast.success("Transaction deleted successfully");
-  };
+  const outstandingPayables = bills.reduce(
+    (sum, bill) => sum + (bill.amount - bill.paidAmount),
+    0,
+  );
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -305,258 +273,432 @@ export const Accounting = () => {
     }).format(amount);
   };
 
-  if (!selectedParty) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-white">
-              Accounting & Finance
-            </h1>
-            <p className="text-white/70 mt-1">
-              Track your financial performance
-            </p>
-          </div>
-          <Button
-            onClick={() => setShowPartySelection(true)}
-            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0"
-          >
-            <Users size={16} className="mr-2" />
-            Select Party Account
-          </Button>
-        </div>
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "paid":
+      case "posted":
+        return "bg-green-500/20 text-green-300";
+      case "sent":
+      case "approved":
+        return "bg-blue-500/20 text-blue-300";
+      case "overdue":
+        return "bg-red-500/20 text-red-300";
+      case "draft":
+        return "bg-gray-500/20 text-gray-300";
+      default:
+        return "bg-orange-500/20 text-orange-300";
+    }
+  };
 
-        {/* Financial Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {financialStats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <GlassCard key={index} className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div
-                    className={`p-3 rounded-lg bg-gradient-to-r ${
-                      stat.positive
-                        ? "from-green-500 to-teal-600"
-                        : "from-red-500 to-orange-600"
-                    }`}
-                  >
-                    <Icon className="text-white" size={24} />
-                  </div>
-                  <span
-                    className={`text-sm font-medium ${
-                      stat.positive ? "text-green-300" : "text-red-300"
-                    }`}
-                  >
-                    {stat.change}
-                  </span>
-                </div>
-                <p className="text-white/70 text-sm font-medium">
-                  {stat.title}
-                </p>
-                <p className="text-2xl font-bold text-white mt-1">
-                  {stat.value}
-                </p>
-              </GlassCard>
-            );
-          })}
-        </div>
+  const navigationTabs = [
+    { id: "dashboard", label: "Dashboard", icon: Home },
+    { id: "general-ledger", label: "General Ledger", icon: BookOpen },
+    { id: "accounts-receivable", label: "A/R", icon: TrendingUp },
+    { id: "accounts-payable", label: "A/P", icon: TrendingDown },
+    { id: "reports", label: "Reports", icon: BarChart3 },
+  ];
 
-        {/* Parties Overview */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <GlassCard className="p-6">
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <User className="text-blue-400" size={20} />
-              Customer Accounts
-            </h3>
-            <div className="space-y-3">
-              {parties
-                .filter((p) => p.type === "customer")
-                .map((party) => (
-                  <div
-                    key={party.id}
-                    className="flex justify-between items-center p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
-                    onClick={() => setSelectedParty(party.id)}
-                  >
-                    <div>
-                      <p className="text-white font-medium">{party.name}</p>
-                      {party.pending > 0 && (
-                        <p className="text-orange-300 text-sm">
-                          Pending: {formatCurrency(party.pending)}
-                        </p>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <span className="text-green-300 font-bold">
-                        {formatCurrency(party.balance)}
-                      </span>
-                      <p className="text-white/60 text-xs">Outstanding</p>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </GlassCard>
-
-          <GlassCard className="p-6">
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <Building className="text-orange-400" size={20} />
-              Supplier Accounts
-            </h3>
-            <div className="space-y-3">
-              {parties
-                .filter((p) => p.type === "supplier")
-                .map((party) => (
-                  <div
-                    key={party.id}
-                    className="flex justify-between items-center p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
-                    onClick={() => setSelectedParty(party.id)}
-                  >
-                    <div>
-                      <p className="text-white font-medium">{party.name}</p>
-                      {party.pending > 0 && (
-                        <p className="text-orange-300 text-sm">
-                          Pending: {formatCurrency(party.pending)}
-                        </p>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <span className="text-red-300 font-bold">
-                        {formatCurrency(Math.abs(party.balance))}
-                      </span>
-                      <p className="text-white/60 text-xs">Payable</p>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </GlassCard>
-        </div>
-      </div>
-    );
-  }
-
-  return (
+  const renderDashboard = () => (
     <div className="space-y-6">
-      {/* Header with Party Info */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            onClick={() => setSelectedParty("")}
-            className="!bg-transparent border-white/20 text-white hover:bg-white/10"
-          >
-            ← Back to Overview
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-              {selectedPartyData?.type === "customer" ? (
-                <User className="text-blue-400" size={24} />
-              ) : (
-                <Building className="text-orange-400" size={24} />
-              )}
-              {selectedPartyData?.name}
-            </h1>
-            <p className="text-white/70 text-sm">
-              {selectedPartyData?.type === "customer" ? "Customer" : "Supplier"}{" "}
-              Account Statement
-            </p>
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <GlassCard className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-green-500 to-teal-600">
+              <IndianRupee className="text-white" size={24} />
+            </div>
+            <span className="text-green-300 text-sm font-medium">+12.5%</span>
           </div>
-        </div>
-        <div className="flex items-center gap-3">
+          <p className="text-white/70 text-sm font-medium">Total Revenue</p>
+          <p className="text-2xl font-bold text-white mt-1">
+            {formatCurrency(totalRevenue)}
+          </p>
+        </GlassCard>
+
+        <GlassCard className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
+              <TrendingUp className="text-white" size={24} />
+            </div>
+            <span className="text-blue-300 text-sm font-medium">
+              Outstanding
+            </span>
+          </div>
+          <p className="text-white/70 text-sm font-medium">
+            Accounts Receivable
+          </p>
+          <p className="text-2xl font-bold text-white mt-1">
+            {formatCurrency(outstandingReceivables)}
+          </p>
+        </GlassCard>
+
+        <GlassCard className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-red-500 to-orange-600">
+              <TrendingDown className="text-white" size={24} />
+            </div>
+            <span className="text-red-300 text-sm font-medium">Due</span>
+          </div>
+          <p className="text-white/70 text-sm font-medium">Accounts Payable</p>
+          <p className="text-2xl font-bold text-white mt-1">
+            {formatCurrency(outstandingPayables)}
+          </p>
+        </GlassCard>
+
+        <GlassCard className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600">
+              <PieChart className="text-white" size={24} />
+            </div>
+            <span className="text-green-300 text-sm font-medium">+18.7%</span>
+          </div>
+          <p className="text-white/70 text-sm font-medium">Net Profit</p>
+          <p className="text-2xl font-bold text-white mt-1">
+            {formatCurrency(netProfit)}
+          </p>
+        </GlassCard>
+      </div>
+
+      {/* Quick Actions */}
+      <GlassCard className="p-6">
+        <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Button
-            onClick={() => setShowPartySelection(true)}
-            variant="outline"
-            className="!bg-transparent border-white/20 text-white hover:bg-white/10"
+            onClick={() => setShowDialog("create-invoice")}
+            className="bg-green-600/80 hover:bg-green-700 text-white border-0 h-16 flex flex-col"
           >
-            <Users size={16} className="mr-2" />
-            Select Party
+            <FileText size={20} className="mb-1" />
+            <span className="text-xs">Create Invoice</span>
           </Button>
           <Button
-            onClick={() => setShowAddTransaction(true)}
-            className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white border-0"
+            onClick={() => setShowDialog("record-payment")}
+            className="bg-blue-600/80 hover:bg-blue-700 text-white border-0 h-16 flex flex-col"
+          >
+            <CreditCard size={20} className="mb-1" />
+            <span className="text-xs">Record Payment</span>
+          </Button>
+          <Button
+            onClick={() => setShowDialog("add-bill")}
+            className="bg-orange-600/80 hover:bg-orange-700 text-white border-0 h-16 flex flex-col"
+          >
+            <Receipt size={20} className="mb-1" />
+            <span className="text-xs">Add Bill</span>
+          </Button>
+          <Button
+            onClick={() => setShowDialog("journal-entry")}
+            className="bg-purple-600/80 hover:bg-purple-700 text-white border-0 h-16 flex flex-col"
+          >
+            <BookOpen size={20} className="mb-1" />
+            <span className="text-xs">Journal Entry</span>
+          </Button>
+        </div>
+      </GlassCard>
+
+      {/* Recent Transactions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <GlassCard className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-white">
+              Recent Invoices
+            </h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setActiveSection("accounts-receivable")}
+            >
+              <Eye size={14} />
+            </Button>
+          </div>
+          <div className="space-y-3">
+            {invoices.slice(0, 3).map((invoice) => (
+              <div
+                key={invoice.id}
+                className="flex justify-between items-center p-3 rounded-lg bg-white/5"
+              >
+                <div>
+                  <p className="text-white font-medium">
+                    {invoice.invoiceNumber}
+                  </p>
+                  <p className="text-white/60 text-sm">
+                    {invoice.customerName}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-white font-bold">
+                    {formatCurrency(invoice.amount)}
+                  </p>
+                  <Badge className={getStatusColor(invoice.status)}>
+                    {invoice.status}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+
+        <GlassCard className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-white">Recent Bills</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setActiveSection("accounts-payable")}
+            >
+              <Eye size={14} />
+            </Button>
+          </div>
+          <div className="space-y-3">
+            {bills.slice(0, 3).map((bill) => (
+              <div
+                key={bill.id}
+                className="flex justify-between items-center p-3 rounded-lg bg-white/5"
+              >
+                <div>
+                  <p className="text-white font-medium">{bill.billNumber}</p>
+                  <p className="text-white/60 text-sm">{bill.supplierName}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-white font-bold">
+                    {formatCurrency(bill.amount)}
+                  </p>
+                  <Badge className={getStatusColor(bill.status)}>
+                    {bill.status}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+      </div>
+    </div>
+  );
+
+  const renderGeneralLedger = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-white">General Ledger</h2>
+        <div className="flex gap-3">
+          <Button
+            onClick={() => setShowDialog("add-account")}
+            variant="outline"
+            className="!bg-transparent border-white/20 text-white hover:bg-white/10"
           >
             <Plus size={16} className="mr-2" />
-            Add Transaction
+            Add Account
+          </Button>
+          <Button
+            onClick={() => setShowDialog("journal-entry")}
+            className="bg-green-600/80 hover:bg-green-700 text-white border-0"
+          >
+            <BookOpen size={16} className="mr-2" />
+            Journal Entry
           </Button>
         </div>
       </div>
 
-      {/* Account Summary Cards */}
+      {/* Chart of Accounts */}
+      <GlassCard className="p-6">
+        <h3 className="text-lg font-semibold text-white mb-4">
+          Chart of Accounts
+        </h3>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-white/20">
+                <th className="text-left text-white/70 font-medium pb-3">
+                  Code
+                </th>
+                <th className="text-left text-white/70 font-medium pb-3">
+                  Account Name
+                </th>
+                <th className="text-left text-white/70 font-medium pb-3">
+                  Type
+                </th>
+                <th className="text-right text-white/70 font-medium pb-3">
+                  Balance
+                </th>
+                <th className="text-center text-white/70 font-medium pb-3">
+                  Status
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {chartOfAccounts.map((account) => (
+                <tr
+                  key={account.id}
+                  className="border-b border-white/10 hover:bg-white/5"
+                >
+                  <td className="py-3 text-white/80">{account.code}</td>
+                  <td className="py-3 text-white font-medium">
+                    {account.name}
+                  </td>
+                  <td className="py-3 text-white/60">{account.subType}</td>
+                  <td className="py-3 text-right text-white font-medium">
+                    {formatCurrency(account.balance)}
+                  </td>
+                  <td className="py-3 text-center">
+                    <Badge
+                      className={
+                        account.isActive
+                          ? "bg-green-500/20 text-green-300"
+                          : "bg-gray-500/20 text-gray-300"
+                      }
+                    >
+                      {account.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </GlassCard>
+
+      {/* Recent Journal Entries */}
+      <GlassCard className="p-6">
+        <h3 className="text-lg font-semibold text-white mb-4">
+          Recent Journal Entries
+        </h3>
+        <div className="space-y-4">
+          {journalEntries.map((entry) => (
+            <div
+              key={entry.id}
+              className="p-4 rounded-lg bg-white/5 border border-white/10"
+            >
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <h4 className="text-white font-medium">{entry.reference}</h4>
+                  <p className="text-white/60 text-sm">{entry.description}</p>
+                  <p className="text-white/40 text-xs">{entry.date}</p>
+                </div>
+                <Badge className={getStatusColor(entry.status)}>
+                  {entry.status}
+                </Badge>
+              </div>
+              <div className="space-y-2">
+                {entry.entries.map((line, index) => (
+                  <div key={index} className="flex justify-between text-sm">
+                    <span className="text-white/80">{line.accountName}</span>
+                    <div className="flex gap-4">
+                      <span className="text-red-300 w-20 text-right">
+                        {line.debit > 0 ? formatCurrency(line.debit) : "-"}
+                      </span>
+                      <span className="text-green-300 w-20 text-right">
+                        {line.credit > 0 ? formatCurrency(line.credit) : "-"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </GlassCard>
+    </div>
+  );
+
+  const renderAccountsReceivable = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-white">Accounts Receivable</h2>
+        <div className="flex gap-3">
+          <Button
+            onClick={() => setShowDialog("send-reminder")}
+            variant="outline"
+            className="!bg-transparent border-white/20 text-white hover:bg-white/10"
+          >
+            <Bell size={16} className="mr-2" />
+            Send Reminders
+          </Button>
+          <Button
+            onClick={() => setShowDialog("create-invoice")}
+            className="bg-green-600/80 hover:bg-green-700 text-white border-0"
+          >
+            <Plus size={16} className="mr-2" />
+            Create Invoice
+          </Button>
+        </div>
+      </div>
+
+      {/* A/R Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <GlassCard className="p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
-              <IndianRupee className="text-white" size={24} />
+              <FileText className="text-white" size={24} />
             </div>
           </div>
-          <p className="text-white/70 text-sm font-medium">Current Balance</p>
-          <p
-            className={`text-2xl font-bold mt-1 ${selectedPartyData?.balance >= 0 ? "text-green-300" : "text-red-300"}`}
-          >
-            {formatCurrency(Math.abs(selectedPartyData?.balance || 0))}
-          </p>
-          <p className="text-white/60 text-xs mt-1">
-            {selectedPartyData?.balance >= 0 ? "Receivable" : "Payable"}
+          <p className="text-white/70 text-sm font-medium">Total Outstanding</p>
+          <p className="text-2xl font-bold text-blue-300 mt-1">
+            {formatCurrency(outstandingReceivables)}
           </p>
         </GlassCard>
 
         <GlassCard className="p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 rounded-lg bg-gradient-to-r from-orange-500 to-red-600">
-              <Calendar className="text-white" size={24} />
+              <Clock className="text-white" size={24} />
             </div>
           </div>
-          <p className="text-white/70 text-sm font-medium">Pending Amount</p>
+          <p className="text-white/70 text-sm font-medium">Overdue Amount</p>
           <p className="text-2xl font-bold text-orange-300 mt-1">
-            {formatCurrency(selectedStatement?.totalPending || 0)}
+            {formatCurrency(
+              invoices
+                .filter((inv) => inv.status === "overdue")
+                .reduce((sum, inv) => sum + (inv.amount - inv.paidAmount), 0),
+            )}
           </p>
-          <p className="text-white/60 text-xs mt-1">Awaiting clearance</p>
         </GlassCard>
 
         <GlassCard className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600">
-              <TrendingUp className="text-white" size={24} />
+            <div className="p-3 rounded-lg bg-gradient-to-r from-green-500 to-teal-600">
+              <Calculator className="text-white" size={24} />
             </div>
           </div>
           <p className="text-white/70 text-sm font-medium">
-            Total Transactions
+            Average Days to Pay
           </p>
-          <p className="text-2xl font-bold text-white mt-1">
-            {selectedStatement?.transactions.length || 0}
-          </p>
-          <p className="text-white/60 text-xs mt-1">This period</p>
+          <p className="text-2xl font-bold text-green-300 mt-1">28 days</p>
         </GlassCard>
       </div>
 
-      {/* Account Statement */}
+      {/* Invoices List */}
       <GlassCard className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-white">
-            Account Statement
-          </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-white">Invoices</h3>
           <div className="flex items-center gap-2">
-            <Filter className="text-white/60" size={16} />
-            <span className="text-white/60 text-sm">Last 30 days</span>
+            <Search className="text-white/60" size={16} />
+            <Input
+              placeholder="Search invoices..."
+              className="w-64 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+            />
           </div>
         </div>
-
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-white/20">
                 <th className="text-left text-white/70 font-medium pb-3">
+                  Invoice #
+                </th>
+                <th className="text-left text-white/70 font-medium pb-3">
+                  Customer
+                </th>
+                <th className="text-left text-white/70 font-medium pb-3">
                   Date
                 </th>
                 <th className="text-left text-white/70 font-medium pb-3">
-                  Description
-                </th>
-                <th className="text-left text-white/70 font-medium pb-3">
-                  Reference
+                  Due Date
                 </th>
                 <th className="text-right text-white/70 font-medium pb-3">
-                  Debit
+                  Amount
                 </th>
                 <th className="text-right text-white/70 font-medium pb-3">
-                  Credit
+                  Paid
+                </th>
+                <th className="text-right text-white/70 font-medium pb-3">
+                  Balance
                 </th>
                 <th className="text-center text-white/70 font-medium pb-3">
                   Status
@@ -567,50 +709,48 @@ export const Accounting = () => {
               </tr>
             </thead>
             <tbody>
-              {selectedStatement?.transactions.map((transaction) => (
+              {invoices.map((invoice) => (
                 <tr
-                  key={transaction.id}
-                  className="border-b border-white/10 hover:bg-white/5 transition-colors"
+                  key={invoice.id}
+                  className="border-b border-white/10 hover:bg-white/5"
                 >
-                  <td className="py-3 text-white/80 text-sm">
-                    {transaction.date}
-                  </td>
                   <td className="py-3 text-white font-medium">
-                    {transaction.description}
+                    {invoice.invoiceNumber}
                   </td>
-                  <td className="py-3 text-white/60 text-sm">
-                    {transaction.reference || "-"}
+                  <td className="py-3 text-white/80">{invoice.customerName}</td>
+                  <td className="py-3 text-white/60">{invoice.date}</td>
+                  <td className="py-3 text-white/60">{invoice.dueDate}</td>
+                  <td className="py-3 text-right text-white font-medium">
+                    {formatCurrency(invoice.amount)}
                   </td>
-                  <td className="py-3 text-right text-red-300 font-medium">
-                    {transaction.type === "debit"
-                      ? formatCurrency(transaction.amount)
-                      : "-"}
+                  <td className="py-3 text-right text-green-300">
+                    {formatCurrency(invoice.paidAmount)}
                   </td>
-                  <td className="py-3 text-right text-green-300 font-medium">
-                    {transaction.type === "credit"
-                      ? formatCurrency(transaction.amount)
-                      : "-"}
-                  </td>
-                  <td className="py-3 text-center">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        transaction.status === "completed"
-                          ? "bg-green-500/20 text-green-300"
-                          : "bg-orange-500/20 text-orange-300"
-                      }`}
-                    >
-                      {transaction.status}
-                    </span>
+                  <td className="py-3 text-right text-orange-300">
+                    {formatCurrency(invoice.amount - invoice.paidAmount)}
                   </td>
                   <td className="py-3 text-center">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteTransaction(transaction.id)}
-                      className="text-red-400 hover:text-red-300 hover:bg-red-500/20"
-                    >
-                      <Trash2 size={14} />
-                    </Button>
+                    <Badge className={getStatusColor(invoice.status)}>
+                      {invoice.status}
+                    </Badge>
+                  </td>
+                  <td className="py-3 text-center">
+                    <div className="flex justify-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-blue-400 hover:text-blue-300"
+                      >
+                        <Eye size={14} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-green-400 hover:text-green-300"
+                      >
+                        <Send size={14} />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -618,251 +758,371 @@ export const Accounting = () => {
           </table>
         </div>
       </GlassCard>
+    </div>
+  );
 
-      {/* Party Selection Dialog */}
-      <Dialog open={showPartySelection} onOpenChange={setShowPartySelection}>
-        <DialogContent className="!bg-gray-900/95 backdrop-blur-md border border-white/20 text-white max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-white">
-              Select Party Account
-            </DialogTitle>
-          </DialogHeader>
+  const renderAccountsPayable = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-white">Accounts Payable</h2>
+        <div className="flex gap-3">
+          <Button
+            onClick={() => setShowDialog("schedule-payment")}
+            variant="outline"
+            className="!bg-transparent border-white/20 text-white hover:bg-white/10"
+          >
+            <Calendar size={16} className="mr-2" />
+            Schedule Payment
+          </Button>
+          <Button
+            onClick={() => setShowDialog("add-bill")}
+            className="bg-red-600/80 hover:bg-red-700 text-white border-0"
+          >
+            <Plus size={16} className="mr-2" />
+            Add Bill
+          </Button>
+        </div>
+      </div>
 
-          <div className="space-y-4">
-            {/* Search Bar */}
-            <div className="relative">
-              <Search
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60"
-                size={16}
-              />
-              <Input
-                placeholder="Search party name..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
-              />
+      {/* A/P Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <GlassCard className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-red-500 to-orange-600">
+              <Receipt className="text-white" size={24} />
             </div>
+          </div>
+          <p className="text-white/70 text-sm font-medium">Total Payable</p>
+          <p className="text-2xl font-bold text-red-300 mt-1">
+            {formatCurrency(outstandingPayables)}
+          </p>
+        </GlassCard>
 
-            {/* Party List */}
-            <div className="max-h-96 overflow-y-auto space-y-2">
-              {filteredParties.map((party) => (
-                <div
-                  key={party.id}
-                  onClick={() => handlePartySelect(party.id)}
-                  className="p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-white/10"
+        <GlassCard className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-orange-500 to-yellow-600">
+              <Clock className="text-white" size={24} />
+            </div>
+          </div>
+          <p className="text-white/70 text-sm font-medium">Due This Week</p>
+          <p className="text-2xl font-bold text-orange-300 mt-1">₹15,000</p>
+        </GlassCard>
+
+        <GlassCard className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600">
+              <Building className="text-white" size={24} />
+            </div>
+          </div>
+          <p className="text-white/70 text-sm font-medium">Active Suppliers</p>
+          <p className="text-2xl font-bold text-purple-300 mt-1">12</p>
+        </GlassCard>
+      </div>
+
+      {/* Bills List */}
+      <GlassCard className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-white">Bills</h3>
+          <div className="flex items-center gap-2">
+            <Search className="text-white/60" size={16} />
+            <Input
+              placeholder="Search bills..."
+              className="w-64 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+            />
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-white/20">
+                <th className="text-left text-white/70 font-medium pb-3">
+                  Bill #
+                </th>
+                <th className="text-left text-white/70 font-medium pb-3">
+                  Supplier
+                </th>
+                <th className="text-left text-white/70 font-medium pb-3">
+                  Date
+                </th>
+                <th className="text-left text-white/70 font-medium pb-3">
+                  Due Date
+                </th>
+                <th className="text-right text-white/70 font-medium pb-3">
+                  Amount
+                </th>
+                <th className="text-right text-white/70 font-medium pb-3">
+                  Paid
+                </th>
+                <th className="text-right text-white/70 font-medium pb-3">
+                  Balance
+                </th>
+                <th className="text-center text-white/70 font-medium pb-3">
+                  Status
+                </th>
+                <th className="text-center text-white/70 font-medium pb-3">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {bills.map((bill) => (
+                <tr
+                  key={bill.id}
+                  className="border-b border-white/10 hover:bg-white/5"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {party.type === "customer" ? (
-                        <div className="p-2 rounded-lg bg-blue-500/20">
-                          <User className="text-blue-400" size={20} />
-                        </div>
-                      ) : (
-                        <div className="p-2 rounded-lg bg-orange-500/20">
-                          <Building className="text-orange-400" size={20} />
-                        </div>
-                      )}
-                      <div>
-                        <h3 className="text-white font-medium">{party.name}</h3>
-                        <p className="text-white/60 text-sm">
-                          {party.type === "customer" ? "Customer" : "Supplier"}{" "}
-                          • {party.email}
-                        </p>
-                        {party.pending > 0 && (
-                          <p className="text-orange-300 text-xs">
-                            Pending: {formatCurrency(party.pending)}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p
-                        className={`font-bold ${party.balance >= 0 ? "text-green-300" : "text-red-300"}`}
+                  <td className="py-3 text-white font-medium">
+                    {bill.billNumber}
+                  </td>
+                  <td className="py-3 text-white/80">{bill.supplierName}</td>
+                  <td className="py-3 text-white/60">{bill.date}</td>
+                  <td className="py-3 text-white/60">{bill.dueDate}</td>
+                  <td className="py-3 text-right text-white font-medium">
+                    {formatCurrency(bill.amount)}
+                  </td>
+                  <td className="py-3 text-right text-green-300">
+                    {formatCurrency(bill.paidAmount)}
+                  </td>
+                  <td className="py-3 text-right text-red-300">
+                    {formatCurrency(bill.amount - bill.paidAmount)}
+                  </td>
+                  <td className="py-3 text-center">
+                    <Badge className={getStatusColor(bill.status)}>
+                      {bill.status}
+                    </Badge>
+                  </td>
+                  <td className="py-3 text-center">
+                    <div className="flex justify-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-blue-400 hover:text-blue-300"
                       >
-                        {formatCurrency(Math.abs(party.balance))}
-                      </p>
-                      <p className="text-white/60 text-xs">
-                        {party.balance >= 0 ? "Receivable" : "Payable"}
-                      </p>
+                        <Eye size={14} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-green-400 hover:text-green-300"
+                      >
+                        <CreditCard size={14} />
+                      </Button>
                     </div>
-                  </div>
-                </div>
+                  </td>
+                </tr>
               ))}
+            </tbody>
+          </table>
+        </div>
+      </GlassCard>
+    </div>
+  );
 
-              {filteredParties.length === 0 && (
-                <div className="text-center py-8">
-                  <Users className="mx-auto text-white/40 mb-2" size={24} />
-                  <p className="text-white/60">
-                    No parties found matching your search
-                  </p>
-                </div>
-              )}
+  const renderReports = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-white">Financial Reports</h2>
+        <Button
+          onClick={() => toast.success("Reports exported successfully!")}
+          className="bg-blue-600/80 hover:bg-blue-700 text-white border-0"
+        >
+          <Download size={16} className="mr-2" />
+          Export All
+        </Button>
+      </div>
+
+      {/* Report Categories */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <GlassCard className="p-6 hover:bg-white/5 cursor-pointer transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-green-500 to-teal-600">
+              <TrendingUp className="text-white" size={24} />
             </div>
+            <div>
+              <h3 className="text-white font-semibold">Profit & Loss</h3>
+              <p className="text-white/60 text-sm">Income statement report</p>
+            </div>
+          </div>
+        </GlassCard>
 
-            <div className="flex justify-end pt-4 border-t border-white/20">
+        <GlassCard className="p-6 hover:bg-white/5 cursor-pointer transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
+              <BarChart3 className="text-white" size={24} />
+            </div>
+            <div>
+              <h3 className="text-white font-semibold">Balance Sheet</h3>
+              <p className="text-white/60 text-sm">Financial position report</p>
+            </div>
+          </div>
+        </GlassCard>
+
+        <GlassCard className="p-6 hover:bg-white/5 cursor-pointer transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600">
+              <IndianRupee className="text-white" size={24} />
+            </div>
+            <div>
+              <h3 className="text-white font-semibold">Cash Flow</h3>
+              <p className="text-white/60 text-sm">Cash movement report</p>
+            </div>
+          </div>
+        </GlassCard>
+
+        <GlassCard className="p-6 hover:bg-white/5 cursor-pointer transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-orange-500 to-red-600">
+              <FileText className="text-white" size={24} />
+            </div>
+            <div>
+              <h3 className="text-white font-semibold">General Ledger</h3>
+              <p className="text-white/60 text-sm">Complete GL report</p>
+            </div>
+          </div>
+        </GlassCard>
+
+        <GlassCard className="p-6 hover:bg-white/5 cursor-pointer transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-600">
+              <Clock className="text-white" size={24} />
+            </div>
+            <div>
+              <h3 className="text-white font-semibold">A/R Aging</h3>
+              <p className="text-white/60 text-sm">Receivables aging report</p>
+            </div>
+          </div>
+        </GlassCard>
+
+        <GlassCard className="p-6 hover:bg-white/5 cursor-pointer transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-red-500 to-pink-600">
+              <Calendar className="text-white" size={24} />
+            </div>
+            <div>
+              <h3 className="text-white font-semibold">A/P Aging</h3>
+              <p className="text-white/60 text-sm">Payables aging report</p>
+            </div>
+          </div>
+        </GlassCard>
+      </div>
+
+      {/* Sample Report */}
+      <GlassCard className="p-6">
+        <h3 className="text-lg font-semibold text-white mb-4">
+          Profit & Loss Summary
+        </h3>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+            <span className="text-white font-medium">Total Revenue</span>
+            <span className="text-green-300 font-bold">
+              {formatCurrency(totalRevenue)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+            <span className="text-white font-medium">Total Expenses</span>
+            <span className="text-red-300 font-bold">
+              {formatCurrency(totalExpenses)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+            <span className="text-white font-bold text-lg">Net Profit</span>
+            <span className="text-blue-300 font-bold text-lg">
+              {formatCurrency(netProfit)}
+            </span>
+          </div>
+        </div>
+      </GlassCard>
+    </div>
+  );
+
+  const renderContent = () => {
+    switch (activeSection) {
+      case "general-ledger":
+        return renderGeneralLedger();
+      case "accounts-receivable":
+        return renderAccountsReceivable();
+      case "accounts-payable":
+        return renderAccountsPayable();
+      case "reports":
+        return renderReports();
+      default:
+        return renderDashboard();
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white">
+            Financial Management
+          </h1>
+          <p className="text-white/70 mt-1">
+            Complete accounting and financial control
+          </p>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <GlassCard className="p-1">
+        <div className="flex overflow-x-auto">
+          {navigationTabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
               <Button
-                variant="outline"
+                key={tab.id}
+                onClick={() => setActiveSection(tab.id)}
+                variant="ghost"
+                className={`flex-shrink-0 px-6 py-3 rounded-lg transition-all ${
+                  activeSection === tab.id
+                    ? "bg-white/20 text-white"
+                    : "text-white/70 hover:text-white hover:bg-white/10"
+                }`}
+              >
+                <Icon size={18} className="mr-2" />
+                {tab.label}
+              </Button>
+            );
+          })}
+        </div>
+      </GlassCard>
+
+      {/* Content */}
+      {renderContent()}
+
+      {/* Dialog placeholder for various forms */}
+      {showDialog && (
+        <Dialog open={!!showDialog} onOpenChange={() => setShowDialog("")}>
+          <DialogContent className="!bg-gray-900/95 backdrop-blur-md border border-white/20 text-white max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-white">
+                {showDialog === "create-invoice" && "Create Invoice"}
+                {showDialog === "journal-entry" && "Journal Entry"}
+                {showDialog === "add-account" && "Add Account"}
+                {showDialog === "record-payment" && "Record Payment"}
+                {showDialog === "add-bill" && "Add Bill"}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="p-6 text-center">
+              <p className="text-white/70 mb-4">
+                This dialog would contain the form for{" "}
+                {showDialog.replace("-", " ")}.
+              </p>
+              <Button
                 onClick={() => {
-                  setShowPartySelection(false);
-                  setSearchQuery("");
+                  setShowDialog("");
+                  toast.success(
+                    `${showDialog.replace("-", " ")} completed successfully!`,
+                  );
                 }}
-                className="!bg-transparent border-white/20 text-white hover:bg-white/10"
+                className="bg-green-600/80 hover:bg-green-700 text-white border-0"
               >
-                Cancel
+                Complete Action
               </Button>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Add Transaction Dialog */}
-      <Dialog open={showAddTransaction} onOpenChange={setShowAddTransaction}>
-        <DialogContent className="!bg-gray-900/95 backdrop-blur-md border border-white/20 text-white max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-white">
-              Add New Transaction
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div>
-              <Label className="text-white text-sm">Date</Label>
-              <Input
-                type="date"
-                value={transactionForm.date}
-                onChange={(e) =>
-                  setTransactionForm((prev) => ({
-                    ...prev,
-                    date: e.target.value,
-                  }))
-                }
-                className="bg-white/10 border-white/20 text-white"
-              />
-            </div>
-
-            <div>
-              <Label className="text-white text-sm">Description *</Label>
-              <Input
-                placeholder="Enter transaction description"
-                value={transactionForm.description}
-                onChange={(e) =>
-                  setTransactionForm((prev) => ({
-                    ...prev,
-                    description: e.target.value,
-                  }))
-                }
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-white text-sm">Type</Label>
-                <Select
-                  value={transactionForm.type}
-                  onValueChange={(value: "debit" | "credit") =>
-                    setTransactionForm((prev) => ({ ...prev, type: value }))
-                  }
-                >
-                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="!bg-gray-900/95 backdrop-blur-md border border-white/20 text-white">
-                    <SelectItem
-                      value="debit"
-                      className="text-white focus:bg-white/20"
-                    >
-                      Debit
-                    </SelectItem>
-                    <SelectItem
-                      value="credit"
-                      className="text-white focus:bg-white/20"
-                    >
-                      Credit
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label className="text-white text-sm">Amount *</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  placeholder="0.00"
-                  value={transactionForm.amount}
-                  onChange={(e) =>
-                    setTransactionForm((prev) => ({
-                      ...prev,
-                      amount: e.target.value,
-                    }))
-                  }
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-white text-sm">Reference</Label>
-              <Input
-                placeholder="Invoice #, PO #, etc."
-                value={transactionForm.reference}
-                onChange={(e) =>
-                  setTransactionForm((prev) => ({
-                    ...prev,
-                    reference: e.target.value,
-                  }))
-                }
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-              />
-            </div>
-
-            <div>
-              <Label className="text-white text-sm">Status</Label>
-              <Select
-                value={transactionForm.status}
-                onValueChange={(value: "completed" | "pending") =>
-                  setTransactionForm((prev) => ({ ...prev, status: value }))
-                }
-              >
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="!bg-gray-900/95 backdrop-blur-md border border-white/20 text-white">
-                  <SelectItem
-                    value="completed"
-                    className="text-white focus:bg-white/20"
-                  >
-                    Completed
-                  </SelectItem>
-                  <SelectItem
-                    value="pending"
-                    className="text-white focus:bg-white/20"
-                  >
-                    Pending
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <Button
-                variant="outline"
-                onClick={() => setShowAddTransaction(false)}
-                className="flex-1 !bg-transparent border-white/20 text-white hover:bg-white/10"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleAddTransaction}
-                className="flex-1 bg-green-600/80 hover:bg-green-700 text-white border-0"
-              >
-                Add Transaction
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
