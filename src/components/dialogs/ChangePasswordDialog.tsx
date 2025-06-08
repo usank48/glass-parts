@@ -349,7 +349,7 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
               type="button"
               variant="outline"
               onClick={handleClose}
-              className="border-white/20 text-white hover:bg-white/10"
+              className="border-white/20 text-white hover:bg-white/10 bg-transparent backdrop-blur-sm"
               disabled={isLoading}
             >
               Cancel
@@ -357,7 +357,7 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
             <Button
               type="submit"
               disabled={!canSubmit || isLoading}
-              className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50"
+              className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:bg-green-600/50 border-0"
             >
               {isLoading ? (
                 <>
