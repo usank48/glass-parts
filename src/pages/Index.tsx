@@ -81,6 +81,7 @@ const Index = () => {
         setActiveModule={setActiveModule}
       />
       <FloatingActionButton
+        activeModule={activeModule}
         onAddProduct={handleAddProduct}
         onAddSale={handleAddSale}
         onAddPurchase={handleAddPurchase}
