@@ -18,17 +18,19 @@ interface TopBarProps {
 }
 
 export const TopBar: React.FC<TopBarProps> = ({ onMenuClick }) => {
+  // All useState calls at the top level - no conditional calls
   const [searchQuery, setSearchQuery] = useState("");
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
-  const [notificationCount, setNotificationCount] = useState(3); // Example notification count
+  const [notificationCount] = useState(3); // Example notification count
 
-  // Dialog states
+  // Dialog states - consolidated into single state object
   const [dialogs, setDialogs] = useState({
     profile: false,
     settings: false,
     changePassword: false,
   });
 
+  // Helper functions
   const openDialog = (dialogType: keyof typeof dialogs) => {
     setDialogs((prev) => ({ ...prev, [dialogType]: true }));
     setIsUserDropdownOpen(false);
@@ -36,6 +38,10 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuClick }) => {
 
   const closeDialog = (dialogType: keyof typeof dialogs) => {
     setDialogs((prev) => ({ ...prev, [dialogType]: false }));
+  };
+
+  const closeUserDropdown = () => {
+    setIsUserDropdownOpen(false);
   };
 
   return (
@@ -104,14 +110,12 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuClick }) => {
 
             {/* Dropdown Menu */}
             {isUserDropdownOpen && (
-              <div className="absolute top-full right-0 mt-2 w-80 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg shadow-lg overflow-hidden">
-                <TopBarUserDropdown
-                  onClose={() => setIsUserDropdownOpen(false)}
-                  onOpenProfile={() => openDialog("profile")}
-                  onOpenSettings={() => openDialog("settings")}
-                  onOpenChangePassword={() => openDialog("changePassword")}
-                />
-              </div>
+              <TopBarUserDropdown
+                onClose={closeUserDropdown}
+                onOpenProfile={() => openDialog("profile")}
+                onOpenSettings={() => openDialog("settings")}
+                onOpenChangePassword={() => openDialog("changePassword")}
+              />
             )}
           </div>
         </div>
@@ -135,7 +139,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuClick }) => {
   );
 };
 
-// TopBar User Dropdown with functional handlers
+// TopBar User Dropdown Component
 interface TopBarUserDropdownProps {
   onClose: () => void;
   onOpenProfile: () => void;
@@ -168,18 +172,21 @@ const TopBarUserDropdown: React.FC<TopBarUserDropdownProps> = ({
 
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to logout?")) {
-      // In real app, clear auth tokens, redirect to login, etc.
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("userSession");
-      console.log("User logged out");
-      // Simulate redirect
-      window.location.reload();
+      // Clear auth tokens and redirect
+      try {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("userSession");
+        console.log("User logged out");
+        // In a real app, you would redirect to login page
+        window.location.reload();
+      } catch (error) {
+        console.error("Logout error:", error);
+      }
     }
     onClose();
   };
 
   const handleNotifications = () => {
-    // Toggle notification panel or navigate to notifications page
     console.log("Opening notifications...");
     onClose();
   };
@@ -194,7 +201,7 @@ const TopBarUserDropdown: React.FC<TopBarUserDropdownProps> = ({
     {
       icon: Edit,
       label: "Edit Profile",
-      onClick: () => onOpenProfile(), // Will open in edit mode via profile dialog
+      onClick: onOpenProfile,
       description: "Update your personal details",
     },
     {
@@ -218,64 +225,66 @@ const TopBarUserDropdown: React.FC<TopBarUserDropdownProps> = ({
   ];
 
   return (
-    <div ref={dropdownRef}>
-      {/* User Info Header */}
-      <div className="p-4 border-b border-white/10 bg-white/5">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
-            <User size={20} className="text-white" />
-          </div>
-          <div>
-            <p className="text-white font-medium">John Doe</p>
-            <p className="text-white/70 text-sm">john.doe@autoparts.com</p>
-            <p className="text-white/60 text-xs">Administrator • Active</p>
+    <div className="absolute top-full right-0 mt-2 w-80 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg shadow-lg overflow-hidden">
+      <div ref={dropdownRef}>
+        {/* User Info Header */}
+        <div className="p-4 border-b border-white/10 bg-white/5">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
+              <User size={20} className="text-white" />
+            </div>
+            <div>
+              <p className="text-white font-medium">John Doe</p>
+              <p className="text-white/70 text-sm">john.doe@autoparts.com</p>
+              <p className="text-white/60 text-xs">Administrator • Active</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Menu Items */}
-      <div className="py-2">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          return (
+        {/* Menu Items */}
+        <div className="py-2">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.label}
+                onClick={item.onClick}
+                className="w-full px-4 py-3 flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200 group"
+              >
+                <Icon size={16} className="flex-shrink-0" />
+                <div className="flex-1 text-left">
+                  <div className="font-medium text-sm">{item.label}</div>
+                  <div className="text-xs text-white/50 group-hover:text-white/70">
+                    {item.description}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+
+          {/* Logout Button */}
+          <div className="border-t border-white/10 mt-2 pt-2">
             <button
-              key={item.label}
-              onClick={item.onClick}
-              className="w-full px-4 py-3 flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200 group"
+              onClick={handleLogout}
+              className="w-full px-4 py-3 flex items-center gap-3 text-red-300 hover:text-red-200 hover:bg-red-500/20 transition-all duration-200 group"
             >
-              <Icon size={16} className="flex-shrink-0" />
+              <User size={16} className="flex-shrink-0" />
               <div className="flex-1 text-left">
-                <div className="font-medium text-sm">{item.label}</div>
-                <div className="text-xs text-white/50 group-hover:text-white/70">
-                  {item.description}
+                <div className="font-medium text-sm">Logout</div>
+                <div className="text-xs text-red-400/70 group-hover:text-red-300/90">
+                  Sign out of your account
                 </div>
               </div>
             </button>
-          );
-        })}
-
-        {/* Logout Button */}
-        <div className="border-t border-white/10 mt-2 pt-2">
-          <button
-            onClick={handleLogout}
-            className="w-full px-4 py-3 flex items-center gap-3 text-red-300 hover:text-red-200 hover:bg-red-500/20 transition-all duration-200 group"
-          >
-            <User size={16} className="flex-shrink-0" />
-            <div className="flex-1 text-left">
-              <div className="font-medium text-sm">Logout</div>
-              <div className="text-xs text-red-400/70 group-hover:text-red-300/90">
-                Sign out of your account
-              </div>
-            </div>
-          </button>
+          </div>
         </div>
-      </div>
 
-      {/* Footer */}
-      <div className="px-4 py-2 border-t border-white/10 bg-white/5">
-        <p className="text-white/50 text-xs text-center">
-          AutoParts Pro v1.0.0
-        </p>
+        {/* Footer */}
+        <div className="px-4 py-2 border-t border-white/10 bg-white/5">
+          <p className="text-white/50 text-xs text-center">
+            AutoParts Pro v1.0.0
+          </p>
+        </div>
       </div>
     </div>
   );
