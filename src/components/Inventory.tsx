@@ -21,6 +21,7 @@ import {
   AlertTriangle,
   Bell,
   X,
+  Eye,
 } from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import { Button } from "@/components/ui/button";
