@@ -73,26 +73,32 @@ export const AddPaymentDialog: React.FC<AddPaymentDialogProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <GlassCard className="w-full max-w-lg">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-xl font-bold text-white">
-                Add Payment Record
-              </h2>
-              <p className="text-white/70 text-sm">For {employeeName}</p>
+      {/* Account for bottom navigation bar height on mobile */}
+      <div className="w-full max-w-lg max-h-[calc(100vh-120px)] flex flex-col">
+        <GlassCard className="flex-1 flex flex-col overflow-hidden">
+          {/* Fixed Header */}
+          <div className="flex-shrink-0 p-6 pb-0">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-white">
+                  Add Payment Record
+                </h2>
+                <p className="text-white/70 text-sm">For {employeeName}</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="text-white hover:bg-white/10"
+              >
+                ×
+              </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="text-white hover:bg-white/10"
-            >
-              ×
-            </Button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto px-6">
+            <form onSubmit={handleSubmit} className="space-y-4 pb-4">
             {/* Payment Date */}
             <div className="space-y-2">
               <Label className="text-white flex items-center gap-2">
