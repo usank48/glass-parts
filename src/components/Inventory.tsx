@@ -111,13 +111,11 @@ export const Inventory = () => {
         partNumber: product.partNumber,
         stock: product.stock,
         status: product.status,
-        // Use more vibrant and distinct colors
         fill: product.status === "Low Stock" ? "#ef4444" : "#10b981",
-        // Alternative gradient colors for better visibility
         color:
           product.status === "Low Stock"
-            ? "hsl(0, 84%, 60%)" // Red for low stock
-            : "hsl(142, 76%, 36%)", // Green for in stock
+            ? "hsl(0, 84%, 60%)"
+            : "hsl(142, 76%, 36%)",
         index,
       }));
   };
@@ -153,7 +151,6 @@ export const Inventory = () => {
   // Group products by selected sort method
   const getGroupedData = (): GroupedData[] => {
     if (sortMethod === "category") {
-      // Group by category
       const categoryGroups = products.reduce(
         (acc, product) => {
           const category = product.category;
@@ -174,7 +171,6 @@ export const Inventory = () => {
         }))
         .sort((a, b) => a.name.localeCompare(b.name));
     } else if (sortMethod === "vehicle") {
-      // Group by vehicle
       const vehicleGroups = products.reduce(
         (acc, product) => {
           const vehicle = product.vehicle;
@@ -195,7 +191,6 @@ export const Inventory = () => {
         }))
         .sort((a, b) => a.name.localeCompare(b.name));
     } else {
-      // All products view - return as single group
       return [
         {
           id: "all-products",
@@ -262,110 +257,30 @@ export const Inventory = () => {
 
   // Handle product save from detail dialog
   const handleProductSave = async (updatedProduct: InventoryItem) => {
-    // In a real implementation, this would update the product in the database
-    // For now, we'll show success feedback and close the dialog
     toast.success("Product updated successfully");
     setShowProductDetail(false);
     setSelectedProduct(null);
   };
 
   const handleExcelImport = (importedData: InventoryData[]) => {
-    let updatedCount = 0;
-    let newCount = 0;
-    const updatedItems: Array<{
-      partNumber: string;
-      partName: string;
-      oldStock: number;
-      newStock: number;
-    }> = [];
-    const newItems: Array<{
-      partNumber: string;
-      partName: string;
-      stock: number;
-    }> = [];
-
-    // Note: In a real implementation, this would need to work with the hook's data
-    // For now, we'll show success feedback
     toast.success(
       "Excel import functionality will be integrated with the new inventory system",
     );
-
     console.log("Import Results:", {
-      updated: updatedItems,
-      new: newItems,
       totalProcessed: importedData.length,
     });
   };
 
   const handleExcelExport = () => {
-    // Convert InventoryItem to the expected format for export
     const exportData = products.map((product) => ({
       ...product,
-      // Add any missing fields that might be expected by the export function
     }));
     exportInventoryToExcel(exportData);
     toast.success("Inventory exported successfully!");
   };
 
-  // Get current sort method display info
-  const getSortDisplayInfo = () => {
-    if (sortMethod === "category") {
-      return {
-        icon: Grid3X3,
-        label: "Categories",
-        description: "Grouped by product categories",
-      };
-    } else if (sortMethod === "vehicle") {
-      return {
-        icon: Car,
-        label: "Vehicle Compatibility",
-        description: "Grouped by vehicle models",
-      };
-    } else {
-      return {
-        icon: List,
-        label: "All Products",
-        description: "All products in a single list",
-      };
-    }
-  };
-
-  // Get product sort display info
-  const getProductSortDisplayInfo = () => {
-    switch (productSortMethod) {
-      case "alphabetical":
-        return {
-          icon: AlignLeft,
-          label: "Alphabetical",
-          description: "Sorted A-Z by name",
-        };
-      case "quantity-asc":
-        return {
-          icon: ArrowUp,
-          label: "Quantity Low to High",
-          description: "Sorted by stock quantity ascending",
-        };
-      case "quantity-desc":
-        return {
-          icon: ArrowDown,
-          label: "Quantity High to Low",
-          description: "Sorted by stock quantity descending",
-        };
-      default:
-        return {
-          icon: ArrowUpDown,
-          label: "Default",
-          description: "Default sorting",
-        };
-    }
-  };
-
-  const sortDisplayInfo = getSortDisplayInfo();
-  const productSortDisplayInfo = getProductSortDisplayInfo();
-  const SortIcon = sortDisplayInfo.icon;
-
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-6 w-full max-w-none">
       {/* Stock Alerts Banner */}
       {stockAlerts.length > 0 && (
         <GlassCard className="p-4 border-l-4 border-l-yellow-500">
@@ -374,7 +289,7 @@ export const Inventory = () => {
               className="text-yellow-400 flex-shrink-0 mt-1"
               size={20}
             />
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <h3 className="text-white font-semibold text-sm mb-2">
                 Stock Alerts ({stockAlerts.length})
               </h3>
@@ -384,11 +299,11 @@ export const Inventory = () => {
                     key={alert.id}
                     className="flex items-center justify-between bg-white/5 p-2 rounded"
                   >
-                    <div className="flex-1">
-                      <span className="text-white text-sm font-medium">
+                    <div className="flex-1 min-w-0">
+                      <span className="text-white text-sm font-medium truncate block">
                         {alert.itemName}
                       </span>
-                      <span className="text-white/70 text-xs ml-2">
+                      <span className="text-white/70 text-xs">
                         ({alert.currentStock} units remaining)
                       </span>
                     </div>
@@ -396,7 +311,7 @@ export const Inventory = () => {
                       size="sm"
                       variant="ghost"
                       onClick={() => dismissAlert(alert.id)}
-                      className="text-white/70 hover:text-white p-1 h-auto"
+                      className="text-white/70 hover:text-white p-1 h-auto flex-shrink-0"
                     >
                       <X size={14} />
                     </Button>
@@ -413,93 +328,95 @@ export const Inventory = () => {
         </GlassCard>
       )}
 
-      {/* Header Section - Responsive */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">
-            Inventory Management
-          </h1>
-          <div className="flex items-center gap-4 mt-1 text-sm sm:text-base">
-            <p className="text-white/70">Manage your car parts inventory</p>
-            {isLoading && (
-              <div className="flex items-center gap-2 text-blue-400">
-                <div className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-xs">Syncing...</span>
-              </div>
+      {/* Header Section */}
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white truncate">
+              Inventory Management
+            </h1>
+            <div className="flex items-center gap-4 mt-1 text-sm">
+              <p className="text-white/70">Manage your car parts inventory</p>
+              {isLoading && (
+                <div className="flex items-center gap-2 text-blue-400">
+                  <div className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                  <span className="text-xs">Syncing...</span>
+                </div>
+              )}
+            </div>
+            {error && (
+              <p className="text-red-400 text-sm mt-1">Error: {error}</p>
             )}
           </div>
-          {error && <p className="text-red-400 text-sm mt-1">Error: {error}</p>}
-        </div>
 
-        {/* Action Buttons - Responsive Grid */}
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
-          <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3">
-            <Button
-              onClick={() => setShowExcelImport(true)}
-              size="sm"
-              className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white border-0 text-xs sm:text-sm"
-            >
-              <Upload size={16} className="mr-1 sm:mr-2" />
-              <span className="hidden xs:inline">Import</span>
-              <span className="xs:hidden">Import</span>
-            </Button>
-            <Button
-              onClick={handleExcelExport}
-              size="sm"
-              variant="outline"
-              className="!bg-transparent border-white/20 text-white hover:bg-white/20 text-xs sm:text-sm backdrop-blur-sm"
-            >
-              <Download size={16} className="mr-1 sm:mr-2" />
-              <span className="hidden xs:inline">Export</span>
-              <span className="xs:hidden">Export</span>
-            </Button>
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:flex-shrink-0">
+            <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3">
+              <Button
+                onClick={() => setShowExcelImport(true)}
+                size="sm"
+                className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white border-0 text-xs sm:text-sm"
+              >
+                <Upload size={16} className="mr-1 sm:mr-2" />
+                Import
+              </Button>
+              <Button
+                onClick={handleExcelExport}
+                size="sm"
+                variant="outline"
+                className="!bg-transparent border-white/20 text-white hover:bg-white/20 text-xs sm:text-sm backdrop-blur-sm"
+              >
+                <Download size={16} className="mr-1 sm:mr-2" />
+                Export
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3">
+              <Button
+                onClick={() => setShowAddProductDialog(true)}
+                size="sm"
+                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 text-xs sm:text-sm"
+              >
+                <Plus size={16} className="mr-1 sm:mr-2" />
+                Add Product
+              </Button>
+              <Button
+                onClick={refreshInventory}
+                size="sm"
+                variant="outline"
+                className="!bg-transparent border-white/20 text-white hover:bg-white/20 text-xs sm:text-sm backdrop-blur-sm"
+                disabled={isLoading}
+              >
+                <Bell size={16} className="mr-1 sm:mr-2" />
+                Sync
+              </Button>
+            </div>
           </div>
-          <Button
-            onClick={() => setShowAddProductDialog(true)}
-            size="sm"
-            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 w-full sm:w-auto text-xs sm:text-sm"
-          >
-            <Plus size={16} className="mr-1 sm:mr-2" />
-            Add Product
-          </Button>
-          <Button
-            onClick={refreshInventory}
-            size="sm"
-            variant="outline"
-            className="!bg-transparent border-white/20 text-white hover:bg-white/20 text-xs sm:text-sm backdrop-blur-sm"
-            disabled={isLoading}
-          >
-            <Bell size={16} className="mr-1 sm:mr-2" />
-            Sync
-          </Button>
         </div>
       </div>
 
       {/* Inventory Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <GlassCard className="p-4 sm:p-6">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 flex-shrink-0">
-              <Package className="text-white" size={20} />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <GlassCard className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 flex-shrink-0">
+              <Package className="text-white" size={18} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white/70 text-xs sm:text-sm">Total Items</p>
-              <p className="text-xl sm:text-2xl font-bold text-white">
-                {products.length}
-              </p>
+              <p className="text-white/70 text-xs">Total Items</p>
+              <p className="text-xl font-bold text-white">{products.length}</p>
             </div>
           </div>
         </GlassCard>
 
-        <GlassCard className="p-4 sm:p-6">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-r from-green-500 to-teal-600 flex-shrink-0">
-              <BarChart3 className="text-white" size={20} />
+        <GlassCard className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-r from-green-500 to-teal-600 flex-shrink-0">
+              <BarChart3 className="text-white" size={18} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white/70 text-xs sm:text-sm">Total Value</p>
+              <p className="text-white/70 text-xs">Total Value</p>
               <p
-                className="text-lg sm:text-2xl font-bold text-white truncate"
+                className="text-xl font-bold text-white truncate"
                 title={formatInventoryValue(getStockValue())}
               >
                 {formatInventoryValue(getStockValue(), true)}
@@ -508,28 +425,28 @@ export const Inventory = () => {
           </div>
         </GlassCard>
 
-        <GlassCard className="p-4 sm:p-6">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-600 flex-shrink-0">
-              <AlertTriangle className="text-white" size={20} />
+        <GlassCard className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-600 flex-shrink-0">
+              <AlertTriangle className="text-white" size={18} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white/70 text-xs sm:text-sm">Low Stock</p>
-              <p className="text-xl sm:text-2xl font-bold text-white">
+              <p className="text-white/70 text-xs">Low Stock</p>
+              <p className="text-xl font-bold text-white">
                 {getLowStockItems().length}
               </p>
             </div>
           </div>
         </GlassCard>
 
-        <GlassCard className="p-4 sm:p-6">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-r from-red-500 to-pink-600 flex-shrink-0">
-              <Bell className="text-white" size={20} />
+        <GlassCard className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-r from-red-500 to-pink-600 flex-shrink-0">
+              <Bell className="text-white" size={18} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white/70 text-xs sm:text-sm">Alerts</p>
-              <p className="text-xl sm:text-2xl font-bold text-white">
+              <p className="text-white/70 text-xs">Alerts</p>
+              <p className="text-xl font-bold text-white">
                 {stockAlerts.length}
               </p>
             </div>
@@ -537,26 +454,23 @@ export const Inventory = () => {
         </GlassCard>
       </div>
 
-      {/* Top 10 Stock Chart - Responsive */}
-      <GlassCard className="p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600">
-              <BarChart3 className="text-white" size={20} />
-            </div>
-            <div>
-              <h3 className="text-white font-semibold text-base sm:text-lg">
-                Top 10 Items by Stock
-              </h3>
-              <p className="text-white/70 text-xs sm:text-sm">
-                Current inventory levels for highest stocked items
-              </p>
-            </div>
+      {/* Top 10 Stock Chart */}
+      <GlassCard className="p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600">
+            <BarChart3 className="text-white" size={20} />
+          </div>
+          <div>
+            <h3 className="text-white font-semibold text-lg">
+              Top 10 Items by Stock
+            </h3>
+            <p className="text-white/70 text-sm">
+              Current inventory levels for highest stocked items
+            </p>
           </div>
         </div>
 
-        {/* Chart Container - Responsive Height */}
-        <div className="h-64 sm:h-80 bg-white/5 rounded-lg p-2 sm:p-4 overflow-hidden">
+        <div className="h-80 bg-white/5 rounded-lg p-4">
           <ChartContainer config={chartConfig}>
             <BarChart
               data={getTop10StockData()}
@@ -637,8 +551,8 @@ export const Inventory = () => {
           </ChartContainer>
         </div>
 
-        {/* Chart Legend - Responsive */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 mt-3 sm:mt-4 text-xs sm:text-sm">
+        {/* Chart Legend */}
+        <div className="flex items-center justify-center gap-6 mt-4 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded bg-green-500"></div>
             <span className="text-white/70">In Stock (10+ units)</span>
@@ -650,11 +564,11 @@ export const Inventory = () => {
         </div>
       </GlassCard>
 
-      {/* Search and Sort - Side by Side */}
-      <GlassCard className="p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+      {/* Search and Filters */}
+      <GlassCard className="p-6">
+        <div className="space-y-4">
           {/* Search Bar */}
-          <div className="flex-1 relative">
+          <div className="relative">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50"
               size={18}
@@ -663,34 +577,34 @@ export const Inventory = () => {
               placeholder="Search products..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50 text-sm sm:text-base"
+              className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
             />
           </div>
 
-          {/* View Type Dropdown */}
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <SortIcon className="text-white/70 flex-shrink-0" size={18} />
+          {/* Filter Controls */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* View Type */}
             <Select
               value={sortMethod}
               onValueChange={(value: SortMethod) => setSortMethod(value)}
             >
-              <SelectTrigger className="w-full sm:w-56 bg-white/10 border-white/20 text-white text-sm">
+              <SelectTrigger className="w-full sm:w-48 bg-white/10 border-white/20 text-white">
                 <SelectValue placeholder="View by..." />
               </SelectTrigger>
               <SelectContent className="bg-white/90 backdrop-blur-md border border-white/20">
-                <SelectItem value="all" className="text-black text-sm">
+                <SelectItem value="all" className="text-black">
                   <div className="flex items-center gap-2">
                     <List size={14} />
                     <span>All Products</span>
                   </div>
                 </SelectItem>
-                <SelectItem value="category" className="text-black text-sm">
+                <SelectItem value="category" className="text-black">
                   <div className="flex items-center gap-2">
                     <Grid3X3 size={14} />
                     <span>Categories</span>
                   </div>
                 </SelectItem>
-                <SelectItem value="vehicle" className="text-black text-sm">
+                <SelectItem value="vehicle" className="text-black">
                   <div className="flex items-center gap-2">
                     <Car size={14} />
                     <span>Vehicle Compatibility</span>
@@ -698,105 +612,77 @@ export const Inventory = () => {
                 </SelectItem>
               </SelectContent>
             </Select>
-          </div>
 
-          {/* Product Sort Dropdown - Only show for All Products view */}
-          {sortMethod === "all" && (
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <ArrowUpDown className="text-white/70 flex-shrink-0" size={18} />
+            {/* Product Sort */}
+            {sortMethod === "all" && (
               <Select
                 value={productSortMethod}
                 onValueChange={(value: ProductSortMethod) =>
                   setProductSortMethod(value)
                 }
               >
-                <SelectTrigger className="w-full sm:w-56 bg-white/10 border-white/20 text-white text-sm">
+                <SelectTrigger className="w-full sm:w-48 bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Sort by..." />
                 </SelectTrigger>
                 <SelectContent className="bg-white/90 backdrop-blur-md border border-white/20">
-                  <SelectItem
-                    value="quantity-desc"
-                    className="text-black text-sm"
-                  >
-                    <div className="flex items-center gap-2">
-                      <ArrowDown size={14} />
-                      <span>Quantity: High to Low</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem
-                    value="quantity-asc"
-                    className="text-black text-sm"
-                  >
-                    <div className="flex items-center gap-2">
-                      <ArrowUp size={14} />
-                      <span>Quantity: Low to High</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem
-                    value="alphabetical"
-                    className="text-black text-sm"
-                  >
+                  <SelectItem value="alphabetical" className="text-black">
                     <div className="flex items-center gap-2">
                       <AlignLeft size={14} />
                       <span>Alphabetical A-Z</span>
                     </div>
                   </SelectItem>
+                  <SelectItem value="quantity-desc" className="text-black">
+                    <div className="flex items-center gap-2">
+                      <ArrowDown size={14} />
+                      <span>Quantity: High to Low</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="quantity-asc" className="text-black">
+                    <div className="flex items-center gap-2">
+                      <ArrowUp size={14} />
+                      <span>Quantity: Low to High</span>
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
+            )}
+
+            {/* View Toggle */}
+            <div className="flex items-center gap-1 bg-white/10 rounded-lg p-1 ml-auto">
+              <Button
+                size="sm"
+                variant={viewMode === "tile" ? "default" : "ghost"}
+                onClick={() => setViewMode("tile")}
+                className={`p-2 h-8 ${
+                  viewMode === "tile"
+                    ? "bg-white/20 text-white hover:bg-white/30"
+                    : "!bg-transparent text-white/70 hover:text-white hover:bg-white/10"
+                }`}
+                title="Tile View"
+              >
+                <LayoutGrid size={16} />
+              </Button>
+              <Button
+                size="sm"
+                variant={viewMode === "list" ? "default" : "ghost"}
+                onClick={() => setViewMode("list")}
+                className={`p-2 h-8 ${
+                  viewMode === "list"
+                    ? "bg-white/20 text-white hover:bg-white/30"
+                    : "!bg-transparent text-white/70 hover:text-white hover:bg-white/10"
+                }`}
+                title="List View"
+              >
+                <Menu size={16} />
+              </Button>
             </div>
-          )}
-
-          {/* View Toggle */}
-          <div className="flex items-center gap-1 bg-white/10 rounded-lg p-1">
-            <Button
-              size="sm"
-              variant={viewMode === "tile" ? "default" : "ghost"}
-              onClick={() => setViewMode("tile")}
-              className={`p-2 h-8 ${
-                viewMode === "tile"
-                  ? "bg-white/20 text-white hover:bg-white/30"
-                  : "!bg-transparent text-white/70 hover:text-white hover:bg-white/10"
-              }`}
-              title="Tile View"
-            >
-              <LayoutGrid size={16} />
-            </Button>
-            <Button
-              size="sm"
-              variant={viewMode === "list" ? "default" : "ghost"}
-              onClick={() => setViewMode("list")}
-              className={`p-2 h-8 ${
-                viewMode === "list"
-                  ? "bg-white/20 text-white hover:bg-white/30"
-                  : "!bg-transparent text-white/70 hover:text-white hover:bg-white/10"
-              }`}
-              title="List View"
-            >
-              <Menu size={16} />
-            </Button>
           </div>
-        </div>
-
-        {/* Sort Info */}
-        <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs sm:text-sm text-white/70">
-          <div className="flex items-center gap-2">
-            <SortDesc size={14} />
-            <span>View: {sortDisplayInfo.label}</span>
-          </div>
-          <span className="hidden sm:inline">•</span>
-          <span>{sortDisplayInfo.description}</span>
-          {sortMethod === "all" && (
-            <>
-              <span className="hidden sm:inline">•</span>
-              <span>Sort: {productSortDisplayInfo.label}</span>
-            </>
-          )}
         </div>
       </GlassCard>
 
-      {/* Groups - Responsive */}
-      <div className="space-y-3 sm:space-y-4">
-        <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">
+      {/* Products Section */}
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold text-white">
           {sortMethod === "category"
             ? "CATEGORIES"
             : sortMethod === "vehicle"
@@ -811,14 +697,14 @@ export const Inventory = () => {
 
           return (
             <GlassCard key={group.id} className="overflow-hidden">
-              {/* Group Header - Only show for grouped views or make non-clickable for All Products */}
+              {/* Group Header */}
               {sortMethod !== "all" ? (
                 <div
-                  className="p-4 sm:p-6 cursor-pointer hover:bg-white/10 transition-all duration-200"
+                  className="p-6 cursor-pointer hover:bg-white/10 transition-all duration-200"
                   onClick={() => toggleGroup(group.id)}
                 >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-2 sm:gap-4 flex-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {isExpanded ? (
                           <ChevronDown className="text-white" size={20} />
@@ -832,55 +718,48 @@ export const Inventory = () => {
                         )}
                       </div>
 
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 flex-1 min-w-0">
-                        <h3 className="text-lg sm:text-xl font-bold text-white tracking-wide truncate">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xl font-bold text-white tracking-wide truncate">
                           {group.name}
                         </h3>
-
-                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm">
-                          <span className="text-white/70">
+                        <div className="flex items-center gap-3 text-sm text-white/70 mt-1">
+                          <span>
                             {getTotalProductsInGroup(group)}{" "}
                             {getTotalProductsInGroup(group) === 1
                               ? "Product"
                               : "Products"}
                           </span>
-                          <span className="text-white/70 hidden sm:inline">
-                            •
-                          </span>
-                          <span className="text-white/70">
-                            {stockStatus.totalStock} Total Stock
-                          </span>
+                          <span>•</span>
+                          <span>{stockStatus.totalStock} Total Stock</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-end sm:justify-start">
-                      <span
-                        className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
-                          stockStatus.status === "In Stock"
-                            ? "bg-green-500/20 text-green-300"
-                            : "bg-red-500/20 text-red-300"
-                        }`}
-                      >
-                        {stockStatus.status === "Low Stock"
-                          ? `${stockStatus.count} Low Stock`
-                          : "All In Stock"}
-                      </span>
-                    </div>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium flex-shrink-0 ${
+                        stockStatus.status === "In Stock"
+                          ? "bg-green-500/20 text-green-300"
+                          : "bg-red-500/20 text-red-300"
+                      }`}
+                    >
+                      {stockStatus.status === "Low Stock"
+                        ? `${stockStatus.count} Low Stock`
+                        : "All In Stock"}
+                    </span>
                   </div>
                 </div>
               ) : (
-                <div className="p-4 sm:p-6 bg-white/5">
+                <div className="p-6 bg-white/5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <List className="text-white/70" size={20} />
                       <div>
-                        <h3 className="text-lg sm:text-xl font-bold text-white">
+                        <h3 className="text-xl font-bold text-white">
                           All Products
                         </h3>
                         <p className="text-white/70 text-sm">
-                          {getTotalProductsInGroup(group)} products •{" "}
-                          {productSortDisplayInfo.description}
+                          {getTotalProductsInGroup(group)} products • Sorted by
+                          quantity
                         </p>
                       </div>
                     </div>
@@ -899,63 +778,39 @@ export const Inventory = () => {
                 </div>
               )}
 
-              {/* Expanded Products - Responsive Grid */}
+              {/* Products Grid/List */}
               {isExpanded && (
                 <div
                   className={
                     sortMethod !== "all" ? "border-t border-white/20" : ""
                   }
                 >
-                  <div className="p-4 sm:p-6 pt-3 sm:pt-4">
+                  <div className="p-6 pt-4">
                     {viewMode === "tile" ? (
                       // Tile View
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {group.products.map((product) => (
                           <div
                             key={product.id}
-                            className="p-3 sm:p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/15 hover:border-blue-400/30 transition-all duration-200 backdrop-blur-sm cursor-pointer group"
+                            className="p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/15 hover:border-blue-400/30 transition-all duration-200 cursor-pointer group"
                             onClick={() => handleProductClick(product)}
-                            title="Click to view product details"
                           >
                             <div className="flex items-start justify-between mb-3">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 group-hover:from-blue-400 group-hover:to-purple-500 transition-all duration-200">
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 group-hover:from-blue-400 group-hover:to-purple-500 transition-all duration-200 flex-shrink-0">
                                   <Package className="text-white" size={16} />
                                 </div>
-                                <div>
-                                  <h4 className="text-white font-semibold text-sm group-hover:text-blue-300 transition-colors duration-200 flex items-center gap-1">
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="text-white font-semibold text-sm group-hover:text-blue-300 transition-colors duration-200 truncate">
                                     {product.name}
-                                    <span className="text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                      →
-                                    </span>
                                   </h4>
-                                  <p className="text-white/70 text-xs">
+                                  <p className="text-white/70 text-xs truncate">
                                     {product.brand}
                                   </p>
-                                  {sortMethod === "category" && (
-                                    <p className="text-white/60 text-xs">
-                                      {product.vehicle}
-                                    </p>
-                                  )}
-                                  {sortMethod === "vehicle" && (
-                                    <p className="text-white/60 text-xs">
-                                      {product.category}
-                                    </p>
-                                  )}
-                                  {sortMethod === "all" && (
-                                    <>
-                                      <p className="text-white/60 text-xs">
-                                        {product.category}
-                                      </p>
-                                      <p className="text-white/60 text-xs">
-                                        {product.vehicle}
-                                      </p>
-                                    </>
-                                  )}
                                 </div>
                               </div>
                               <span
-                                className={`px-2 py-1 rounded-full text-xs font-medium border ${getInventoryStatusColor(product)}`}
+                                className={`px-2 py-1 rounded-full text-xs font-medium border flex-shrink-0 ${getInventoryStatusColor(product)}`}
                               >
                                 {product.status}
                               </span>
@@ -964,7 +819,7 @@ export const Inventory = () => {
                             <div className="space-y-1 text-xs">
                               <div className="flex justify-between">
                                 <span className="text-white/70">Part #:</span>
-                                <span className="text-white font-medium">
+                                <span className="text-white font-medium truncate ml-2">
                                   {product.partNumber}
                                 </span>
                               </div>
@@ -987,14 +842,6 @@ export const Inventory = () => {
                                 </span>
                               </div>
                             </div>
-
-                            {/* Tap for details indicator */}
-                            <div className="mt-3 pt-2 border-t border-white/10">
-                              <div className="flex items-center justify-center gap-1 text-blue-300/70 group-hover:text-blue-300 transition-colors duration-200">
-                                <Eye size={12} />
-                                <span className="text-xs">Tap for details</span>
-                              </div>
-                            </div>
                           </div>
                         ))}
                       </div>
@@ -1004,53 +851,38 @@ export const Inventory = () => {
                         {group.products.map((product) => (
                           <div
                             key={product.id}
-                            className="p-3 sm:p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/15 hover:border-blue-400/30 transition-all duration-200 backdrop-blur-sm cursor-pointer group"
+                            className="p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/15 hover:border-blue-400/30 transition-all duration-200 cursor-pointer group"
                             onClick={() => handleProductClick(product)}
-                            title="Click to view product details"
                           >
                             <div className="flex items-center gap-4">
-                              {/* Product Icon */}
                               <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 group-hover:from-blue-400 group-hover:to-purple-500 transition-all duration-200 flex-shrink-0">
                                 <Package className="text-white" size={16} />
                               </div>
 
-                              {/* Product Info */}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <h4 className="text-white font-semibold text-sm group-hover:text-blue-300 transition-colors duration-200 flex items-center gap-1 truncate">
+                                  <h4 className="text-white font-semibold text-sm group-hover:text-blue-300 transition-colors duration-200 truncate">
                                     {product.name}
-                                    <span className="text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                      →
-                                    </span>
                                   </h4>
                                   <span
-                                    className={`px-2 py-1 rounded-full text-xs font-medium border ${getInventoryStatusColor(product)} flex-shrink-0`}
+                                    className={`px-2 py-1 rounded-full text-xs font-medium border flex-shrink-0 ${getInventoryStatusColor(product)}`}
                                   >
                                     {product.status}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-4 text-xs text-white/70">
-                                  <span>{product.brand}</span>
+                                  <span className="truncate">
+                                    {product.brand}
+                                  </span>
                                   <span>•</span>
-                                  <span>{product.partNumber}</span>
+                                  <span className="truncate">
+                                    {product.partNumber}
+                                  </span>
                                   <span>•</span>
                                   <span>{product.stock} units</span>
-                                  {sortMethod === "all" && (
-                                    <>
-                                      <span>•</span>
-                                      <span>{product.category}</span>
-                                    </>
-                                  )}
                                 </div>
-                                {(sortMethod === "category" ||
-                                  sortMethod === "all") && (
-                                  <div className="text-xs text-white/60 mt-1">
-                                    {product.vehicle}
-                                  </div>
-                                )}
                               </div>
 
-                              {/* Pricing */}
                               <div className="flex items-center gap-6 text-right flex-shrink-0">
                                 <div>
                                   <div className="text-xs text-white/70">
@@ -1068,12 +900,10 @@ export const Inventory = () => {
                                     ₹{product.sellingPrice}
                                   </div>
                                 </div>
-                                <div className="w-8 flex justify-center">
-                                  <Eye
-                                    size={16}
-                                    className="text-blue-300/70 group-hover:text-blue-300 transition-colors duration-200"
-                                  />
-                                </div>
+                                <Eye
+                                  size={16}
+                                  className="text-blue-300/70 group-hover:text-blue-300 transition-colors duration-200"
+                                />
                               </div>
                             </div>
                           </div>
@@ -1088,7 +918,7 @@ export const Inventory = () => {
         })}
       </div>
 
-      {/* Excel Import Dialog */}
+      {/* Dialogs */}
       <ExcelImportDialog
         isOpen={showExcelImport}
         onClose={() => setShowExcelImport(false)}
@@ -1096,7 +926,6 @@ export const Inventory = () => {
         existingProducts={products}
       />
 
-      {/* Product Detail Dialog */}
       <ProductDetailDialog
         open={showProductDetail}
         onClose={() => {
@@ -1108,20 +937,18 @@ export const Inventory = () => {
         onSave={handleProductSave}
       />
 
-      {/* Add Product Dialog */}
       {showAddProductDialog && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] overflow-y-auto">
           <div className="min-h-full flex items-start justify-center p-4 py-8">
             <div className="bg-slate-900/95 backdrop-blur-md border border-white/20 rounded-lg w-full max-w-4xl my-8 mb-32">
-              {/* Fixed Header */}
               <div className="p-6 pb-4 border-b border-white/20">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
+                    <div className="p-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
                       <Package className="text-white" size={20} />
                     </div>
                     <div>
-                      <h2 className="text-lg sm:text-xl font-bold text-white">
+                      <h2 className="text-xl font-bold text-white">
                         Add New Product
                       </h2>
                       <p className="text-white/70 text-sm">
@@ -1138,8 +965,6 @@ export const Inventory = () => {
                   </Button>
                 </div>
               </div>
-
-              {/* Content */}
               <div className="p-6">
                 <AddProductDialog
                   onClose={() => setShowAddProductDialog(false)}
