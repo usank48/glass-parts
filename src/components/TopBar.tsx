@@ -22,6 +22,22 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuClick }) => {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(3); // Example notification count
 
+  // Dialog states
+  const [dialogs, setDialogs] = useState({
+    profile: false,
+    settings: false,
+    changePassword: false,
+  });
+
+  const openDialog = (dialogType: keyof typeof dialogs) => {
+    setDialogs((prev) => ({ ...prev, [dialogType]: true }));
+    setIsUserDropdownOpen(false);
+  };
+
+  const closeDialog = (dialogType: keyof typeof dialogs) => {
+    setDialogs((prev) => ({ ...prev, [dialogType]: false }));
+  };
+
   return (
     <div className="fixed top-0 left-0 right-0 z-40 bg-white/10 backdrop-blur-md border-b border-white/20">
       <div className="flex items-center justify-between px-4 py-3">
@@ -91,18 +107,48 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuClick }) => {
               <div className="absolute top-full right-0 mt-2 w-80 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg shadow-lg overflow-hidden">
                 <TopBarUserDropdown
                   onClose={() => setIsUserDropdownOpen(false)}
+                  onOpenProfile={() => openDialog("profile")}
+                  onOpenSettings={() => openDialog("settings")}
+                  onOpenChangePassword={() => openDialog("changePassword")}
                 />
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Dialog Components */}
+      <UserProfileDialog
+        isOpen={dialogs.profile}
+        onClose={() => closeDialog("profile")}
+        mode="view"
+      />
+      <UserSettingsDialog
+        isOpen={dialogs.settings}
+        onClose={() => closeDialog("settings")}
+      />
+      <ChangePasswordDialog
+        isOpen={dialogs.changePassword}
+        onClose={() => closeDialog("changePassword")}
+      />
     </div>
   );
 };
 
-// Simplified TopBar version of UserDropdown
-const TopBarUserDropdown: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+// TopBar User Dropdown with functional handlers
+interface TopBarUserDropdownProps {
+  onClose: () => void;
+  onOpenProfile: () => void;
+  onOpenSettings: () => void;
+  onOpenChangePassword: () => void;
+}
+
+const TopBarUserDropdown: React.FC<TopBarUserDropdownProps> = ({
+  onClose,
+  onOpenProfile,
+  onOpenSettings,
+  onOpenChangePassword,
+}) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -122,23 +168,53 @@ const TopBarUserDropdown: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to logout?")) {
-      console.log("Logging out...");
-      alert("Logout functionality - ready to integrate with your auth system!");
+      // In real app, clear auth tokens, redirect to login, etc.
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userSession");
+      console.log("User logged out");
+      // Simulate redirect
+      window.location.reload();
     }
     onClose();
   };
 
-  const handleAction = (action: string) => {
-    alert(`${action} - ready to implement!`);
+  const handleNotifications = () => {
+    // Toggle notification panel or navigate to notifications page
+    console.log("Opening notifications...");
     onClose();
   };
 
   const menuItems = [
-    { icon: User, label: "View Profile", action: "View Profile" },
-    { icon: User, label: "Edit Profile", action: "Edit Profile" },
-    { icon: User, label: "Settings", action: "Settings" },
-    { icon: User, label: "Change Password", action: "Change Password" },
-    { icon: Bell, label: "Notifications", action: "Notifications" },
+    {
+      icon: User,
+      label: "View Profile",
+      onClick: onOpenProfile,
+      description: "View your profile information",
+    },
+    {
+      icon: Edit,
+      label: "Edit Profile",
+      onClick: () => onOpenProfile(), // Will open in edit mode via profile dialog
+      description: "Update your personal details",
+    },
+    {
+      icon: Settings,
+      label: "Settings",
+      onClick: onOpenSettings,
+      description: "Application preferences",
+    },
+    {
+      icon: Shield,
+      label: "Change Password",
+      onClick: onOpenChangePassword,
+      description: "Update your password",
+    },
+    {
+      icon: Bell,
+      label: "Notifications",
+      onClick: handleNotifications,
+      description: "Manage notification preferences",
+    },
   ];
 
   return (
@@ -164,11 +240,16 @@ const TopBarUserDropdown: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           return (
             <button
               key={item.label}
-              onClick={() => handleAction(item.action)}
-              className="w-full px-4 py-3 flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200"
+              onClick={item.onClick}
+              className="w-full px-4 py-3 flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200 group"
             >
               <Icon size={16} className="flex-shrink-0" />
-              <span className="font-medium text-sm">{item.label}</span>
+              <div className="flex-1 text-left">
+                <div className="font-medium text-sm">{item.label}</div>
+                <div className="text-xs text-white/50 group-hover:text-white/70">
+                  {item.description}
+                </div>
+              </div>
             </button>
           );
         })}
@@ -177,10 +258,15 @@ const TopBarUserDropdown: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <div className="border-t border-white/10 mt-2 pt-2">
           <button
             onClick={handleLogout}
-            className="w-full px-4 py-3 flex items-center gap-3 text-red-300 hover:text-red-200 hover:bg-red-500/20 transition-all duration-200"
+            className="w-full px-4 py-3 flex items-center gap-3 text-red-300 hover:text-red-200 hover:bg-red-500/20 transition-all duration-200 group"
           >
             <User size={16} className="flex-shrink-0" />
-            <span className="font-medium text-sm">Logout</span>
+            <div className="flex-1 text-left">
+              <div className="font-medium text-sm">Logout</div>
+              <div className="text-xs text-red-400/70 group-hover:text-red-300/90">
+                Sign out of your account
+              </div>
+            </div>
           </button>
         </div>
       </div>
