@@ -110,33 +110,30 @@ export const AddAttendanceDialog: React.FC<AddAttendanceDialogProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      {/* Container with height to show all fields while keeping buttons visible */}
-      <div className="w-full max-w-lg h-[320px] md:h-[450px] flex flex-col">
-        <GlassCard className="flex-1 flex flex-col overflow-hidden">
-          {/* Fixed Header */}
-          <div className="flex-shrink-0 p-4 pb-3 border-b border-white/10">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-white">
-                  Add Attendance Record
-                </h2>
-                <p className="text-white/70 text-xs">For {employeeName}</p>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-                className="text-white hover:bg-white/10 h-8 w-8"
-              >
-                ×
-              </Button>
+      <div className="w-full max-w-lg max-h-[90vh] flex flex-col">
+        <GlassCard className="flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-white/10">
+            <div>
+              <h2 className="text-lg font-bold text-white">
+                Add Attendance Record
+              </h2>
+              <p className="text-white/70 text-xs">For {employeeName}</p>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="text-white hover:bg-white/10 h-8 w-8"
+            >
+              ×
+            </Button>
           </div>
 
-          {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden">
-            <div className="p-4 space-y-2">
-              {/* Date */}
+          {/* Form Content */}
+          <form onSubmit={handleSubmit}>
+            <div className="p-4 space-y-3 max-h-[60vh] overflow-y-auto">
+              {/* Date Field */}
               <div className="space-y-1">
                 <Label className="text-white flex items-center gap-2 text-sm">
                   <Calendar size={14} />
@@ -151,7 +148,7 @@ export const AddAttendanceDialog: React.FC<AddAttendanceDialogProps> = ({
                 />
               </div>
 
-              {/* Status */}
+              {/* Status Field */}
               <div className="space-y-1">
                 <Label className="text-white flex items-center gap-2 text-sm">
                   {getStatusIcon(formData.status)}
@@ -269,28 +266,26 @@ export const AddAttendanceDialog: React.FC<AddAttendanceDialogProps> = ({
               </div>
             </div>
 
-            {/* Fixed Footer with Action Buttons */}
-            <form onSubmit={handleSubmit}>
-              <div className="flex-shrink-0 p-4 pt-3 border-t border-white/10">
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onClose}
-                    className="flex-1 border-white/20 text-white hover:bg-white/10 h-9 text-sm"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="flex-1 bg-blue-600/80 hover:bg-blue-700 text-white border-0 h-9 text-sm"
-                  >
-                    Add Attendance
-                  </Button>
-                </div>
+            {/* Footer Buttons */}
+            <div className="p-4 pt-3 border-t border-white/10">
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  className="flex-1 border-white/20 text-white hover:bg-white/10 h-9 text-sm"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1 bg-blue-600/80 hover:bg-blue-700 text-white border-0 h-9 text-sm"
+                >
+                  Add Attendance
+                </Button>
               </div>
-            </form>
-          </div>
+            </div>
+          </form>
         </GlassCard>
       </div>
     </div>
