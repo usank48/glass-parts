@@ -176,6 +176,50 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Inventory quick actions dialog */}
+      <Dialog
+        open={dialogType === "inventory"}
+        onOpenChange={() => setDialogType(null)}
+      >
+        <DialogContent className="bg-white/10 backdrop-blur-md border border-white/20 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white">Inventory Actions</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <button
+              onClick={() => {
+                setDialogType("product");
+              }}
+              className="w-full p-4 bg-gradient-to-r from-blue-500/20 to-purple-600/20 backdrop-blur-md border border-white/20 rounded-lg text-white hover:from-blue-500/30 hover:to-purple-600/30 transition-all duration-200 flex items-center gap-3"
+            >
+              <Package size={20} />
+              <span>Add Single Product</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setDialogType("excel-import");
+              }}
+              className="w-full p-4 bg-gradient-to-r from-green-500/20 to-teal-600/20 backdrop-blur-md border border-white/20 rounded-lg text-white hover:from-green-500/30 hover:to-teal-600/30 transition-all duration-200 flex items-center gap-3"
+            >
+              <Upload size={20} />
+              <span>Import from Excel</span>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Excel Import Dialog */}
+      <ExcelImportDialog
+        open={dialogType === "excel-import"}
+        onClose={() => setDialogType(null)}
+        onImport={(data) => {
+          // This is a placeholder - in real app, you'd handle the import
+          console.log("Imported data:", data);
+          setDialogType(null);
+        }}
+      />
     </>
   );
 };
