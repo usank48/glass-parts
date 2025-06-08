@@ -1110,7 +1110,7 @@ export const Inventory = () => {
 
       {/* Add Product Dialog */}
       {showAddProductDialog && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 pb-20">
           <div className="bg-slate-900/95 backdrop-blur-md border border-white/20 rounded-lg w-full max-w-4xl max-h-[calc(100vh-12rem)] flex flex-col">
             {/* Fixed Header */}
             <div className="p-6 pb-4 border-b border-white/20 flex-shrink-0">
