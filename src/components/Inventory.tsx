@@ -1110,39 +1110,41 @@ export const Inventory = () => {
 
       {/* Add Product Dialog */}
       {showAddProductDialog && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start justify-center z-[9999] p-4 pt-8 pb-32">
-          <div className="bg-slate-900/95 backdrop-blur-md border border-white/20 rounded-lg w-full max-w-4xl max-h-[calc(100vh-20rem)] flex flex-col">
-            {/* Fixed Header */}
-            <div className="p-6 pb-4 border-b border-white/20 flex-shrink-0">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
-                    <Package className="text-white" size={20} />
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] overflow-y-auto">
+          <div className="min-h-full flex items-start justify-center p-4 py-8">
+            <div className="bg-slate-900/95 backdrop-blur-md border border-white/20 rounded-lg w-full max-w-4xl my-8 mb-24">
+              {/* Fixed Header */}
+              <div className="p-6 pb-4 border-b border-white/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
+                      <Package className="text-white" size={20} />
+                    </div>
+                    <div>
+                      <h2 className="text-lg sm:text-xl font-bold text-white">
+                        Add New Product
+                      </h2>
+                      <p className="text-white/70 text-sm">
+                        Add a new product to your inventory
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-lg sm:text-xl font-bold text-white">
-                      Add New Product
-                    </h2>
-                    <p className="text-white/70 text-sm">
-                      Add a new product to your inventory
-                    </p>
-                  </div>
+                  <Button
+                    onClick={() => setShowAddProductDialog(false)}
+                    variant="ghost"
+                    className="text-white/70 hover:text-white p-2"
+                  >
+                    <X size={20} />
+                  </Button>
                 </div>
-                <Button
-                  onClick={() => setShowAddProductDialog(false)}
-                  variant="ghost"
-                  className="text-white/70 hover:text-white p-2"
-                >
-                  <X size={20} />
-                </Button>
               </div>
-            </div>
 
-            {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto p-6">
-              <AddProductDialog
-                onClose={() => setShowAddProductDialog(false)}
-              />
+              {/* Content */}
+              <div className="p-6">
+                <AddProductDialog
+                  onClose={() => setShowAddProductDialog(false)}
+                />
+              </div>
             </div>
           </div>
         </div>
