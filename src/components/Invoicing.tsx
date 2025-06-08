@@ -45,6 +45,7 @@ export const Invoicing = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [showInvoiceDetail, setShowInvoiceDetail] = useState(false);
+  const [invoicesList, setInvoicesList] = useState<Invoice[]>([]);
 
   const invoices: Invoice[] = [
     {
