@@ -651,6 +651,12 @@ export const Inventory = () => {
         open={showExcelImport}
         onClose={() => setShowExcelImport(false)}
         onImport={handleExcelImport}
+        existingProducts={products.map((p) => ({
+          id: p.id,
+          partNumber: p.partNumber,
+          name: p.name,
+          stock: p.stock,
+        }))}
       />
     </div>
   );
