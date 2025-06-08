@@ -8,7 +8,7 @@ import {
   Search,
   Filter,
   Calendar,
-  DollarSign,
+  IndianRupee,
 } from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import { Button } from "@/components/ui/button";

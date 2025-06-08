@@ -333,7 +333,7 @@ export const AddStaffDialog: React.FC<AddStaffDialogProps> = ({
 
               <div className="space-y-2">
                 <Label className="text-white/90 flex items-center gap-2">
-                  <DollarSign size={16} />
+                  <IndianRupee size={16} />
                   Salary
                 </Label>
                 <Input
