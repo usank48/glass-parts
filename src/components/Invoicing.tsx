@@ -462,6 +462,16 @@ export const Invoicing = () => {
     // Implement download logic
   };
 
+  const handleSaveInvoice = (updatedInvoice: Invoice) => {
+    setInvoicesList((prevInvoices) =>
+      prevInvoices.map((invoice) =>
+        invoice.id === updatedInvoice.id ? updatedInvoice : invoice,
+      ),
+    );
+    setSelectedInvoice(updatedInvoice);
+    toast.success("Invoice updated successfully!");
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
