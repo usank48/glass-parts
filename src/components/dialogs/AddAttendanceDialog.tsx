@@ -110,8 +110,8 @@ export const AddAttendanceDialog: React.FC<AddAttendanceDialogProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      {/* Container with minimal height to ensure buttons are fully visible */}
-      <div className="w-full max-w-lg h-[280px] md:h-[420px] flex flex-col">
+      {/* Container with extremely minimal height to ensure buttons are fully visible */}
+      <div className="w-full max-w-lg h-[260px] md:h-[400px] flex flex-col">
         <GlassCard className="flex-1 flex flex-col overflow-hidden">
           {/* Fixed Header */}
           <div className="flex-shrink-0 p-4 pb-3 border-b border-white/10">
