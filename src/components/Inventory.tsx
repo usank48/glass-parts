@@ -72,6 +72,10 @@ export const Inventory = () => {
   const [productSortMethod, setProductSortMethod] =
     useState<ProductSortMethod>("quantity-desc");
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [selectedProduct, setSelectedProduct] = useState<InventoryItem | null>(
+    null,
+  );
+  const [showProductDetail, setShowProductDetail] = useState(false);
 
   // Use the inventory sync hook
   const {
@@ -83,6 +87,8 @@ export const Inventory = () => {
     refreshInventory,
     isLoading,
     error,
+    transactions,
+    updateStock,
   } = useInventorySync();
 
   // Get top 10 items by stock for chart with proper color coding
