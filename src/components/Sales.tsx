@@ -38,6 +38,10 @@ export const Sales = () => {
   const [showNewSale, setShowNewSale] = useState(false);
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
   const [showSaleDetail, setShowSaleDetail] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<InventoryItem | null>(
+    null,
+  );
+  const [showProductDetail, setShowProductDetail] = useState(false);
 
   // Use inventory sync hook for real-time inventory management
   const {
@@ -47,6 +51,7 @@ export const Sales = () => {
     getItemById,
     getLowStockItems,
     isLoading,
+    transactions,
   } = useInventorySync();
 
   // Sample sales data with inventory integration
