@@ -534,7 +534,7 @@ export const Inventory = () => {
               onClick={handleExcelExport}
               size="sm"
               variant="outline"
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs sm:text-sm"
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs sm:text-sm backdrop-blur-sm"
             >
               <Download size={16} className="mr-1 sm:mr-2" />
               <span className="hidden xs:inline">Export</span>
