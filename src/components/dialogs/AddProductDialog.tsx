@@ -34,6 +34,7 @@ interface Vehicle {
 
 export const AddProductDialog: React.FC<AddProductDialogProps> = ({
   onClose,
+  onProductAdded,
 }) => {
   const [formData, setFormData] = useState({
     partNumber: "",
