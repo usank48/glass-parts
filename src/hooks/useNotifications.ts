@@ -1,8 +1,18 @@
 import { useState, useCallback, useEffect } from "react";
 import { Notification } from "@/components/ui/notification-panel";
+import { notificationService } from "@/utils/notificationService";
 
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  // Subscribe to global notification service
+  useEffect(() => {
+    const unsubscribe = notificationService.subscribe((notification) => {
+      addNotification(notification);
+    });
+
+    return unsubscribe;
+  }, []);
 
   // Initialize with some sample notifications
   useEffect(() => {
