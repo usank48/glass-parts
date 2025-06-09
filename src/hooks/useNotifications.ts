@@ -5,6 +5,28 @@ import { notificationService } from "@/utils/notificationService";
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
+  const addNotification = useCallback(
+    (notification: Omit<Notification, "id" | "timestamp">) => {
+      const newNotification: Notification = {
+        ...notification,
+        id: Date.now().toString(),
+        timestamp: new Date(),
+      };
+
+      setNotifications((prev) => [newNotification, ...prev]);
+
+      // Auto-remove notification after 10 seconds if it's a success type
+      if (notification.type === "success") {
+        setTimeout(() => {
+          setNotifications((prev) =>
+            prev.filter((n) => n.id !== newNotification.id),
+          );
+        }, 10000);
+      }
+    },
+    [],
+  );
+
   // Subscribe to global notification service
   useEffect(() => {
     const unsubscribe = notificationService.subscribe((notification) => {
@@ -12,7 +34,7 @@ export const useNotifications = () => {
     });
 
     return unsubscribe;
-  }, []);
+  }, [addNotification]);
 
   // Initialize with some sample notifications
   useEffect(() => {
@@ -69,28 +91,6 @@ export const useNotifications = () => {
 
     setNotifications(sampleNotifications);
   }, []);
-
-  const addNotification = useCallback(
-    (notification: Omit<Notification, "id" | "timestamp">) => {
-      const newNotification: Notification = {
-        ...notification,
-        id: Date.now().toString(),
-        timestamp: new Date(),
-      };
-
-      setNotifications((prev) => [newNotification, ...prev]);
-
-      // Auto-remove notification after 10 seconds if it's a success type
-      if (notification.type === "success") {
-        setTimeout(() => {
-          setNotifications((prev) =>
-            prev.filter((n) => n.id !== newNotification.id),
-          );
-        }, 10000);
-      }
-    },
-    [],
-  );
 
   const markAsRead = useCallback((id: string) => {
     setNotifications((prev) =>
