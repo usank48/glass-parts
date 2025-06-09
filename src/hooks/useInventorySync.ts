@@ -61,6 +61,8 @@ interface UseInventorySyncReturn {
     reference: string,
     unitPrice?: number,
     notes?: string,
+    customerId?: string,
+    supplierId?: string,
   ) => Promise<boolean>;
   getItemById: (itemId: number) => InventoryItem | undefined;
   getItemByPartNumber: (partNumber: string) => InventoryItem | undefined;
