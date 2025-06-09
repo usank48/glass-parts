@@ -177,9 +177,10 @@ export const useInventorySync = (
   };
 
   // Generate new product ID
-  const generateProductId = () => {
+  const generateProductId = useCallback(() => {
+    if (inventory.length === 0) return 1;
     return Math.max(...inventory.map((item) => item.id), 0) + 1;
-  };
+  }, [inventory]);
 
   // Add new product
   const addProduct = useCallback(
