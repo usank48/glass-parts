@@ -1,9 +1,9 @@
+/* Mobile optimizations for Android app */
+@import "./mobile.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Mobile optimizations for Android app */
-@import "./mobile.css";
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
 
