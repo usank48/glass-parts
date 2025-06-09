@@ -62,24 +62,42 @@ const Index = () => {
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"></div>
 
       <div className="relative z-10 flex h-screen">
-        <Sidebar
-          activeModule={activeModule}
-          setActiveModule={setActiveModule}
-          isOpen={isSidebarOpen}
-          setIsOpen={setIsSidebarOpen}
-        />
-        <div className="flex-1 flex flex-col">
+        {/* Desktop Sidebar */}
+        <div className="hidden md:block">
+          <Sidebar
+            activeModule={activeModule}
+            setActiveModule={setActiveModule}
+            isOpen={true}
+            setIsOpen={() => {}}
+          />
+        </div>
+
+        {/* Mobile Sidebar */}
+        <div className="md:hidden">
+          <Sidebar
+            activeModule={activeModule}
+            setActiveModule={setActiveModule}
+            isOpen={isSidebarOpen}
+            setIsOpen={setIsSidebarOpen}
+          />
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col min-w-0">
           <TopBar onMenuClick={() => setIsSidebarOpen(true)} />
-          <main className="flex-1 overflow-auto p-6 pt-20 pb-24">
-            {renderActiveModule()}
+          <main className="flex-1 overflow-auto p-4 sm:p-6 pt-20 pb-20">
+            <div className="max-w-full">{renderActiveModule()}</div>
           </main>
         </div>
       </div>
 
+      {/* Bottom Bar - Always Visible */}
       <BottomBar
         activeModule={activeModule}
         setActiveModule={setActiveModule}
       />
+
+      {/* Floating Action Button */}
       <FloatingActionButton
         activeModule={activeModule}
         onAddProduct={handleAddProduct}

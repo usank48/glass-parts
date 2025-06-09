@@ -31,6 +31,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "accounting", label: "Accounting", icon: Calculator },
   ];
 
+  const handleMenuItemClick = (itemId: string) => {
+    setActiveModule(itemId);
+    // Auto-close on mobile after selection
+    if (window.innerWidth < 768) {
+      setIsOpen(false);
+    }
+  };
+
   return (
     <>
       {/* Mobile overlay */}
@@ -41,13 +49,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         />
       )}
 
+      {/* Sidebar */}
       <div
         className={`
-        fixed top-0 left-0 z-50 h-full bg-white/10 backdrop-blur-md border-r border-white/20
-        transition-all duration-300 ease-in-out w-64
-        ${isOpen ? "translate-x-0" : "-translate-x-full"}
-        md:relative md:translate-x-0 md:block
-      `}
+          fixed top-0 left-0 z-50 h-full bg-white/10 backdrop-blur-md border-r border-white/20
+          transition-all duration-300 ease-in-out w-64
+          md:relative md:z-auto
+          ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+        `}
       >
         {/* Header with close button */}
         <div className="p-4 border-b border-white/20 flex items-center justify-between">
@@ -64,30 +73,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setActiveModule(item.id);
-                  // Auto-close on mobile after selection
-                  if (window.innerWidth < 768) {
-                    setIsOpen(false);
-                  }
-                }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all duration-200 ${
-                  activeModule === item.id
-                    ? "bg-white/20 text-white shadow-lg"
-                    : "text-white/70 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                <Icon size={20} />
-                <span className="font-medium">{item.label}</span>
-              </button>
-            );
-          })}
+        <nav className="flex-1 p-4 overflow-y-auto">
+          <div className="space-y-2">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleMenuItemClick(item.id)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                    activeModule === item.id
+                      ? "bg-white/20 text-white shadow-lg"
+                      : "text-white/70 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  <Icon size={20} />
+                  <span className="font-medium">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </nav>
 
         {/* App info */}
