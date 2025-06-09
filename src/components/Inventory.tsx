@@ -95,6 +95,7 @@ export const Inventory = () => {
     error,
     transactions,
     updateStock,
+    addProduct,
   } = useInventorySync();
 
   // Get top 10 items by stock for chart with proper color coding
@@ -262,7 +263,7 @@ export const Inventory = () => {
     setSelectedProduct(null);
   };
 
-  const handleExcelImport = (importedData: InventoryData[]) => {
+  const handleExcelImport = async (importedData: InventoryData[]) => {
     const startTime = Date.now();
     let updatedProducts = 0;
     let newProducts = 0;
@@ -280,7 +281,7 @@ export const Inventory = () => {
     }> = [];
 
     try {
-      importedData.forEach((importItem) => {
+      for (const importItem of importedData) {
         try {
           // Find existing product by part number or name
           const existingProduct = products.find(
@@ -319,19 +320,40 @@ export const Inventory = () => {
               );
             }
           } else {
-            // Add new product (in a real system, you'd have an addProduct function)
-            console.log("Would add new product:", importItem.partName);
-            newProducts++;
-            newItems.push({
+            // Add new product
+            const newProductData = {
               partNumber: importItem.partNumber,
-              partName: importItem.partName,
+              oemPartNumber: importItem.oemPartNumber || "",
+              name: importItem.partName,
+              brand: importItem.brand,
+              vehicle: importItem.vehicleCompatibility || "Universal",
               stock: importItem.quantity,
-            });
+              costPrice: importItem.costPrice,
+              sellingPrice: importItem.sellingPrice,
+              category: importItem.category,
+              minStockLevel: 10, // Default minimum stock level
+              location: "Warehouse A", // Default location
+              supplier: "Unknown", // Default supplier
+            };
+
+            // Add the product to inventory
+            const addResult = await addProduct(newProductData);
+
+            if (addResult) {
+              newProducts++;
+              newItems.push({
+                partNumber: importItem.partNumber,
+                partName: importItem.partName,
+                stock: importItem.quantity,
+              });
+            } else {
+              errors.push(`Failed to add new product: ${importItem.partName}`);
+            }
           }
         } catch (itemError) {
           errors.push(`Failed to process ${importItem.partName}: ${itemError}`);
         }
-      });
+      }
 
       // Calculate processing time
       const processingTime = Date.now() - startTime;
