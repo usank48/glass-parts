@@ -263,12 +263,109 @@ export const Inventory = () => {
   };
 
   const handleExcelImport = (importedData: InventoryData[]) => {
-    toast.success(
-      "Excel import functionality will be integrated with the new inventory system",
-    );
-    console.log("Import Results:", {
-      totalProcessed: importedData.length,
-    });
+    const startTime = Date.now();
+    let updatedProducts = 0;
+    let newProducts = 0;
+    const errors: string[] = [];
+    const updatedItems: Array<{
+      partNumber: string;
+      partName: string;
+      oldStock: number;
+      newStock: number;
+    }> = [];
+    const newItems: Array<{
+      partNumber: string;
+      partName: string;
+      stock: number;
+    }> = [];
+
+    try {
+      importedData.forEach((importItem) => {
+        try {
+          // Find existing product by part number or name
+          const existingProduct = products.find(
+            (product) =>
+              product.partNumber.toLowerCase() ===
+                importItem.partNumber.toLowerCase() ||
+              product.name.toLowerCase() === importItem.partName.toLowerCase(),
+          );
+
+          if (existingProduct) {
+            // Update existing product
+            const oldStock = existingProduct.stock;
+            const newStock = importItem.quantity;
+
+            // Update the stock using the inventory sync hook
+            updateStock(
+              existingProduct.id,
+              newStock,
+              "import",
+              `Stock updated via Excel import from ${oldStock} to ${newStock} units`,
+            );
+
+            updatedProducts++;
+            updatedItems.push({
+              partNumber: importItem.partNumber,
+              partName: importItem.partName,
+              oldStock,
+              newStock,
+            });
+
+            // Create a transaction record for the import
+            const stockDifference = newStock - oldStock;
+            if (stockDifference !== 0) {
+              console.log(
+                `Stock ${stockDifference > 0 ? "increased" : "decreased"} for ${importItem.partName}: ${Math.abs(stockDifference)} units`,
+              );
+            }
+          } else {
+            // Add new product (in a real system, you'd have an addProduct function)
+            console.log("Would add new product:", importItem.partName);
+            newProducts++;
+            newItems.push({
+              partNumber: importItem.partNumber,
+              partName: importItem.partName,
+              stock: importItem.quantity,
+            });
+          }
+        } catch (itemError) {
+          errors.push(`Failed to process ${importItem.partName}: ${itemError}`);
+        }
+      });
+
+      // Calculate processing time
+      const processingTime = Date.now() - startTime;
+
+      // Show detailed success message
+      if (errors.length === 0) {
+        toast.success(
+          `Import completed successfully! Updated ${updatedProducts} products, would add ${newProducts} new products. Processed in ${processingTime}ms.`,
+        );
+      } else {
+        toast.warning(
+          `Import completed with ${errors.length} errors. Updated ${updatedProducts} products, would add ${newProducts} new products.`,
+        );
+        console.error("Import errors:", errors);
+      }
+
+      // Refresh inventory to reflect changes
+      refreshInventory();
+
+      // Log detailed import results
+      console.log("Import Results:", {
+        totalProcessed: importedData.length,
+        updatedProducts,
+        newProducts,
+        errors: errors.length,
+        processingTime: `${processingTime}ms`,
+        updatedItems,
+        newItems,
+        errorDetails: errors,
+      });
+    } catch (error) {
+      toast.error(`Import failed: ${error}`);
+      console.error("Import error:", error);
+    }
   };
 
   const handleExcelExport = () => {
