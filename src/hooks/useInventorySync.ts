@@ -51,6 +51,9 @@ interface UseInventorySyncReturn {
   stockAlerts: StockAlert[];
 
   // Inventory operations
+  addProduct: (
+    product: Omit<InventoryItem, "id" | "status">,
+  ) => Promise<boolean>;
   updateStock: (
     itemId: number,
     quantity: number,
@@ -168,10 +171,80 @@ export const useInventorySync = (
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Generate unique transaction ID
+  // Generate new transaction ID
   const generateTransactionId = () => {
     return `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   };
+
+  // Generate new product ID
+  const generateProductId = () => {
+    return Math.max(...inventory.map((item) => item.id), 0) + 1;
+  };
+
+  // Add new product
+  const addProduct = useCallback(
+    async (product: Omit<InventoryItem, "id" | "status">): Promise<boolean> => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Check if product with same part number already exists
+        const existingProduct = getItemByPartNumber(product.partNumber);
+        if (existingProduct) {
+          throw new Error(
+            `Product with part number ${product.partNumber} already exists`,
+          );
+        }
+
+        const newProduct: InventoryItem = {
+          ...product,
+          id: generateProductId(),
+          status:
+            product.stock <= (product.minStockLevel || 10)
+              ? product.stock === 0
+                ? "Out of Stock"
+                : "Low Stock"
+              : "In Stock",
+        };
+
+        // Add to inventory
+        setInventory((prevInventory) => [...prevInventory, newProduct]);
+
+        // Create initial stock transaction if stock > 0
+        if (product.stock > 0) {
+          const transaction: InventoryTransaction = {
+            id: generateTransactionId(),
+            type: "adjustment",
+            itemId: newProduct.id,
+            partNumber: newProduct.partNumber,
+            quantity: product.stock,
+            unitPrice: product.costPrice,
+            totalValue: product.stock * product.costPrice,
+            reference: "Initial Stock",
+            date: new Date().toISOString(),
+            notes: "Product added via import/manual entry",
+          };
+
+          setTransactions((prevTransactions) => [
+            transaction,
+            ...prevTransactions,
+          ]);
+        }
+
+        toast.success(`Product "${product.name}" added successfully`);
+        return true;
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to add product";
+        setError(errorMessage);
+        toast.error(errorMessage);
+        return false;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [inventory, getItemByPartNumber],
+  );
 
   // Update stock levels and create transaction record
   const updateStock = useCallback(
@@ -567,6 +640,7 @@ export const useInventorySync = (
     stockAlerts,
 
     // Operations
+    addProduct,
     updateStock,
     getItemById,
     getItemByPartNumber,
