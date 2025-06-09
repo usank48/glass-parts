@@ -1,7 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Capacitor } from "@capacitor/core";
-import { StatusBar, Style } from "@capacitor/status-bar";
-import { SplashScreen } from "@capacitor/splash-screen";
 
 interface MobileWrapperProps {
   children: React.ReactNode;
@@ -12,37 +9,46 @@ export const MobileWrapper: React.FC<MobileWrapperProps> = ({ children }) => {
 
   useEffect(() => {
     const setupMobile = async () => {
-      if (Capacitor.isNativePlatform()) {
-        setIsNative(true);
+      // Check if we're in a Capacitor environment
+      const isCapacitor = window && (window as any).Capacitor;
 
-        // Configure status bar
-        try {
-          await StatusBar.setStyle({ style: Style.Dark });
-          await StatusBar.setBackgroundColor({ color: "#6366f1" });
-        } catch (error) {
-          console.log("StatusBar not available:", error);
+      if (isCapacitor) {
+        const { Capacitor } = await import("@capacitor/core");
+
+        if (Capacitor.isNativePlatform()) {
+          setIsNative(true);
+
+          // Configure status bar
+          try {
+            const { StatusBar, Style } = await import("@capacitor/status-bar");
+            await StatusBar.setStyle({ style: Style.Dark });
+            await StatusBar.setBackgroundColor({ color: "#6366f1" });
+          } catch (error) {
+            console.log("StatusBar not available:", error);
+          }
+
+          // Hide splash screen
+          try {
+            const { SplashScreen } = await import("@capacitor/splash-screen");
+            await SplashScreen.hide();
+          } catch (error) {
+            console.log("SplashScreen not available:", error);
+          }
+
+          // Add mobile-specific styles
+          document.body.style.webkitUserSelect = "none";
+          document.body.style.webkitTouchCallout = "none";
+          document.body.style.webkitTapHighlightColor = "transparent";
         }
+      }
 
-        // Hide splash screen
-        try {
-          await SplashScreen.hide();
-        } catch (error) {
-          console.log("SplashScreen not available:", error);
-        }
-
-        // Prevent zoom on inputs (mobile web behavior)
-        const viewport = document.querySelector("meta[name=viewport]");
-        if (viewport) {
-          viewport.setAttribute(
-            "content",
-            "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
-          );
-        }
-
-        // Add mobile-specific styles
-        document.body.style.webkitUserSelect = "none";
-        document.body.style.webkitTouchCallout = "none";
-        document.body.style.webkitTapHighlightColor = "transparent";
+      // Mobile web optimizations (always apply)
+      const viewport = document.querySelector("meta[name=viewport]");
+      if (viewport && window.innerWidth <= 768) {
+        viewport.setAttribute(
+          "content",
+          "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
+        );
       }
     };
 
