@@ -38,6 +38,7 @@ import {
 import { ExcelImportDialog } from "./dialogs/ExcelImportDialog";
 import { exportInventoryToExcel, InventoryData } from "@/lib/excelUtils";
 import { toast } from "sonner";
+import { notificationService } from "@/utils/notificationService";
 import {
   ChartContainer,
   ChartTooltip,
@@ -358,16 +359,76 @@ export const Inventory = () => {
       // Calculate processing time
       const processingTime = Date.now() - startTime;
 
-      // Show detailed success message
+      // Show detailed success message and notifications
       if (errors.length === 0) {
         toast.success(
-          `Import completed successfully! Updated ${updatedProducts} products, would add ${newProducts} new products. Processed in ${processingTime}ms.`,
+          `Import completed successfully! Updated ${updatedProducts} products, added ${newProducts} new products. Processed in ${processingTime}ms.`,
+        );
+
+        // Send notification about successful import
+        notificationService.success(
+          "Excel Import Completed",
+          `Successfully imported ${importedData.length} products (${updatedProducts} updated, ${newProducts} new)`,
+          "View Inventory",
+          "/inventory",
         );
       } else {
         toast.warning(
-          `Import completed with ${errors.length} errors. Updated ${updatedProducts} products, would add ${newProducts} new products.`,
+          `Import completed with ${errors.length} errors. Updated ${updatedProducts} products, added ${newProducts} new products.`,
         );
+
+        // Send warning notification about partial import
+        notificationService.warning(
+          "Excel Import Completed with Issues",
+          `Imported ${importedData.length - errors.length}/${importedData.length} products successfully. ${errors.length} items failed.`,
+          "View Details",
+          "/inventory",
+        );
+
         console.error("Import errors:", errors);
+      }
+
+      // Send specific notifications for stock updates
+      if (updatedItems.length > 0) {
+        updatedItems.slice(0, 3).forEach((item) => {
+          const stockChange = item.newStock - item.oldStock;
+          if (Math.abs(stockChange) > 0) {
+            notificationService.info(
+              "Stock Updated",
+              `${item.partName}: ${stockChange > 0 ? "+" : ""}${stockChange} units (${item.oldStock} → ${item.newStock})`,
+              "View Product",
+            );
+          }
+        });
+
+        if (updatedItems.length > 3) {
+          notificationService.info(
+            "Multiple Stock Updates",
+            `${updatedItems.length - 3} more products were updated via import`,
+            "View Inventory",
+            "/inventory",
+          );
+        }
+      }
+
+      // Send notifications for new products
+      if (newItems.length > 0) {
+        newItems.slice(0, 2).forEach((item) => {
+          notificationService.success(
+            "New Product Added",
+            `${item.partName} (${item.partNumber}) - ${item.stock} units`,
+            "View Product",
+          );
+        });
+
+        if (newItems.length > 2) {
+          notificationService.success(
+            "Multiple Products Added",
+            `${newItems.length - 2} more products were added via import`,
+            "View Inventory",
+            "/inventory",
+          );
+        }
       }
 
       // Refresh inventory to reflect changes
