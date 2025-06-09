@@ -244,7 +244,7 @@ export const useInventorySync = (
         setIsLoading(false);
       }
     },
-    [inventory, getItemByPartNumber],
+    [generateProductId, getItemByPartNumber],
   );
 
   // Update stock levels and create transaction record
