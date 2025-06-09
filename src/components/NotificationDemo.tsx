@@ -123,6 +123,56 @@ export const NotificationDemo: React.FC = () => {
     }, 4000);
   };
 
+  const triggerExcelImportDemo = () => {
+    // Simulate Excel import process with notifications
+    notificationService.info(
+      "Excel Import Started",
+      "Processing uploaded file...",
+    );
+
+    setTimeout(() => {
+      notificationService.success(
+        "Excel Import Completed",
+        "Successfully imported 15 products (8 updated, 7 new)",
+        "View Inventory",
+        "/inventory",
+      );
+    }, 2000);
+
+    setTimeout(() => {
+      notificationService.info(
+        "Stock Updated",
+        "Brake Pads Premium: +25 units (15 → 40)",
+        "View Product",
+      );
+    }, 2500);
+
+    setTimeout(() => {
+      notificationService.info(
+        "Stock Updated",
+        "Oil Filter Heavy Duty: +50 units (5 → 55)",
+        "View Product",
+      );
+    }, 3000);
+
+    setTimeout(() => {
+      notificationService.success(
+        "New Product Added",
+        "Shock Absorber Set (SA-SET-002) - 20 units",
+        "View Product",
+      );
+    }, 3500);
+
+    setTimeout(() => {
+      notificationService.success(
+        "Multiple Products Added",
+        "6 more products were added via import",
+        "View Inventory",
+        "/inventory",
+      );
+    }, 4000);
+  };
+
   return (
     <div className="p-6 space-y-6">
       <Card className="bg-white/10 backdrop-blur-sm border-white/20">
@@ -232,6 +282,15 @@ export const NotificationDemo: React.FC = () => {
                 onClick={triggerBusinessFlow}
               >
                 Business Flow Demo
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 gap-3">
+              <Button
+                variant="default"
+                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                onClick={triggerExcelImportDemo}
+              >
+                Excel Import Demo
               </Button>
             </div>
           </div>
