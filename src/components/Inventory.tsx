@@ -301,7 +301,7 @@ export const Inventory = () => {
             updateStock(
               existingProduct.id,
               newStock,
-              "import",
+              "adjustment",
               `Stock updated via Excel import from ${oldStock} to ${newStock} units`,
             );
 
