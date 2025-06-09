@@ -180,8 +180,12 @@ export const useInventorySync = (
 
   // Generate new product ID
   const generateProductId = useCallback(() => {
-    if (inventory.length === 0) return 1;
-    return Math.max(...inventory.map((item) => item.id), 0) + 1;
+    if (!inventory || inventory.length === 0) return 1;
+    const ids = inventory
+      .map((item) => item.id)
+      .filter((id) => typeof id === "number" && !isNaN(id));
+    if (ids.length === 0) return 1;
+    return Math.max(...ids) + 1;
   }, [inventory]);
 
   // Add new product
