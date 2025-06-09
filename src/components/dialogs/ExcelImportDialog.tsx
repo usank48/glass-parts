@@ -23,7 +23,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 
 interface ExcelImportDialogProps {
-  open: boolean;
+  isOpen: boolean;
   onClose: () => void;
   onImport: (data: InventoryData[]) => void;
   existingProducts?: Array<{
@@ -35,7 +35,7 @@ interface ExcelImportDialogProps {
 }
 
 export const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
-  open,
+  isOpen,
   onClose,
   onImport,
   existingProducts = [],
@@ -436,7 +436,7 @@ export const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="bg-white/10 backdrop-blur-md border border-white/20 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-white">
