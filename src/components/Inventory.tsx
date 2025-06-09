@@ -535,10 +535,11 @@ export const Inventory = () => {
               <Button
                 onClick={() => setShowExcelImport(true)}
                 size="sm"
-                className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white border-0 text-xs sm:text-sm"
+                className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white border-0 text-xs sm:text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+                disabled={isLoading}
               >
                 <Upload size={16} className="mr-1 sm:mr-2" />
-                Import
+                {isLoading ? "Processing..." : "Import Excel"}
               </Button>
               <Button
                 onClick={handleExcelExport}
