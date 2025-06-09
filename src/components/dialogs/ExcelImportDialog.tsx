@@ -23,9 +23,9 @@ import {
 import { Progress } from "@/components/ui/progress";
 
 interface ExcelImportDialogProps {
-  open: boolean;
+  isOpen: boolean;
   onClose: () => void;
-  onImport: (data: InventoryData[]) => void;
+  onImport: (data: InventoryData[]) => Promise<void>;
   existingProducts?: Array<{
     id: number;
     partNumber: string;
@@ -35,7 +35,7 @@ interface ExcelImportDialogProps {
 }
 
 export const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
-  open,
+  isOpen,
   onClose,
   onImport,
   existingProducts = [],
@@ -44,6 +44,7 @@ export const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
   const [validationResult, setValidationResult] =
     useState<ExcelValidationResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const [step, setStep] = useState<"upload" | "validate" | "confirm">("upload");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -81,10 +82,17 @@ export const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
     }
   };
 
-  const handleImport = () => {
+  const handleImport = async () => {
     if (validationResult?.isValid && validationResult.data.length > 0) {
-      onImport(validationResult.data);
-      handleClose();
+      try {
+        setIsImporting(true);
+        await onImport(validationResult.data);
+        handleClose();
+      } catch (error) {
+        console.error("Import failed:", error);
+      } finally {
+        setIsImporting(false);
+      }
     }
   };
 
@@ -93,6 +101,7 @@ export const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
     setValidationResult(null);
     setStep("upload");
     setIsProcessing(false);
+    setIsImporting(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -425,9 +434,12 @@ export const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
           {validationResult.isValid && validationResult.validRows > 0 && (
             <Button
               onClick={handleImport}
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+              disabled={isImporting}
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white disabled:opacity-50"
             >
-              Import {validationResult.validRows} Records
+              {isImporting
+                ? "Importing..."
+                : `Import ${validationResult.validRows} Records`}
             </Button>
           )}
         </div>
@@ -436,7 +448,7 @@ export const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="bg-white/10 backdrop-blur-md border border-white/20 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-white">
@@ -444,15 +456,23 @@ export const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        {isProcessing && (
+        {(isProcessing || isImporting) && (
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-            <span className="ml-3 text-white">Processing file...</span>
+            <span className="ml-3 text-white">
+              {isImporting ? "Importing products..." : "Processing file..."}
+            </span>
           </div>
         )}
 
-        {!isProcessing && step === "upload" && renderUploadStep()}
-        {!isProcessing && step === "validate" && renderValidationStep()}
+        {!isProcessing &&
+          !isImporting &&
+          step === "upload" &&
+          renderUploadStep()}
+        {!isProcessing &&
+          !isImporting &&
+          step === "validate" &&
+          renderValidationStep()}
       </DialogContent>
     </Dialog>
   );

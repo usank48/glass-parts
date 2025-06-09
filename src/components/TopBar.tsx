@@ -12,6 +12,8 @@ import {
 import { UserProfileDialog } from "./dialogs/UserProfileDialog";
 import { UserSettingsDialog } from "./dialogs/UserSettingsDialog";
 import { ChangePasswordDialog } from "./dialogs/ChangePasswordDialog";
+import { NotificationPanel } from "./ui/notification-panel";
+import { useNotifications } from "@/hooks/useNotifications";
 
 interface TopBarProps {
   onMenuClick: () => void;
@@ -21,7 +23,20 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuClick }) => {
   // All useState calls at the top level - no conditional calls
   const [searchQuery, setSearchQuery] = useState("");
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
-  const [notificationCount] = useState(3); // Example notification count
+  const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
+
+  // Notification system
+  const {
+    notifications,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    clearAll,
+    getUnreadCount,
+    notifyNewOrder,
+    notifyLowStock,
+    notifyPaymentOverdue,
+  } = useNotifications();
 
   // Dialog states - consolidated into single state object
   const [dialogs, setDialogs] = useState({
@@ -44,6 +59,49 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuClick }) => {
     setIsUserDropdownOpen(false);
   };
 
+  const handleNotificationClick = (notification: any) => {
+    if (notification.actionUrl) {
+      console.log(`Navigating to: ${notification.actionUrl}`);
+      // In a real app, you would use your router to navigate
+      // For now, we'll just show different modules based on the URL
+      if (notification.actionUrl.includes("/inventory")) {
+        console.log("Would navigate to inventory module");
+      } else if (notification.actionUrl.includes("/sales")) {
+        console.log("Would navigate to sales module");
+      } else if (notification.actionUrl.includes("/accounting")) {
+        console.log("Would navigate to accounting module");
+      }
+    }
+    setIsNotificationPanelOpen(false);
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      console.log("Searching for:", searchQuery);
+      // Add search functionality here
+    }
+  };
+
+  // Close notification panel when clicking outside
+  const notificationRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target as Node)
+      ) {
+        setIsNotificationPanelOpen(false);
+      }
+    };
+
+    if (isNotificationPanelOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [isNotificationPanelOpen]);
+
   return (
     <div className="fixed top-0 left-0 right-0 z-40 bg-white/10 backdrop-blur-md border-b border-white/20">
       <div className="flex items-center justify-between px-4 py-3">
@@ -60,7 +118,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuClick }) => {
         </div>
 
         <div className="flex-1 max-w-md mx-4">
-          <div className="relative">
+          <form onSubmit={handleSearchSubmit} className="relative">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60"
               size={18}
@@ -72,19 +130,44 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuClick }) => {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
             />
-          </div>
+          </form>
         </div>
 
         <div className="flex items-center gap-2">
           {/* Notifications */}
-          <button className="relative p-2 rounded-lg text-white hover:bg-white/10 transition-colors">
-            <Bell size={20} />
-            {notificationCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {notificationCount}
-              </span>
+          <div className="relative" ref={notificationRef}>
+            <button
+              onClick={() =>
+                setIsNotificationPanelOpen(!isNotificationPanelOpen)
+              }
+              className={`relative p-2 rounded-lg text-white transition-all duration-200 ${
+                isNotificationPanelOpen
+                  ? "bg-white/20 ring-2 ring-white/30"
+                  : "hover:bg-white/10"
+              }`}
+            >
+              <Bell size={20} />
+              {getUnreadCount() > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+                  {getUnreadCount() > 99 ? "99+" : getUnreadCount()}
+                </span>
+              )}
+            </button>
+
+            {/* Notification Panel */}
+            {isNotificationPanelOpen && (
+              <div className="absolute top-full right-0 mt-2 z-50">
+                <NotificationPanel
+                  notifications={notifications}
+                  onMarkAsRead={markAsRead}
+                  onMarkAllAsRead={markAllAsRead}
+                  onDeleteNotification={deleteNotification}
+                  onClearAll={clearAll}
+                  onNotificationClick={handleNotificationClick}
+                />
+              </div>
             )}
-          </button>
+          </div>
 
           {/* User Dropdown */}
           <div className="relative">
@@ -187,7 +270,8 @@ const TopBarUserDropdown: React.FC<TopBarUserDropdownProps> = ({
   };
 
   const handleNotifications = () => {
-    console.log("Opening notifications...");
+    console.log("Opening notification settings...");
+    // This could open a notification preferences dialog
     onClose();
   };
 

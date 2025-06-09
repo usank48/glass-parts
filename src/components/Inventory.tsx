@@ -38,6 +38,7 @@ import {
 import { ExcelImportDialog } from "./dialogs/ExcelImportDialog";
 import { exportInventoryToExcel, InventoryData } from "@/lib/excelUtils";
 import { toast } from "sonner";
+import { notificationService } from "@/utils/notificationService";
 import {
   ChartContainer,
   ChartTooltip,
@@ -95,6 +96,7 @@ export const Inventory = () => {
     error,
     transactions,
     updateStock,
+    addProduct,
   } = useInventorySync();
 
   // Get top 10 items by stock for chart with proper color coding
@@ -262,13 +264,191 @@ export const Inventory = () => {
     setSelectedProduct(null);
   };
 
-  const handleExcelImport = (importedData: InventoryData[]) => {
-    toast.success(
-      "Excel import functionality will be integrated with the new inventory system",
-    );
-    console.log("Import Results:", {
-      totalProcessed: importedData.length,
-    });
+  const handleExcelImport = async (importedData: InventoryData[]) => {
+    const startTime = Date.now();
+    let updatedProducts = 0;
+    let newProducts = 0;
+    const errors: string[] = [];
+    const updatedItems: Array<{
+      partNumber: string;
+      partName: string;
+      oldStock: number;
+      newStock: number;
+    }> = [];
+    const newItems: Array<{
+      partNumber: string;
+      partName: string;
+      stock: number;
+    }> = [];
+
+    try {
+      for (const importItem of importedData) {
+        try {
+          // Find existing product by part number or name
+          const existingProduct = products.find(
+            (product) =>
+              product.partNumber.toLowerCase() ===
+                importItem.partNumber.toLowerCase() ||
+              product.name.toLowerCase() === importItem.partName.toLowerCase(),
+          );
+
+          if (existingProduct) {
+            // Update existing product
+            const oldStock = existingProduct.stock;
+            const newStock = importItem.quantity;
+
+            // Update the stock using the inventory sync hook
+            updateStock(
+              existingProduct.id,
+              newStock,
+              "adjustment",
+              `Stock updated via Excel import from ${oldStock} to ${newStock} units`,
+            );
+
+            updatedProducts++;
+            updatedItems.push({
+              partNumber: importItem.partNumber,
+              partName: importItem.partName,
+              oldStock,
+              newStock,
+            });
+
+            // Create a transaction record for the import
+            const stockDifference = newStock - oldStock;
+            if (stockDifference !== 0) {
+              console.log(
+                `Stock ${stockDifference > 0 ? "increased" : "decreased"} for ${importItem.partName}: ${Math.abs(stockDifference)} units`,
+              );
+            }
+          } else {
+            // Add new product
+            const newProductData = {
+              partNumber: importItem.partNumber,
+              oemPartNumber: importItem.oemPartNumber || "",
+              name: importItem.partName,
+              brand: importItem.brand,
+              vehicle: importItem.vehicleCompatibility || "Universal",
+              stock: importItem.quantity,
+              costPrice: importItem.costPrice,
+              sellingPrice: importItem.sellingPrice,
+              category: importItem.category,
+              minStockLevel: 10, // Default minimum stock level
+              location: "Warehouse A", // Default location
+              supplier: "Unknown", // Default supplier
+            };
+
+            // Add the product to inventory
+            const addResult = await addProduct(newProductData);
+
+            if (addResult) {
+              newProducts++;
+              newItems.push({
+                partNumber: importItem.partNumber,
+                partName: importItem.partName,
+                stock: importItem.quantity,
+              });
+            } else {
+              errors.push(`Failed to add new product: ${importItem.partName}`);
+            }
+          }
+        } catch (itemError) {
+          errors.push(`Failed to process ${importItem.partName}: ${itemError}`);
+        }
+      }
+
+      // Calculate processing time
+      const processingTime = Date.now() - startTime;
+
+      // Show detailed success message and notifications
+      if (errors.length === 0) {
+        toast.success(
+          `Import completed successfully! Updated ${updatedProducts} products, added ${newProducts} new products. Processed in ${processingTime}ms.`,
+        );
+
+        // Send notification about successful import
+        notificationService.success(
+          "Excel Import Completed",
+          `Successfully imported ${importedData.length} products (${updatedProducts} updated, ${newProducts} new)`,
+          "View Inventory",
+          "/inventory",
+        );
+      } else {
+        toast.warning(
+          `Import completed with ${errors.length} errors. Updated ${updatedProducts} products, added ${newProducts} new products.`,
+        );
+
+        // Send warning notification about partial import
+        notificationService.warning(
+          "Excel Import Completed with Issues",
+          `Imported ${importedData.length - errors.length}/${importedData.length} products successfully. ${errors.length} items failed.`,
+          "View Details",
+          "/inventory",
+        );
+
+        console.error("Import errors:", errors);
+      }
+
+      // Send specific notifications for stock updates
+      if (updatedItems.length > 0) {
+        updatedItems.slice(0, 3).forEach((item) => {
+          const stockChange = item.newStock - item.oldStock;
+          if (Math.abs(stockChange) > 0) {
+            notificationService.info(
+              "Stock Updated",
+              `${item.partName}: ${stockChange > 0 ? "+" : ""}${stockChange} units (${item.oldStock} → ${item.newStock})`,
+              "View Product",
+            );
+          }
+        });
+
+        if (updatedItems.length > 3) {
+          notificationService.info(
+            "Multiple Stock Updates",
+            `${updatedItems.length - 3} more products were updated via import`,
+            "View Inventory",
+            "/inventory",
+          );
+        }
+      }
+
+      // Send notifications for new products
+      if (newItems.length > 0) {
+        newItems.slice(0, 2).forEach((item) => {
+          notificationService.success(
+            "New Product Added",
+            `${item.partName} (${item.partNumber}) - ${item.stock} units`,
+            "View Product",
+          );
+        });
+
+        if (newItems.length > 2) {
+          notificationService.success(
+            "Multiple Products Added",
+            `${newItems.length - 2} more products were added via import`,
+            "View Inventory",
+            "/inventory",
+          );
+        }
+      }
+
+      // Refresh inventory to reflect changes
+      refreshInventory();
+
+      // Log detailed import results
+      console.log("Import Results:", {
+        totalProcessed: importedData.length,
+        updatedProducts,
+        newProducts,
+        errors: errors.length,
+        processingTime: `${processingTime}ms`,
+        updatedItems,
+        newItems,
+        errorDetails: errors,
+      });
+    } catch (error) {
+      toast.error(`Import failed: ${error}`);
+      console.error("Import error:", error);
+    }
   };
 
   const handleExcelExport = () => {
@@ -355,10 +535,11 @@ export const Inventory = () => {
               <Button
                 onClick={() => setShowExcelImport(true)}
                 size="sm"
-                className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white border-0 text-xs sm:text-sm"
+                className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white border-0 text-xs sm:text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+                disabled={isLoading}
               >
                 <Upload size={16} className="mr-1 sm:mr-2" />
-                Import
+                {isLoading ? "Processing..." : "Import Excel"}
               </Button>
               <Button
                 onClick={handleExcelExport}
