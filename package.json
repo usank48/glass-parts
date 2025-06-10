@@ -9,12 +9,12 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "build:mobile": "vite build && npx cap sync",
-    "android:setup": "npx cap add android && npm run build:mobile",
-    "android:dev": "vite build && npx cap sync android && npx cap open android",
-    "android:build": "vite build && npx cap sync android",
-    "mobile:sync": "npx cap sync",
-    "mobile:serve": "npx cap serve"
+    "build:mobile": "vite build && npx @capacitor/cli sync",
+    "android:setup": "npx @capacitor/cli add android && npm run build:mobile",
+    "android:dev": "vite build && npx @capacitor/cli sync android && npx @capacitor/cli open android",
+    "android:build": "vite build && npx @capacitor/cli sync android",
+    "mobile:sync": "npx @capacitor/cli sync",
+    "mobile:serve": "npx @capacitor/cli serve"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
