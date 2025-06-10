@@ -1,35 +1,50 @@
-import { Capacitor } from "@capacitor/core";
-import { Toast } from "@capacitor/toast";
-import { Haptics, ImpactStyle } from "@capacitor/haptics";
 import { notificationService } from "./notificationService";
 
 class MobileNotificationService {
-  private isNative = Capacitor.isNativePlatform();
+  private isNative = false;
+
+  constructor() {
+    this.checkPlatform();
+  }
+
+  private async checkPlatform() {
+    try {
+      const isCapacitor = window && (window as any).Capacitor;
+      if (isCapacitor) {
+        const { Capacitor } = await import("@capacitor/core");
+        this.isNative = Capacitor.isNativePlatform();
+      }
+    } catch (error) {
+      console.log("Capacitor not available, using web fallbacks");
+      this.isNative = false;
+    }
+  }
 
   // Show toast notification (mobile-friendly)
   async showToast(message: string, duration: "short" | "long" = "short") {
     if (this.isNative) {
       try {
+        const { Toast } = await import("@capacitor/toast");
         await Toast.show({
           text: message,
           duration: duration,
           position: "bottom",
         });
+        return;
       } catch (error) {
         console.log("Toast not available:", error);
-        // Fallback to web toast
-        notificationService.info("Notification", message);
       }
-    } else {
-      // Web fallback
-      notificationService.info("Notification", message);
     }
+
+    // Web fallback
+    notificationService.info("Notification", message);
   }
 
   // Trigger haptic feedback
   async hapticFeedback(type: "light" | "medium" | "heavy" = "light") {
     if (this.isNative) {
       try {
+        const { Haptics, ImpactStyle } = await import("@capacitor/haptics");
         const impactStyle =
           type === "light"
             ? ImpactStyle.Light
@@ -138,7 +153,12 @@ class MobileNotificationService {
 
   // Check if running on mobile
   get isRunningOnMobile() {
-    return this.isNative;
+    return (
+      this.isNative ||
+      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent,
+      )
+    );
   }
 }
 
